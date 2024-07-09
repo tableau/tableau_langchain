@@ -3,7 +3,7 @@ import json
 import pandas as pd
 
 # define the headless BI query template
-def send(env_vars, query):
+def query(env_vars, query):
     url = env_vars['VDS_URL']
     payload = json.dumps({
         "connection": {
