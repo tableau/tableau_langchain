@@ -13,9 +13,9 @@ async def main(env_vars):
     # defined in modules/read
     datasource_metadata = metadata.read(env_vars)
     # add datasource metadata of the connected datasource to the system prompt
-    prompt['system']['data_model'] = datasource_metadata
+    prompt['nlq_to_vds']['data_model'] = datasource_metadata
     # load and instantiate system prompt
-    headless_bi_prompt_string = json.dumps(prompt.system)
+    headless_bi_prompt_string = json.dumps(prompt.nlq_to_vds)
 
     active_utterance = utter.get_utterance()
 

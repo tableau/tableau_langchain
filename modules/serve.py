@@ -12,7 +12,7 @@ async def langtab_agent(chain):
     add_routes(
         app,
         chain,
-        path="/chain",
+        path="/headlesscopilot",
     )
 
     return app
