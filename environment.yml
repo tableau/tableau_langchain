@@ -1,0 +1,17 @@
+name: langtab
+channels:
+    - conda-forge
+    - defaults
+dependencies:
+    - python=3.12.2
+    - conda-forge::notebook
+    - conda-forge::nb_conda_kernels
+    - ipykernel
+    - python-dotenv
+    - pandas
+    - pyjwt
+    - pip=23.3.1
+    - pip:
+        - langchain
+        - langchain_openai
+        - langchain_experimental
