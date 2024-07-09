@@ -1,0 +1,37 @@
+# Root configuration applies to all files
+root = true
+
+# Default settings for all files
+[*]
+# Use UTF-8 character encoding
+charset = utf-8
+# Use LF (Unix-style) line endings
+end_of_line = lf
+# Use spaces for indentation
+indent_style = space
+# In Python, the standard convention for indentation is to use 4 spaces per level.
+indent_size = 4
+# Insert a newline at the end of the file
+insert_final_newline = true
+# Trim trailing whitespace
+trim_trailing_whitespace = true
+# Case-sensitive file matching
+case_sensitive = true
+
+# Python files specific settings
+[*.py]
+# Override default settings for Python files
+# Use UTF-8 character encoding
+charset = utf-8
+# Use spaces for indentation
+indent_style = space
+# Indentation size set to 4 spaces
+indent_size = 4
+# Use LF (Unix-style) line endings
+end_of_line = lf
+# Insert a newline at the end of the file
+insert_final_newline = true
+# Trim trailing whitespace
+trim_trailing_whitespace = true
+# Set maximum line length to 79 characters (PEP 8 recommendation)
+max_line_length = 79
