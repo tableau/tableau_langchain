@@ -10,8 +10,11 @@ dependencies:
     - python-dotenv
     - pandas
     - pyjwt
+    - aiohttp
+    - fastapi
     - pip=23.3.1
     - pip:
         - langchain
         - langchain_openai
         - langchain_experimental
+        - "langserve[all]"
