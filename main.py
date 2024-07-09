@@ -1,30 +1,25 @@
 async def main(env_vars):
     import json
+    import uvicorn
 
     from langchain_openai import ChatOpenAI
     from langchain_core.prompts import ChatPromptTemplate
-    from langchain_core.prompts import PromptTemplate
-    from langchain_core.messages import HumanMessage, SystemMessage
+    from langchain_core.messages import SystemMessage
     from langchain_core.output_parsers import StrOutputParser
-    from langchain import hub
-    from langchain.agents import AgentExecutor
-    from langchain_experimental.tools import PythonREPLTool
-    from langserve import add_routes
-    from typing import List
-    from fastapi import FastAPI
 
-    from modules import read, send, prompt, utter
+    from modules import metadata, prompt, utter, headless, serve
     from agents import analyst
 
     # defined in modules/read
-    datasource_metadata = read(env_vars)
+    datasource_metadata = metadata.read(env_vars)
     # add datasource metadata of the connected datasource to the system prompt
     prompt['system']['data_model'] = datasource_metadata
     # load and instantiate system prompt
-    headless_bi_prompt_string = json.dumps(prompt['system'])
+    headless_bi_prompt_string = json.dumps(prompt.system)
 
     active_utterance = utter.get_utterance()
 
+    # Chat Model used in chain
     llm = ChatOpenAI(model="gpt-4o")
 
     # Langchain prompt template
@@ -50,13 +45,16 @@ async def main(env_vars):
         payload = utter.get_payload()
 
         # defined in modules/send
-        df = send(env_vars, payload)
+        df = headless.query(env_vars, payload)
 
         instruct_header = "answer the following query directly by executing the necessary python code. Give a succinct explanation of the steps you took and how you know the answer is correct: "
 
-
         analyst.vds_analyst.invoke(instruct_header + active_utterance)
         active_utterance = utter.get_utterance()
+
+    app = serve.langtab_agent(chain)
+
+    uvicorn.run(app, host="localhost", port=8000)
 
 if __name__ == "__main__":
     import os
