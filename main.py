@@ -1,4 +1,4 @@
-async def main(env_vars):
+def main(env_vars):
     import json
     import uvicorn
 
@@ -7,15 +7,16 @@ async def main(env_vars):
     from langchain_core.messages import SystemMessage
     from langchain_core.output_parsers import StrOutputParser
 
-    from modules import metadata, prompt, utter, headless, serve
+    from modules import metadata, utter, headless, serve
     from agents import analyst
+    from prompts import nlq_to_vds
 
     # defined in modules/read
     datasource_metadata = metadata.read(env_vars)
     # add datasource metadata of the connected datasource to the system prompt
-    prompt['nlq_to_vds']['data_model'] = datasource_metadata
+    nlq_to_vds.prompt['data_model'] = datasource_metadata
     # load and instantiate system prompt
-    headless_bi_prompt_string = json.dumps(prompt.nlq_to_vds)
+    headless_bi_prompt_string = json.dumps(nlq_to_vds.prompt)
 
     active_utterance = utter.get_utterance()
 
@@ -42,7 +43,7 @@ async def main(env_vars):
         # Invokes chain
         output = chain.invoke(active_utterance)
 
-        payload = utter.get_payload()
+        payload = utter.get_payload(output)
 
         # defined in modules/send
         df = headless.query(env_vars, payload)
@@ -58,10 +59,9 @@ async def main(env_vars):
 
 if __name__ == "__main__":
     import os
-    import asyncio
     from dotenv import load_dotenv
 
     load_dotenv()
     env_vars = os.environ
 
-    asyncio.run(main(env_vars))
+    main(env_vars)

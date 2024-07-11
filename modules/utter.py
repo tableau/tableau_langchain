@@ -2,7 +2,7 @@ import re
 import json
 
 def get_utterance():
-    query = input('what would you like to know about your data? reply stop if you are done.')
+    query = input('What would you like to know about your data? Reply with "stop" if you are done.')
     return query
 
 def get_payload(output):
