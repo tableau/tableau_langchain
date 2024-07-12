@@ -12,6 +12,7 @@ dependencies:
     - pyjwt
     - aiohttp
     - fastapi
+    - tabulate
     - pip=23.3.1
     - pip:
         - langchain
