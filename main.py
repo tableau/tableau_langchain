@@ -34,7 +34,8 @@ def run_interactive_mode(chain, env_vars):
         df = headless.query(env_vars, payload)
 
         instruct_header = "Answer the following query directly by executing the necessary python code. Give a succinct explanation of the steps you took and how you know the answer is correct: "
-        analyst.vds_analyst.invoke(instruct_header + active_utterance)
+        vds_analyst = analyst.vds_analyst(df)
+        vds_analyst.invoke(instruct_header + active_utterance)
         active_utterance = utter.get_utterance()
 
 def run_api_mode(chain, host, port=8000):
