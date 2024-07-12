@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from langserve import add_routes
 
-async def langtab_agent(chain):
+def langtab_agent(chain):
     # define the server app
     app = FastAPI(
     title="LangTab Headless BI",
