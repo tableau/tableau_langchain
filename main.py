@@ -1,44 +1,20 @@
 import argparse
-import json
 import uvicorn
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage
-from langchain_core.output_parsers import StrOutputParser
 
-from modules import metadata, utter, headless, serve
+from modules import chain_config, utter, headless, serve
 from agents import pandas
-from prompts import nlq_to_vds
 
-def create_chain(env_vars):
-    datasource_metadata = metadata.read(env_vars)
-    nlq_to_vds.prompt['data_model'] = datasource_metadata
-    headless_bi_prompt_string = json.dumps(nlq_to_vds.prompt)
 
-    llm = ChatOpenAI(model="gpt-4")
-
-    active_prompt_template = ChatPromptTemplate.from_messages([
-        SystemMessage(content=headless_bi_prompt_string),
-        ("user", "{utterance}")
-    ])
-
-    output_parser = StrOutputParser()
-    chain = active_prompt_template | llm | output_parser
-    return chain
-
-def run_interactive_mode(chain, env_vars):
+def run_interactive_mode(env_vars, chain):
     active_utterance = utter.get_utterance()
     while active_utterance != 'stop':
-        output = chain.invoke(active_utterance)
-        payload = utter.get_payload(output)
-        df = headless.query(env_vars, payload)
-
+        analyst = pandas.pandas_agent(env_vars, chain, active_utterance)
         instruct_header = "Answer the following query directly by executing the necessary python code. Give a succinct explanation of the steps you took and how you know the answer is correct: "
-        analyst = pandas.pandas_agent(df)
         analyst.invoke(instruct_header + active_utterance)
         active_utterance = utter.get_utterance()
 
-def run_api_mode(chain, env_vars, host, port=8000):
+
+def run_api_mode(env_vars, chain, host, port=8000):
     active_utterance = utter.get_utterance()
     output = chain.invoke(active_utterance)
     payload = utter.get_payload(output)
@@ -60,12 +36,12 @@ def main():
     args = parser.parse_args()
 
     env_vars = load_environment_variables()
-    chain = create_chain(env_vars)
+    chain = chain_config.create_chain(env_vars)
 
     if args.mode == "interactive":
-        run_interactive_mode(chain, env_vars)
+        run_interactive_mode(env_vars, chain)
     else:
-        run_api_mode(chain, env_vars, args.host, args.port)
+        run_api_mode(env_vars, chain, args.host, args.port)
 
 def load_environment_variables():
     from dotenv import load_dotenv
