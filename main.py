@@ -5,12 +5,10 @@ from modules import chain_config, utter, headless, serve
 from agents import pandas
 
 
-def run_interactive_mode(env_vars, chain):
+def run_interactive_mode(chain):
     active_utterance = utter.get_utterance()
     while active_utterance != 'stop':
-        analyst = pandas.pandas_agent(env_vars, chain, active_utterance)
-        instruct_header = "Answer the following query directly by executing the necessary python code. Give a succinct explanation of the steps you took and how you know the answer is correct: "
-        analyst.invoke(instruct_header + active_utterance)
+        chain.invoke(active_utterance)
         active_utterance = utter.get_utterance()
 
 
@@ -39,7 +37,7 @@ def main():
     chain = chain_config.create_chain(env_vars)
 
     if args.mode == "interactive":
-        run_interactive_mode(env_vars, chain)
+        run_interactive_mode(chain)
     else:
         run_api_mode(env_vars, chain, args.host, args.port)
 
