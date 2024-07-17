@@ -6,11 +6,11 @@ from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe
 
 from modules import headless
 
-
-def pandas_agent(env_vars, chain, active_utterance):
-    output = chain.invoke(active_utterance)
-    payload = get_payload(output)
-    df = headless.query(env_vars, payload)
+def analyze(input_variables: dict) -> dict:
+    query = input_variables['query']
+    payload = get_payload(query)
+    print('testing payload', payload)
+    df = headless.query(payload)
 
     agent = create_pandas_dataframe_agent(
         ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0125"),
@@ -20,10 +20,15 @@ def pandas_agent(env_vars, chain, active_utterance):
         allow_dangerous_code=True,
     )
 
-    return agent
+    instruct_header = "Answer the following query directly by executing the necessary python code. Give a succinct explanation of the steps you took and how you know the answer is correct: "
+
+    analysis = agent.invoke(instruct_header + query)
+
+    return { 'analysis': analysis }
 
 
 def get_payload(output):
+    print('testing output', output)
     # print reasoning
     print(output.split('JSON_payload')[0])
     # parse LLM output and query headless BI
