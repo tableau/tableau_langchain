@@ -9,9 +9,10 @@ from modules import metadata
 from prompts import nlq_to_vds
 from agents import pandas
 
-def create_chain(env_vars):
+# defines the langtab chain
+def create_chain():
     # 1. Prompt template
-    datasource_metadata = metadata.read(env_vars)
+    datasource_metadata = metadata.read()
     nlq_to_vds.prompt['data_model'] = datasource_metadata
     headless_bi_prompt_string = json.dumps(nlq_to_vds.prompt)
 
