@@ -12,15 +12,15 @@ def run_interactive_mode(chain):
         active_utterance = utter.get_utterance()
 
 
-def run_api_mode(env_vars, chain, host, port=8000):
-    active_utterance = utter.get_utterance()
-    output = chain.invoke(active_utterance)
-    payload = utter.get_payload(output)
-    df = headless.query(env_vars, payload)
+def run_api_mode(chain, host, port=8000):
+    # active_utterance = utter.get_utterance()
+    # output = chain.invoke(active_utterance)
+    # payload = utter.get_payload(output)
+    # df = headless.query(env_vars, payload)
 
-    instruct_header = "Answer the following query directly by executing the necessary python code. Give a succinct explanation of the steps you took and how you know the answer is correct: "
-    analyst = pandas.pandas_agent(df)
-    analyst.invoke(instruct_header + active_utterance)
+    # instruct_header = "Answer the following query directly by executing the necessary python code. Give a succinct explanation of the steps you took and how you know the answer is correct: "
+    # analyst = pandas.pandas_agent(df)
+    # analyst.invoke(instruct_header + active_utterance)
     # active_utterance = utter.get_utterance()
     app = serve.langtab_agent(chain)
     uvicorn.run(app, host=host, port=port)
@@ -39,7 +39,7 @@ def main():
     if args.mode == "interactive":
         run_interactive_mode(chain)
     else:
-        run_api_mode(env_vars, chain, args.host, args.port)
+        run_api_mode(chain, args.host, args.port)
 
 def load_environment_variables():
     from dotenv import load_dotenv
