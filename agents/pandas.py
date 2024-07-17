@@ -24,7 +24,16 @@ def analyze(input_variables: dict) -> dict:
 
     analysis = agent.invoke(instruct_header + query)
 
-    return { 'analysis': analysis }
+    print('pandas agent input', analysis['input'])
+    print('pandas agent input type', type(analysis['input']))
+
+    print('-----------------------------------------')
+
+    print('pandas agent output', analysis['output'])
+    print('pandas agent output type', type(analysis['output']))
+
+
+    return { 'analysis': analysis['output'] }
 
 
 def get_payload(output):
