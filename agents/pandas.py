@@ -9,7 +9,6 @@ from modules import headless
 def analyze(input_variables: dict) -> dict:
     query = input_variables['query']
     payload = get_payload(query)
-    print('testing payload', payload)
     df = headless.query(payload)
 
     agent = create_pandas_dataframe_agent(
@@ -24,20 +23,16 @@ def analyze(input_variables: dict) -> dict:
 
     analysis = agent.invoke(instruct_header + query)
 
-    print('pandas agent input', analysis['input'])
-    print('pandas agent input type', type(analysis['input']))
-
+    print('analysis keys:', type(analysis), '\n', list(analysis.keys()))
     print('-----------------------------------------')
+    print('pandas agent input:', type(analysis['input']), '\n', analysis['input'])
+    print('-----------------------------------------')
+    print('pandas agent output:', type(analysis['output']), '\n', analysis['output'])
 
-    print('pandas agent output', analysis['output'])
-    print('pandas agent output type', type(analysis['output']))
-
-
-    return { 'analysis': analysis['output'] }
+    return { 'analysis': analysis }
 
 
 def get_payload(output):
-    print('testing output', output)
     # print reasoning
     print(output.split('JSON_payload')[0])
     # parse LLM output and query headless BI
