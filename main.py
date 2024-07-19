@@ -18,7 +18,7 @@ def run_api_mode(chain, host, port=8000):
 
 # prompts the user to continue asking questions
 def get_utterance():
-    query = input('What would you like to know about your data? Reply with "stop" if you are done. ')
+    query = input('What would you like to know about your data? Reply with "stop" if you are done.\n')
     return query
 
 def main():
