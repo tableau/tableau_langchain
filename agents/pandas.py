@@ -6,7 +6,7 @@ from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe
 
 from modules import headless
 
-def analyze(input_variables: dict) -> dict:
+async def analyze(input_variables: dict) -> dict:
     query = input_variables['query']
     payload = get_payload(query)
     df = headless.query(payload)
@@ -29,7 +29,29 @@ def analyze(input_variables: dict) -> dict:
     print('-----------------------------------------')
     print('pandas agent output:', type(analysis['output']), '\n', analysis['output'])
 
-    return { 'analysis': analysis }
+    response_template = {
+        "title": "ChainOutput",
+        "analysis": analysis['output']
+    }
+
+    response = json.dumps(response_template)
+
+    print('api response', response)
+
+    # return response
+
+    return json.dumps({ 'analysis': analysis })
+
+    # # sample output
+    # {
+    #     "title": "ChainOutput",
+    #     "type": "object",
+    #     "properties": {
+    #         "analysis": {
+    #             "title": "Analysis"
+    #         }
+    #     }
+    # }
 
 
 def get_payload(output):

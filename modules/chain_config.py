@@ -18,7 +18,7 @@ def create_chain():
 
     active_prompt_template = ChatPromptTemplate.from_messages([
         SystemMessage(content=headless_bi_prompt_string),
-        ("user", "{utterance}")
+        ("user", "{query}")
     ])
 
     # 2. Chat model
@@ -31,7 +31,8 @@ def create_chain():
     pandas_agent = TransformChain(
         input_variables=["query"],
         output_variables=["analysis"],
-        transform=pandas.analyze
+        transform=pandas.analyze,
+        atransform=pandas.analyze,
     )
 
     chain = active_prompt_template | llm | output_parser | pandas_agent
