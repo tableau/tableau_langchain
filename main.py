@@ -1,6 +1,5 @@
-import argparse
-import json
-import uvicorn
+import os, argparse, json, uvicorn
+
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
@@ -15,7 +14,9 @@ def create_chain(env_vars):
     nlq_to_vds.prompt['data_model'] = datasource_metadata
     headless_bi_prompt_string = json.dumps(nlq_to_vds.prompt)
 
-    llm = ChatOpenAI(model="gpt-4")
+    vds_model = os.environ['VDS_AGENT_MODEL']
+
+    llm = ChatOpenAI(model=vds_model)
 
     active_prompt_template = ChatPromptTemplate.from_messages([
         SystemMessage(content=headless_bi_prompt_string),
