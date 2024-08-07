@@ -11,7 +11,7 @@ from prompts import nlq_to_vds
 from agents import pandas
 
 # defines the langtab chain
-async def create_chain():
+def create_chain():
     # 1. Prompt template
     datasource_metadata = metadata.read()
     nlq_to_vds.prompt['data_model'] = datasource_metadata
