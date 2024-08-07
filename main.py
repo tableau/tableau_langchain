@@ -1,4 +1,4 @@
-import argparse, uvicorn
+import argparse, uvicorn, asyncio
 
 from dotenv import load_dotenv
 
@@ -21,7 +21,7 @@ def get_utterance():
     query = input('What would you like to know about your data? Reply with "stop" if you are done.\n')
     return query
 
-def main():
+async def main():
     # environment variables available to current process and sub processes
     load_dotenv()
     # runs the application in different modes: interactive (default) & api with optional arguments
@@ -31,7 +31,7 @@ def main():
     parser.add_argument("--port", type=int, default=8000, help="Port for API mode")
     args = parser.parse_args()
 
-    chain = chain_config.create_chain()
+    chain = await chain_config.create_chain()
 
     if args.mode == "interactive":
         run_interactive_mode(chain)
@@ -39,4 +39,4 @@ def main():
         run_api_mode(chain, args.host, args.port)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
