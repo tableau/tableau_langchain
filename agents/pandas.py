@@ -20,17 +20,16 @@ def analyze(query):
 
     instruct_header = "Answer the following query directly by executing the necessary python code. Give a succinct explanation of the steps you took and how you know the answer is correct: "
 
-    analysis = agent.invoke(instruct_header + query)
-    print('***** PANDAS AGENT Input *****', type(analysis['input']), '\n', analysis['input'])
+    operation = agent.invoke(instruct_header + query)
+
+    input = operation['input']
+    output = operation['output']
+
+    print('***** PANDAS AGENT Input *****', type(input), '\n', input)
     print('-----------------------------------------')
-    print('***** PANDAS AGENT Output *****:', type(analysis['output']), '\n', analysis['output'])
+    print('***** PANDAS AGENT Output *****:', type(output), '\n', output)
 
-    response_template = {
-        "title": "Pandas Agent Output",
-        "analysis": analysis['output']
-    }
-
-    return response_template
+    return output
 
 
 def get_payload(output):
