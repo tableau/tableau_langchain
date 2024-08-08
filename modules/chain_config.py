@@ -29,12 +29,24 @@ def create_chain():
     output_parser = StrOutputParser()
 
     # 4. Pandas agent
-    pandas_agent = TransformChain(
-        input_variables=["query"],
-        output_variables=["analysis"],
-        transform=pandas.analyze
+    pandas_agent = pandas.analyze
+
+    # 5. API response
+    response = TransformChain(
+        input_variables=["analysis"],
+        output_variables=["response"],
+        transform=create_response
     )
 
-    chain = active_prompt_template | llm | output_parser | pandas_agent
+    chain = active_prompt_template | llm | output_parser | pandas_agent | response
 
     return chain
+
+def create_response(parameters: dict) -> dict:
+    print('***** create_response ******', parameters)
+
+    response_template = {
+        'response': 'none'
+    }
+
+    return response_template
