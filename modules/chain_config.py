@@ -3,15 +3,18 @@ import os, json
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
-from langchain_core.output_parsers import StrOutputParser
-from langchain.chains import TransformChain
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain.globals import set_verbose
 
-from modules import metadata
+from modules import metadata, api
 from prompts import nlq_to_vds
 from agents import pandas
 
 # defines the langtab chain
 def create_chain():
+    set_verbose(True)
+
     # 1. Prompt template
     datasource_metadata = metadata.read()
     nlq_to_vds.prompt['data_model'] = datasource_metadata
@@ -32,21 +35,13 @@ def create_chain():
     pandas_agent = pandas.analyze
 
     # 5. API response
-    response = TransformChain(
-        input_variables=["analysis"],
-        output_variables=["response"],
-        transform=create_response
-    )
+    json_parser = api.vds_transform
 
-    chain = active_prompt_template | llm | output_parser | pandas_agent | response
+    chain = active_prompt_template | llm | output_parser | pandas_agent | json_parser
 
     return chain
 
-def create_response(parameters: dict) -> dict:
-    print('***** create_response ******', parameters)
-
-    response_template = {
-        'response': 'none'
-    }
-
-    return response_template
+# Define the data structure for the response
+class VDS_Query_Response(BaseModel):
+    data: str = Field(description="the table of data containing the response to the query")
+    behavioral: str = Field(description="a behavioral summary of the reasoning and explanation behind the action taken")
