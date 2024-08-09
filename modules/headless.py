@@ -1,4 +1,4 @@
-import os, requests, json, pandas as pd
+import os, requests, json
 
 # define the headless BI query template
 def query(query):
@@ -22,9 +22,7 @@ def query(query):
     # Check if the request was successful (status code 200)
     if response.status_code == 200:
         data = response.json()['data']
-        # Create a pandas DataFrame from the JSON data
-        df = pd.DataFrame(data)
-        return df
+        return data
     else:
         print("Failed to fetch data from the API. Status code:", response.status_code)
         print(response.text)
