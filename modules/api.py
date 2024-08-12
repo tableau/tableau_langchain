@@ -20,13 +20,33 @@ def vds_transform(parameters: dict) -> dict:
     response = TransformChain(
         input_variables=["pandas_agent_output"],
         output_variables=["analysis"],
-        transform=create_response
+        transform=create_response,
+        atransform=create_response_async
     )
 
     return response
 
 
 def create_response(parameters: dict) -> dict:
+    # split the string before and after data
+    split_string = parameters['pandas_agent_output'].split('\n\n|', 1)
+    # store behavioral data in natural language
+    pandas_behavioral = split_string[0]
+    print('******* pandas_behavior *******\n', pandas_behavioral)
+    # add back the '|' character and extract the data
+    pandas_data = '|' + split_string[1] if len(split_string) > 1 else ''
+    print('******* data *******\n', pandas_data)
+
+    response_template = {
+        'analysis': {
+            'analyst_behavior': pandas_behavioral,
+            'analyst_result': pandas_data
+        }
+    }
+
+    return response_template
+
+async def create_response_async(parameters: dict) -> dict:
     # split the string before and after data
     split_string = parameters['pandas_agent_output'].split('\n\n|', 1)
     # store behavioral data in natural language
