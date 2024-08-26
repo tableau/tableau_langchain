@@ -1,7 +1,11 @@
 # langtab
-Integrating langchain with VDS
+This projects is an initial proof of concept to introduce Tableau specific tooling to the langchain open source project. It leverages existing langchain libraries and Tableau's VizQL Data Service to generate VizQL queries from natural language questions and commands. It lays the foundation for targeted contributions to the langchain project in order to support the Tableau data dev community in building intelligent data apps and experiences on the Tableau platform. You can read more about the context for this project and planned future work here: https://docs.google.com/document/d/1eQbBqEYGL2xotTjsXTbzlNkBq_aiFow9iwN7RYA17T4/edit?usp=sharing
 
-# About the cookbook
-This cookbook was created by Joe Constantino on June 25, 2024. Shout out to Patrick Green for doing the initial work to prove how you can query Headless BI from a notebook.
+# Getting Started
+The easiest way to get started with running the headlesscopilot query pipeline is to try it in the jupyter notebook
 
-This cookbook can be configured to query a Tableau Published data source in natural language using the Headless BI REST endpoint. It uses langchain libraries and the langchain development framework to generate a headless BI request payload from a natural language input query. It then executes a chain to generate an answer to the user's input query.
+# Getting started with the headlesscopilot REST API
+1. Perform the JSON serialization fix? /usr/local/Caskroom/mambaforge/base/envs/langtab/lib/python3.12/site-packages/langserve/serialization.py 
+2. Activate the langtab conda environment - conda activate langtab
+3. run python main.py --mode api and open: http://localhost:8000/headlesscopilot/playground/
+Alternatively you can type python main.py to run the API from terminal 
