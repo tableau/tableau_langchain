@@ -16,6 +16,15 @@ This codebase is able to run in your terminal, providing a quick and direct way 
 > A PR will soon come to this page to track this improvement.
 
 ## Getting Started
+The easiest way to get started with running the headlesscopilot query pipeline is to try it in the jupyter notebook
+
+### Getting started with the headlesscopilot REST API
+1. Perform the JSON serialization fix? /usr/local/Caskroom/mambaforge/base/envs/langtab/lib/python3.12/site-packages/langserve/serialization.py 
+2. Activate the langtab conda environment - conda activate langtab
+3. run python main.py --mode api and open: http://localhost:8000/headlesscopilot/playground/
+Alternatively you can type python main.py to run the API from terminal 
+
+## Terminal Mode
 
 LangTab runs on Python and its requirements are described in the `environment.yml` file which can be read by either [Mamba](https://github.com/mamba-org/mamba) or [Conda](https://anaconda.org/anaconda/conda) to install packages. For help installing either of them, ask [Perplexity](https://www.perplexity.ai/) for help and mention your operating system.
 
@@ -51,9 +60,7 @@ Python
 python main.py
 ```
 
-5. Type a question to the AI to see how it operates
+5. Type a question to the AI to see how it operates!
 
 ## About LangTab
 LangTab was developed by Stephen Price [@stephenlprice](https://github.com/stephenlprice) and [@joeconstantino](https://github.com/joeconstantino). Shout out to Patrick Green for doing the initial work to prove how you can query Headless BI from a notebook.
-
-This cookbook can be configured to query a Tableau Published data source in natural language using the Headless BI REST endpoint. It uses langchain libraries and the langchain development framework to generate a headless BI request payload from a natural language input query. It then executes a chain to generate an answer to the user's input query.
