@@ -63,4 +63,4 @@ python main.py
 5. Type a question to the AI to see how it operates!
 
 ## About LangTab
-LangTab was developed by Stephen Price [@stephenlprice](https://github.com/stephenlprice) and [@joeconstantino](https://github.com/joeconstantino). Shout out to Patrick Green for doing the initial work to prove how you can query Headless BI from a notebook.
+LangTab was developed by Stephen Price [@stephenlprice](https://github.com/stephenlprice) and Joe Constantino [@joeconstantino](https://github.com/joeconstantino). Shout out to Patrick Green for doing the initial work to prove how you can query Headless BI from a notebook.
