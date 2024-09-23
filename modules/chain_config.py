@@ -16,9 +16,10 @@ def create_chain():
     set_verbose(True)
 
     # 1. Prompt template
-    datasource_metadata = metadata.read()
-    nlq_to_vds.prompt['data_model'] = datasource_metadata
-    headless_bi_prompt_string = json.dumps(nlq_to_vds.prompt)
+    # datasource_metadata = metadata.instantiate_prompt()
+    # nlq_to_vds.prompt['data_model'] = datasource_metadata
+    # headless_bi_prompt_string = json.dumps(nlq_to_vds.prompt)
+    headless_bi_prompt_string = metadata.instantiate_prompt()
 
     active_prompt_template = ChatPromptTemplate.from_messages([
         SystemMessage(content=headless_bi_prompt_string),
@@ -26,7 +27,7 @@ def create_chain():
     ])
 
     # 2. Chat model
-    llm = ChatOpenAI(model=os.environ['VDS_AGENT_MODEL'])
+    llm = ChatOpenAI(model=os.environ['VDS_AGENT_MODEL'], temperature=0)
 
     # 3. Parser
     output_parser = StrOutputParser()

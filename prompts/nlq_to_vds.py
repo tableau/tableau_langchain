@@ -1,6 +1,8 @@
 prompt = {
-    "instructions": "You are an expert at writing JSON payloads for VDS queries. \nVDS queries are passed in as a JSON body that describes the query, and the return is passed back as an array of JSON objects. The VDS query is a JSON object. It contains two fundamental components.\n1. columns [required] - an array of columns that define the desired output of the query\n2. filters [optional] - an array of filters to apply to the query. They can include fields that are not in the columns array.\nYour task is to retrieve data relevant to a natural language query. A pandas AI Agent will be used to transform and analyze the data that your VDS query returns. Don't try to do too much with the json query. You will be successful if you bring back all the data that is required to answer the question, even if additional transformation and actions are needed. Query as much data as might be useful; it's ok if you pull in superfluous columns, but only pull in columns based on what is available in the data model. You will construct a VDS query from a natural language query.\nYou will ground the natural language query in the data model provided in the prompt.You have to map the intent of the query to the exact string that are listed in the 'data model' section.\nUse the natural language query and the provided datamodel to generate the appropriate JSON object for a VDS query.\nKeep your ouput very structured. Use the following structure:\nReasoning: \nJSON_payload:\nMake sure you use this structure so that it's simple to parse the output.\n",
+    "instructions": "You are an expert at writing JSON payloads for Tableau’s VizQL Data Service (VDS) API. \nThe VDS query is a JSON object that contains two fundamental components.\n1. columns [required] - an array of columns that define the desired output of the query\n2. filters [optional] - an array of filters to apply to the query. They can include fields that are not in the columns array.\nYour task is to retrieve data relevant to a user’s natural language query. A pandas AI Agent will be used to transform and analyze the data that your VDS query returns. Don't try to do too much with the json query. You will be successful if you bring back all the data that could help to answer the question, even if additional transformation and actions are needed. Query as much data as might be useful; it's ok if you pull in superfluous columns, but only use columns based on what is listed in the available_fields dictionary. DO NOT HALLUCINATE FIELD NAMES./ You can find the columnNames by checking the values of each key in the available_fields dictionary. The keys in the available_fields dictionary are the caption names for each column. The caption names are more likely to correspond to the user’s input, but you have to use the columnName when generating JSON. \nKeep your output very structured. Use the following structure:\nReasoning: \nJSON_payload:\nMake sure you use this structure so that it's simple to parse the output.\n",
     "user_query": "",
+    "available_fields": {},
+    "data_model": [],
     "vds_schema": {
         "Column": {
             "type": "object",
@@ -26,7 +28,7 @@ prompt = {
             "properties": {
                 "columnName": {
                     "type": "string",
-                    "description": "The name of the column which must be supplied. Either a reference to a specific column in the data source, or in the case of a calculation a user supplied name for the calculation."
+                    "description": "The name of the column which must be supplied."
                 },
                 "columnAlias": {
                     "type": "string",
@@ -59,10 +61,6 @@ prompt = {
                             "description": "Provide a Function for a Column to generate an aggregation against that Columns' values. For example providing the SUM Function will cause an aggregated SUM to be calculated for that Column."
                         }
                     ]
-                },
-                "calculation": {
-                    "type": "string",
-                    "description": "Provide a Calculation to generate a new data Column based on that Calculation. The Calcuation should contain a string based on the Tableau Calculated Field Syntax. Since this is a newly generated Column, you must give it its own unique Column Name. Also a Column cannot contain both a Function, and a Calculation."
                 }
             }
         },
@@ -429,6 +427,5 @@ prompt = {
             ]
         }
     },
-    "few_shot_examples": "\n\"sum of sales by segment\"\n{\n  \"columns\": [\n    {\n      \"columnName\": \"Segment\"\n    },\n    {\n      \"columnName\": \"Sales\",\n      \"function\": \"SUM\",\n      \"maxDecimalPlaces\": 2\n    }\n  ]\n}\n\"What are the most profitable sub categories, and include the name of the category that each sub category belongs to.\"\n\n{\n    \"columns\": [\n      {\n        \"columnName\": \"Category\"\n      },\n      {\n        \"columnName\": \"Sub-Category\"\n      },\n      {\n        \"columnName\": \"Profit Margin\",\n        \"calculation\": \"SUM([Profit])/SUM([Sales])\",\n        \"sortPriority\": 1,\n        \"sortDirection\": \"DESC\"\n      }\n    ]\n  }\n\"what are the top selling Sub-Catetories? Remove individual sales below 200K\n{\n  \"columns\": [\n    {\n      \"columnName\": \"Sub-Category\"\n    },\n    {\n      \"columnName\": \"Sales\",\n      \"function\": \"SUM\",\n      \"sortPriority\": 1,\n      \"sortDirection\": \"DESC\"\n    }\n  ],\n  \"filters\": [\n      {\n          \"columnName\": \"Sales\",\n          \"filterType\": \"QUANTITATIVE\",\n          \"quantitativeFilterType\": \"MIN\",\n          \"min\": 200000\n      }\n  ]\n}",
-    "data_model": {}
+    "few_shot_examples": "\n\"sum of sales by segment\"\n{\n  \"columns\": [\n    {\n      \"columnName\": \"Segment\"\n    },\n    {\n      \"columnName\": \"Sales\",\n      \"function\": \"SUM\",\n      \"maxDecimalPlaces\": 2\n    }\n  ]\n}\n\"What are the most profitable sub categories, and include the name of the category that each sub category belongs to.\"\n\n{\n    \"columns\": [\n      {\n        \"columnName\": \"Category\"\n      },\n      {\n        \"columnName\": \"Sub-Category\"\n      },\n\"what are the top selling Sub-Catetories? Remove individual sales below 200K\n{\n  \"columns\": [\n    {\n      \"columnName\": \"Sub-Category\"\n    },\n    {\n      \"columnName\": \"Sales\",\n      \"function\": \"SUM\",\n      \"sortPriority\": 1,\n      \"sortDirection\": \"DESC\"\n    }\n  ],\n  \"filters\": [\n      {\n          \"columnName\": \"Sales\",\n          \"filterType\": \"QUANTITATIVE\",\n          \"quantitativeFilterType\": \"MIN\",\n          \"min\": 200000\n      }\n  ]\n}",
 }
