@@ -1,5 +1,7 @@
 
 import os, requests, json
+from modules.headless import query
+from prompts.nlq_to_vds import prompt
 
 # request metadata of declared datasource (READ_METADATA)
 def read():
@@ -26,3 +28,44 @@ def read():
     else:
         print("Failed to fetch data from the API. Status code:", response.status_code)
         print(response.text)
+
+def get_values(column_name):
+     #read in prompt
+     if column_name == 'PatientStatus1':
+        return ""
+     column_values = {'columns': [{'columnName': column_name}]}
+     output = query(column_values)
+     if output is None:
+        return None
+     sample_values = [list(item.values())[0] for item in output][:4]
+     return sample_values
+
+def instantiate_prompt():
+    datasource_metadata = read()
+
+    #convert headless bi prompt string to a json object
+    headless_bi_prompt = prompt
+
+    # #clean up and augment data model
+    # for item in headless_bi_prompt:
+    #     del item['objectGraphId']
+    data_model = []
+
+    
+    for field in datasource_metadata:
+        column_dict = {}
+        del field['objectGraphId']
+        column_dict['caption'] = field['caption']
+        column_dict['colName'] = field['columnName']
+        if field['dataType'] == 'STRING':
+            string_values = get_values(field['columnName'])
+            column_dict['sampleValues'] = string_values
+        else:
+            column_dict['sampleValues'] = ""
+        data_model.append(column_dict)
+
+    # add the datasource metadata of the connected datasource to the system prompt
+    
+        # print(headless_bi_prompt['data_model'])
+    headless_bi_prompt['data_model'] = data_model
+    return json.dumps(headless_bi_prompt, indent=2)

@@ -2,6 +2,7 @@ import os, requests, json
 
 # define the headless BI query template
 def query(query):
+    print("here is the JSON output I've generated and will send to VDS: " + json.dumps(query))
     url = os.getenv('VDS_URL')
     payload = json.dumps({
         "connection": {
