@@ -5,7 +5,6 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 def vds_query():
-#    print('******   vds_query    *****\n', type(parameters), '\n', parameters)
     # sets up parser to respond with reliable outputs
    parser = JsonOutputParser(pydantic_object=VDS_Query_Response)
    return parser

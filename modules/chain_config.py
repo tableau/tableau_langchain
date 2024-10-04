@@ -1,48 +1,39 @@
-import os, json
+import os
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-from langchain_core.pydantic_v1 import BaseModel, Field
+from langchain_core.output_parsers import StrOutputParser
 from langchain.globals import set_verbose
 
 from modules import metadata, api
-from prompts import nlq_to_vds
 from agents import pandas
 
 # defines the langtab chain
 def create_chain():
     set_verbose(True)
 
-    # 1. Prompt template
-    # datasource_metadata = metadata.instantiate_prompt()
-    # nlq_to_vds.prompt['data_model'] = datasource_metadata
-    # headless_bi_prompt_string = json.dumps(nlq_to_vds.prompt)
+    # 1. Prompt template incorporating datasource metadata
     headless_bi_prompt_string = metadata.instantiate_prompt()
-
+    # passes instructions and metadata to Langchain prompt template
     active_prompt_template = ChatPromptTemplate.from_messages([
         SystemMessage(content=headless_bi_prompt_string),
         ("user", "{query}")
     ])
 
-    # 2. Chat model
+    # 2. Chat model (BYOM)
     llm = ChatOpenAI(model=os.environ['VDS_AGENT_MODEL'], temperature=0)
 
-    # 3. Parser
+    # 3. Standard Langchain parser
     output_parser = StrOutputParser()
 
-    # 4. Pandas agent
+    # 4. Langchain pandas agent
     pandas_agent = pandas.analyze
 
-    # 5. API response
+    # 5. natural language response in the expected API format
     json_parser = api.vds_transform
 
+    # this chain defines the flow of data through the system
     chain = active_prompt_template | llm | output_parser | pandas_agent | json_parser
 
     return chain
-
-# Define the data structure for the response
-class VDS_Query_Response(BaseModel):
-    data: str = Field(description="the table of data containing the response to the query")
-    behavioral: str = Field(description="a behavioral summary of the reasoning and explanation behind the action taken")
