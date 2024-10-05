@@ -26,41 +26,59 @@ Alternatively you can type python main.py to run the API from terminal
 
 ## Terminal Mode
 
-LangTab runs on Python and its requirements are described in the `environment.yml` file which can be read by either [Mamba](https://github.com/mamba-org/mamba) or [Conda](https://anaconda.org/anaconda/conda) to install packages. For help installing either of them, ask [Perplexity](https://www.perplexity.ai/) for help and mention your operating system.
+LangTab runs on Python and its requirements are described in the `environment.yml` file which can be read by either [Conda](https://anaconda.org/anaconda/conda) or [Mamba](https://github.com/mamba-org/mamba) to install packages. For help installing either of them, ask [Perplexity](https://www.perplexity.ai/) for help and mention your operating system.
 
-1. Clone the repository
-2. Create a Python environment to run the code
-
-Mamba
+1 - Clone the repository
 ```
-mamba env create -f environment.yml
+git clone https://github.com/Tab-SE/langtab.git
 ```
 
-Conda
+2 - Create a Python environment to run the code
+
+2.1 - Using Anaconda or Miniconda
 ```
 conda env create -f environment.yml
 ```
 
-3. Activate your environment
-
-Mamba
+2.2 - Using Mamba
 ```
-mamba activate myenv
+mamba env create -f environment.yml
 ```
 
-Conda
+3 - Activate your environment
+
+3.1 - Using Anaconda or Miniconda
+
 ```
-conda activate myenv
+conda activate langtab
 ```
 
-4. Run the app in the terminal
+3.2 - Using Mamba
+```
+mamba activate langtab
+```
 
-Python
+4 - Duplicate file **.env.template** as **.env** and modify the values.
+```
+cp .env.template .env
+```
+
+5 - Run the chain in the terminal
+
+5.1 - To run the chain interactively in the terminal
 ```
 python main.py
 ```
 
-5. Type a question to the AI to see how it operates!
+5.2 - To run the chain as an API service 
+
+```
+python main.py --mode api
+```
+
+
+
+6 - Type a question to the AI to see how it operates!
 
 ## About LangTab
 LangTab was developed by Stephen Price [@stephenlprice](https://github.com/stephenlprice) and Joe Constantino [@joeconstantino](https://github.com/joeconstantino). Shout out to Patrick Green for doing the initial work to prove how you can query Headless BI from a notebook.
