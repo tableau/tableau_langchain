@@ -2,7 +2,6 @@ import os, requests, json
 
 # define the headless BI query template
 def query(query):
-    print("here is the JSON output I've generated and will send to VDS: " + json.dumps(query))
     url = os.getenv('VDS_URL')
     payload = json.dumps({
         "connection": {
@@ -23,6 +22,7 @@ def query(query):
     # Check if the request was successful (status code 200)
     if response.status_code == 200:
         data = response.json()['data']
+        print("here is the JSON output I've generated and will send to VDS: " + data)
         return data
     else:
         print("Failed to fetch data from the API. Status code:", response.status_code)

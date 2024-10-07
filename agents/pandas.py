@@ -35,7 +35,7 @@ def analyze(query):
 
 
 def get_payload(output):
-    # print reasoning
+    # output reasoning
     print(output.split('JSON_payload')[0])
     # parse LLM output and query headless BI
     parsed_output = output.split('JSON_payload')[1]

@@ -1,4 +1,3 @@
-
 import os, requests, json
 from modules.headless import query
 from prompts.nlq_to_vds import prompt
@@ -30,7 +29,7 @@ def read():
         print(response.text)
 
 def get_values(column_name):
-     #read in prompt
+     # read in prompt
      if column_name == 'PatientStatus1':
         return ""
      column_values = {'columns': [{'columnName': column_name}]}
@@ -43,15 +42,11 @@ def get_values(column_name):
 def instantiate_prompt():
     datasource_metadata = read()
 
-    #convert headless bi prompt string to a json object
-    headless_bi_prompt = prompt
+    # convert headless bi prompt string to a json object
+    # headless_bi_prompt = prompt
 
-    # #clean up and augment data model
-    # for item in headless_bi_prompt:
-    #     del item['objectGraphId']
     data_model = []
 
-    
     for field in datasource_metadata:
         column_dict = {}
         del field['objectGraphId']
@@ -65,7 +60,5 @@ def instantiate_prompt():
         data_model.append(column_dict)
 
     # add the datasource metadata of the connected datasource to the system prompt
-    
-        # print(headless_bi_prompt['data_model'])
-    headless_bi_prompt['data_model'] = data_model
-    return json.dumps(headless_bi_prompt, indent=2)
+    prompt['data_model'] = data_model
+    return json.dumps(prompt, indent=2)
