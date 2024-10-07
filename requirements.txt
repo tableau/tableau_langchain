@@ -1,6 +1,7 @@
-python==3.12.2
+# python>=3.12.2
+# pip>=23.3.1
+
 notebook
-nb_conda_kernels
 ipykernel
 python-dotenv
 pandas
@@ -8,7 +9,6 @@ pyjwt
 aiohttp
 fastapi
 tabulate
-pip==23.3.1
 langchain
 langchain_openai
 langchain_experimental
