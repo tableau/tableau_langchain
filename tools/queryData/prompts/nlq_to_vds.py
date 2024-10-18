@@ -30,27 +30,6 @@ Only use columns based on what is listed in the available_fields dictionary.
 Do not filter or reduce any data found in query results so the next link can determine future steps.
 """
 
-available_fields = [
-    "Category",
-    "City",
-    "Country/Region",
-    "Customer ID",
-    "Customer Name",
-    "Order ID (Returns)",
-    "Order ID",
-    "Postal Code",
-    "Product ID",
-    "Product Name",
-    "Region (People)",
-    "Region",
-    "Regional Manager",
-    "Returned",
-    "Segment",
-    "Ship Mode",
-    "State/Province",
-    "Sub-Category"
-]
-
 prompt = {
     "instructions": instructions,
     "restrictions": restrictions,

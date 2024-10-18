@@ -34,6 +34,10 @@ def create_chain():
     json_parser = api.vds_transform
 
     # this chain defines the flow of data through the system
-    chain = active_prompt_template | llm | output_parser | pandas_agent | json_parser
+
+    # chain = active_prompt_template | llm | output_parser | pandas_agent | json_parser
+
+    chain = active_prompt_template | llm | output_parser | json_parser
+
 
     return chain
