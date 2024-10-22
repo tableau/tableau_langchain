@@ -1,0 +1,36 @@
+query GetAllDashboards {
+    dashboards {
+        id
+        name
+        path
+        workbook {
+            id
+            name
+            luid
+            projectName
+            tags {
+                name
+            }
+            sheets {
+                id
+                name
+                createdAt
+                updatedAt
+                sheetFieldInstances {
+                    name
+                    description
+                    isHidden
+                    id
+                }
+                worksheetFields{
+                    name
+                    description
+                    isHidden
+                    formula
+                    aggregation
+                    id
+                }
+            }
+        }
+    }
+}
