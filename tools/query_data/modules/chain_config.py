@@ -25,7 +25,7 @@ def create_chain():
     ])
 
     # 2. Chat model (BYOM)
-    llm = ChatOpenAI(model=os.environ['VDS_AGENT_MODEL'], temperature=0)
+    llm = ChatOpenAI(model=os.environ['QUERY_AGENT_MODEL'], temperature=0)
 
     # 3. Standard Langchain parser
     output_parser = StrOutputParser()
