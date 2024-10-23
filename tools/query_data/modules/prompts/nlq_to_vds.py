@@ -8,7 +8,6 @@ The HBI query is a JSON object that contains 2 fundamental components.
     2. filters [optional] - an array of filters to apply to the query. They can include fields that are not in the columns array.
 Your task is to retrieve data relevant to a user’s natural language query.
 
-A pandas AI Agent will be used to transform and analyze the data that your VDS query returns.
 Query as much data as might be useful; it's ok if you pull in superfluous columns,
 You will be successful if you bring back all the data that could help to answer the question, even if additional transformation and actions are needed.
 
