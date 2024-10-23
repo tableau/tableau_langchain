@@ -12,50 +12,6 @@ def get_tableau_client():
     server = TSC.Server(tableau_server, use_server_version=True)
     return server, tableau_auth
 
-def fetch_dashboard_data_old(server, auth):
-    with server.auth.sign_in(auth):
-        # Query the Metadata API and store the response in resp
-        query = """
-            query GetAllDashboards {
-                dashboards {
-                    id
-                    name
-                    path
-                    workbook {
-                        id
-                        name
-                        luid
-                        projectName
-                        tags {
-                            name
-                        }
-                        sheets {
-                            id
-                            name
-                            createdAt
-                            updatedAt
-                            sheetFieldInstances {
-                                name
-                                description
-                                isHidden
-                                id
-                            }
-                            worksheetFields{
-                                name
-                                description
-                                isHidden
-                                formula
-                                aggregation
-                                id
-                            }
-                        }
-                    }
-                }
-            }
-        """
-        resp = server.metadata.query(query)
-        return resp['data']['dashboards']
-
 def fetch_dashboard_data(server, auth):
     with server.auth.sign_in(auth):
         # Read the GraphQL query from the file
@@ -78,28 +34,74 @@ def fetch_sheets_data(server, auth):
     
 def fetch_datasources(server, auth):
     with server.auth.sign_in(auth):
+
         # Read the GraphQL query from the file
         query_file_path = os.path.join('tools','queryData','prompts', 'tab_datasources.graphql')
         with open(query_file_path, 'r') as f:
             query = f.read()
+
         # Query the Metadata API and store the response in resp
         resp = server.metadata.query(query)
-        return resp['data']['publishedDatasources']
+        
+        # Prepare datasources for RAG
+        datasources = resp['data']['publishedDatasources']
 
-def main():
-    server, auth = get_tableau_client()
-    # dashboards = fetch_dashboard_data(server, auth)
-    # sheets = fetch_sheets_data(server, auth)
-    datasources = fetch_datasources(server, auth)
-    for datasource in datasources:
-        print(datasource)
+        for datasource in datasources:
 
-    # for sheet in sheets:
-    #     print(sheet)
+            # Combine datasource columns (is not hidden) to one cell for RAG
+            fields = datasource['fields']
 
-    # Print the result
-    # for dashboard in dashboards:
-    #     print(f"Dashboard ID: {dashboard['id']}, Name: {dashboard['name']}, Path: {dashboard['path']}")
+            field_entries = []
+            for field in fields:
+                # Exclude columns that are hidden
+                if not field.get('isHidden', True):
+                    name = field.get('name', '')
+                    description = field.get('description', '')
+                    # If there's a description include it
+                    if description:
+                        # Remove newlines and extra spaces
+                        description = ' '.join(description.split())
+                        field_entry = f"- {name}: [{description}]"
+                    else:
+                        field_entry = "- " + name
+                    field_entries.append(field_entry)
 
-if __name__ == "__main__":
-    main()
+            # Combining Datasource columns
+            concatenated_field_entries = '\n'.join(field_entries)
+
+            # Datasource RAG headers
+            datasource_name = datasource['name']
+            datasource_desc = datasource['description']
+            datasource_project = datasource['projectName']
+
+            # Formating Output for readability
+            rag_column = f"Datasource: {datasource_name}\n{datasource_desc}\n{datasource_project}\n\nDatasource Columns:\n{concatenated_field_entries}"
+            
+            datasource['dashboard_overview'] = rag_column
+
+            # Simplifying output schema 
+            keys_to_extract = [
+                'dashboard_overview',
+                'id',
+                'luid',
+                'uri',
+                'vizportalId',
+                'vizportalUrlId',
+                'name',
+                'hasExtracts',
+                'createdAt',
+                'updatedAt',
+                'extractLastUpdateTime',
+                'extractLastRefreshTime',
+                'extractLastIncrementalUpdateTime',
+                'projectName',
+                'containerName',
+                'isCertified',
+                'description'
+            ]
+
+            # Create a new dictionary with only the specified keys
+            datasource = {key: datasource.get(key) for key in keys_to_extract}
+
+        return datasources
+
