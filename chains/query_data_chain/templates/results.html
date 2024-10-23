@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <h2>You searched for: "{{ query }}"</h2>
+    {% if results %}
+        <ul>
+            {% for item in results %}
+                <li>
+                    <strong>Name:</strong> {{ item.name }}<br>
+                    <strong>URI:</strong> {{ item.uri }}<br>
+                    <strong>LUID:</strong> {{ item.luid }}<br>
+                    <strong>Certified?:</strong> {{ item.isCertified }}<br>
+                    <strong>Last Update:</strong> {{ item.updatedAt }}<br>
+                    <strong>Vector Distance:</strong> {{ item.distance }}<br>
+                </li>
+                <hr>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results found for "{{ query }}".</p>
+    {% endif %}
+    <a href="/">Back to Search</a>
+</body>
+</html>
