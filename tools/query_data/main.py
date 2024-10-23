@@ -1,4 +1,4 @@
-import argparse, uvicorn, asyncio
+import argparse, uvicorn
 
 from dotenv import load_dotenv
 
@@ -8,7 +8,8 @@ from modules import chain_config, serve
 def run_interactive_mode(chain):
     active_utterance = get_utterance()
     while active_utterance != 'stop':
-        chain.invoke(active_utterance)
+        interaction = chain.invoke(active_utterance)
+        print("******", interaction, "******")
         active_utterance = get_utterance()
 
 # runs as a service via Langserve

@@ -1,4 +1,4 @@
-from prompts import vds_schema, few_shot
+from modules.prompts import vds_schema, few_shot
 
 
 instructions = """
