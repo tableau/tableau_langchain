@@ -2,14 +2,14 @@ import argparse, uvicorn
 
 from dotenv import load_dotenv
 
-from modules import chain_config, serve
+from modules import toolchain, serve
 
 # runs interactively in the terminal
 def run_interactive_mode(chain):
     active_utterance = get_utterance()
     while active_utterance != 'stop':
         interaction = chain.invoke(active_utterance)
-        print("******", interaction, "******")
+        print("****** START LOCAL OUTPUT\n", interaction, "\n****** END LOCAL OUTPUT")
         active_utterance = get_utterance()
 
 # runs as a service via Langserve
@@ -32,7 +32,7 @@ def main():
     parser.add_argument("--port", type=int, default=8000, help="Port for API mode")
     args = parser.parse_args()
 
-    chain = chain_config.create_chain()
+    chain = toolchain.create_chain()
 
     if args.mode == "interactive":
         run_interactive_mode(chain)
