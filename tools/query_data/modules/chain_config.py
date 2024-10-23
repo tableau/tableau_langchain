@@ -11,7 +11,7 @@ from modules import metadata, api
 # defines the langtab chain
 def create_chain():
     # Check if the environment variable ENV is set to 'development'
-    if os.getenv('ENV') == 'development':
+    if os.getenv('DEBUG') == 'True':
         set_verbose(True)
     else:
         set_verbose(False)
