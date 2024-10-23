@@ -14,7 +14,7 @@ def run_interactive_mode(chain):
 
 # runs as a service via Langserve
 def run_api_mode(chain, host, port=8000):
-    app = serve.langtab_agent(chain)
+    app = serve.query_data(chain)
     uvicorn.run(app, host=host, port=port)
 
 # prompts the user to continue asking questions

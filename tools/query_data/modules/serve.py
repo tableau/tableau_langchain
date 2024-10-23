@@ -1,18 +1,18 @@
 from fastapi import FastAPI
 from langserve import add_routes
 
-def langtab_agent(chain):
+def query_data(chain):
     # define the server app
     app = FastAPI(
     title="LangTab Headless BI",
     version="1.0",
-    description="An early demonstration of a LangChain agent querying Tableau's Headless BI service",
+    description="A tool for querying data sources via Tableau Headless BI on-demand using natural language",
     )
-    # use langserve to serve up the agent
+    # use langserve to serve up the endpoint
     add_routes(
         app,
         chain,
-        path="/headlesscopilot",
+        path="/query_data",
     )
 
     return app
