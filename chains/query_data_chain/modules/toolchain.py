@@ -6,12 +6,12 @@ from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain.globals import set_verbose
 
-from modules import metadata, api
+from modules import metadata
 
 # defines the langtab chain
 def create_chain():
     # Check if the environment variable ENV is set to 'development'
-    if os.getenv('ENV') == 'development':
+    if os.getenv('DEBUG') == 'True':
         set_verbose(True)
     else:
         set_verbose(False)
@@ -25,7 +25,7 @@ def create_chain():
     ])
 
     # 2. Chat model (BYOM)
-    llm = ChatOpenAI(model=os.environ['VDS_AGENT_MODEL'], temperature=0)
+    llm = ChatOpenAI(model=os.environ['QUERY_AGENT_MODEL'], temperature=0)
 
     # 3. Standard Langchain parser
     output_parser = StrOutputParser()
