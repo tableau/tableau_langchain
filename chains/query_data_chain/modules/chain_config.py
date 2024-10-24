@@ -30,11 +30,7 @@ def create_chain():
     # 3. Standard Langchain parser
     output_parser = StrOutputParser()
 
-    # 4. natural language response in the expected API format
-    json_parser = api.vds_transform
-
     # this chain defines the flow of data through the system
-    chain = active_prompt_template | llm | output_parser | json_parser
-
+    chain = active_prompt_template | llm | output_parser
 
     return chain
