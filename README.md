@@ -18,6 +18,14 @@ This codebase is able to run in your terminal, providing a quick and direct way 
 ## Getting Started
 The easiest way to get started with running the headlesscopilot query pipeline is to try it in the jupyter notebook
 
+### Deploy to Heroku
+Use this [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://www.heroku.com/deploy)
+ button to build and launch this app within Heroku.  You will be prompted to set your environment (config) variables within Heroku, and then it will build and deploy the app for you.  Once the app is running, you can navigate to the app page in Heroku and find the Settings tab.  You can see the domain created for this app under the Domains section.  In order to access the API, you can make a POST request like this: 
+
+```
+curl -X POST "<domain-from-heroku>>/headlesscopilot/invoke" -H "Content-Type: application/json" -d '{"input": {"query": "sales by region"}}'
+```
+
 ### Getting started with the headlesscopilot REST API
 1. Perform the JSON serialization fix? /usr/local/Caskroom/mambaforge/base/envs/langtab/lib/python3.12/site-packages/langserve/serialization.py 
 2. Activate the langtab conda environment - conda activate langtab
