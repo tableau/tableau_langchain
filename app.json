@@ -1,0 +1,64 @@
+{
+    "name": "Tableau Langchain",
+    "description": "Integration between Tableau's VizQL Data Service and LangChain",
+    "repository": "https://github.com/Tab-SE/tableau_langchain",
+    "keywords": ["python", "tableau", "langchain"],
+    "env": {
+        "OPENAI_API_KEY": {
+            "description": "OpenAI API Key",
+            "value": ""
+        },
+        "TABLEAU_DOMAIN": {
+            "description": "Hostname for your Tableau Cloud environment",
+            "value": ""
+        },
+        "SITE_NAME": {
+            "description": "Tableau Site Name (contentUrl)",
+            "value": ""
+        },
+        "DATA_SOURCE": {
+            "description": "Tableau Data Source Repository name",
+            "value": ""
+        },
+        "PAT_NAME": {
+            "description": "Tableau Personal Access Token name",
+            "value": ""
+        },
+        "PAT_SECRET": {
+            "description": "Tableau Personal Access Token secret",
+            "value": ""
+        },
+        "READ_METADATA": {
+            "description": "Salesforce Metadata URL",
+            "value": ""
+        },
+        "VDS_URL": {
+            "description": "Salesforce VizQL Data Service URL",
+            "value": ""
+        },
+        "VDS_AGENT_MODEL": {
+            "description": "",
+            "value": "gpt-4o-mini"
+        },
+        "PANDAS_AGENT_MODEL": {
+            "description": "",
+            "value": "gpt-4o-mini"
+        },
+        "LANGCHAIN_TRACING_V2": {
+            "description": "",
+            "value": "true"
+        },
+        "LANGCHAIN_ENDPOINT": {
+            "description": "",
+            "value": "https://api.smith.langchain.com"
+        },
+        "LANGCHAIN_API_KEY": {
+            "description": "",
+            "value": ""
+        },
+        "LANGCHAIN_PROJECT": {
+            "description": "",
+            "value": "langtab"
+        }
+    }
+}
