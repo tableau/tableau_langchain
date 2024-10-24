@@ -2,7 +2,7 @@ import os, requests, json
 
 # define the headless BI query template
 def query(query):
-    url = os.getenv('VDS_URL')
+    url = os.getenv('HEADLESSBI_URL')
     payload = json.dumps({
         "connection": {
             "tableauServerName": os.getenv('TABLEAU_DOMAIN'),
