@@ -1,4 +1,4 @@
-name: langtab
+name: tableau_langchain
 channels:
     - conda-forge
     - defaults

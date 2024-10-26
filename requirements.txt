@@ -4,9 +4,7 @@
 notebook
 ipykernel
 python-dotenv
-pandas
 pyjwt
-aiohttp
 fastapi
 tabulate
 langchain
