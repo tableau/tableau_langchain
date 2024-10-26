@@ -1,8 +1,8 @@
 {
     "name": "Tableau Langchain",
-    "description": "Integration between Tableau's VizQL Data Service and LangChain",
+    "description": "Tableau tools for Agentic use cases with Langchain",
     "repository": "https://github.com/Tab-SE/tableau_langchain",
-    "keywords": ["python", "tableau", "langchain"],
+    "keywords": ["python", "tableau", "langchain", "agents", "tools", "ai"],
     "env": {
         "OPENAI_API_KEY": {
             "description": "OpenAI API Key",
@@ -58,7 +58,7 @@
         },
         "LANGCHAIN_PROJECT": {
             "description": "",
-            "value": "langtab"
+            "value": "tableau_langchain"
         }
     }
 }
