@@ -8,7 +8,7 @@ from langchain.globals import set_verbose
 
 from modules import metadata
 
-# defines the langtab chain
+# defines query_data_chain
 def create_chain():
     # Check if the environment variable ENV is set to 'development'
     if os.getenv('DEBUG') == 'True':

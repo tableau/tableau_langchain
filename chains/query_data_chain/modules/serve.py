@@ -4,7 +4,7 @@ from langserve import add_routes
 def query_data(chain):
     # define the server app
     app = FastAPI(
-    title="LangTab Headless BI",
+    title="Tableau AI Data Query",
     version="1.0",
     description="A tool for querying data sources via Tableau Headless BI on-demand using natural language",
     )
