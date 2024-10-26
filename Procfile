@@ -1,1 +1,1 @@
-web: python tools/queryData/main.py --mode api 
+web: python chains/query_data_chain/main.py --mode api
