@@ -1,6 +1,10 @@
-from tools.query_data import QueryTableauData
+from agent.community.tools.tableau.query_data import QueryTableauData
+from agent.utils import _set_env
 
-# Example usage
+_set_env('AGENT_MODEL')
+_set_env('OPENAI_API_KEY')
+
+# Example usage of query_data tool
 tool = QueryTableauData()
 result = tool.invoke({
     "api_key": "your_api_key",
