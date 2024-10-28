@@ -1,5 +1,6 @@
-import getpass
 import os
+import getpass
+
 from IPython.display import Image, display
 
 
