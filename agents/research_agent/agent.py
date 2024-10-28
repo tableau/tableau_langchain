@@ -1,4 +1,4 @@
-from agents.chatbot import graph, state, nodes
+from agents.research_agent import graph, state, nodes
 
 def initialize_agent():
     """
@@ -15,6 +15,6 @@ def initialize_agent():
     summaries of key analytical activity and insights.
     """
     # LangGraph Agents rely on graphs to describe state
-    agent = graph.graph_state(state.ChatbotState, "chatbot", nodes.chatbot)
+    agent = graph.graph_state(state.ResearchAgentState, "research_agent", nodes.chatbot)
 
     return agent
