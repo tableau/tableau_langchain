@@ -21,4 +21,5 @@ dependencies:
         - langchain-pinecone
         - "langserve[all]"
         - langchain_community
+        - semantic-router
         - tavily-python
