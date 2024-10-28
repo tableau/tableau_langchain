@@ -14,13 +14,25 @@ def _set_env(var: str):
 
 def _visualize_graph(graph):
     """
-    Creates a mermaid visualization of the State Graph .png format
+    Creates a mermaid visualization of the State Graph in .png format
     """
+
+    # Attempt to generate and save PNG
     try:
-        display(Image(graph.get_graph().draw_mermaid_png()))
-    except Exception:
-        # This requires some extra dependencies and is optional
-        pass
+        png_data = graph.get_graph().draw_mermaid_png()
+        filename = "graph_visualization.png"
+        with open(filename, "wb") as f:
+            f.write(png_data)
+
+        if os.path.exists(filename):
+            file_size = os.path.getsize(filename)
+            print(f"Graph image saved as '{filename}' | file size: {file_size} bytes")
+            display(Image(png_data))
+        else:
+            print(f"Failed to create file '{filename}'")
+    except Exception as e:
+        print(f"Failed to generate PNG: {str(e)}")
+
 
 
 def stream_graph_updates(user_input: str, graph):
