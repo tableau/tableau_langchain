@@ -2,11 +2,11 @@ import os
 
 from langchain_openai import ChatOpenAI
 
-from agents.chatbot.state import ChatbotState
-from agents.chatbot.tooling import equip_tooling
+from agents.tableau.research_agent.state import ResearchAgentState
+from agents.tableau.research_agent.tooling import equip_tooling
 
 
-def chatbot(state: ChatbotState):
+def chatbot(state: ResearchAgentState):
     """
     Graph Node
     Takes the current State as input and returns a dictionary containing an updated messages list

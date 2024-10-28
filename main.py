@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 
-from agents.chatbot.agent import initialize_agent
-from agents.chatbot.utils import _set_env, stream_graph_updates
+from agents.tableau.chatbot.agent import initialize_agent
+from agents.tableau.chatbot.utils import _set_env, stream_graph_updates
 
 
 def main():
