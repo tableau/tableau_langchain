@@ -18,5 +18,6 @@ dependencies:
         - langsmith
         - langchain_anthropic
         - langchain_openai
-        - langchain_experimental
         - "langserve[all]"
+        - langchain_community
+        - tavily-python
