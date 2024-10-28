@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "your_project"
+version = "0.1.0"
+description = "A project with two installable modules."
+readme = "README.md"
+requires-python = ">=3.6"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"},
+]
+
+[project.urls]
+"Homepage" = "https://example.com"
+"Documentation" = "https://example.com/docs"
+
+[project.scripts]
+query-data = "queryData.module1:main"  # Replace with actual entry point
+search-datasources = "searchDatasources.module2:main"  # Replace with actual entry point
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["queryData", "searchDatasources"]

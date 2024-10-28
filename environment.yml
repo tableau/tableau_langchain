@@ -1,4 +1,4 @@
-name: langtab
+name: tableau_langchain
 channels:
     - conda-forge
     - defaults
@@ -8,9 +8,7 @@ dependencies:
     - conda-forge::nb_conda_kernels
     - ipykernel
     - python-dotenv
-    - pandas
     - pyjwt
-    - aiohttp
     - fastapi
     - tabulate
     - pip=23.3.1
