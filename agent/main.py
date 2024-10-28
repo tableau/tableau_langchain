@@ -20,6 +20,11 @@ def main():
     _set_env('SITE_NAME')
     _set_env('DATA_SOURCE')
     _set_env('TAVILY_API_KEY')
+    _set_env('PINECONE_API_KEY')
+    _set_env('PINECONE_ENVIRONMENT')
+    _set_env('PINECONE_INDEX_NAME')
+
+
 
     # LangGraph Agents rely on graphs to describe state
     graph = graph_state()
