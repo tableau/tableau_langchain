@@ -23,8 +23,7 @@ def main():
     _set_env('PINECONE_API_KEY')
     _set_env('PINECONE_ENVIRONMENT')
     _set_env('PINECONE_INDEX_NAME')
-
-
+    _set_env('RETRIEVER_MODEL')
 
     # LangGraph Agents rely on graphs to describe state
     graph = graph_state()
