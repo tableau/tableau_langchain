@@ -5,11 +5,10 @@ from pinecone import Pinecone, ServerlessSpec
 
 from semantic_router.encoders import OpenAIEncoder
 
-from langchain_pinecone import PineconeVectorStore
 from langchain_core.tools import tool
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-from community.tools.tableau.query_data import QueryTableauData
+from tools.tableau.query_data import QueryTableauData
 
 
 def equip_tooling():

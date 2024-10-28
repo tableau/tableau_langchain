@@ -1,9 +1,6 @@
 from dotenv import load_dotenv
 
-from graph import graph_state
-from state import AgentState, ChatbotState
-from nodes import chatbot
-from utils import _set_env, stream_graph_updates
+from agents.research_agent import graph, state, nodes, utils
 
 
 def main():
@@ -21,18 +18,18 @@ def main():
     load_dotenv()
 
     # checks for values in .env, else prompts user before initializing
-    _set_env('OPENAI_API_KEY')
-    _set_env('TABLEAU_DOMAIN')
-    _set_env('SITE_NAME')
-    _set_env('DATA_SOURCE')
-    _set_env('TAVILY_API_KEY')
-    _set_env('PINECONE_API_KEY')
-    _set_env('PINECONE_ENVIRONMENT')
-    _set_env('PINECONE_INDEX_NAME')
-    _set_env('RETRIEVER_MODEL')
+    utils._set_env('OPENAI_API_KEY')
+    utils._set_env('TABLEAU_DOMAIN')
+    utils._set_env('SITE_NAME')
+    utils._set_env('DATA_SOURCE')
+    utils._set_env('TAVILY_API_KEY')
+    utils._set_env('PINECONE_API_KEY')
+    utils._set_env('PINECONE_ENVIRONMENT')
+    utils._set_env('PINECONE_INDEX_NAME')
+    utils._set_env('RETRIEVER_MODEL')
 
     # LangGraph Agents rely on graphs to describe state
-    graph = graph_state(ChatbotState, "chatbot", chatbot)
+    agent = graph.graph_state(state.ChatbotState, "chatbot", nodes.chatbot)
 
     # User input loop
     while True:
@@ -43,12 +40,12 @@ def main():
                 print("Goodbye!")
                 break
 
-            stream_graph_updates(user_input, graph)
+            utils.stream_graph_updates(user_input, agent)
         except:
             # fallback if input() is not available
             user_input = "average discount, total sales, profits by region"
             print("User: " + user_input)
-            stream_graph_updates(user_input, graph)
+            utils.stream_graph_updates(user_input, agent)
             break
 
 if __name__ == "__main__":
