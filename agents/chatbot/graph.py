@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from agents.research_agent.tooling import equip_tooling
-from agents.research_agent.utils import  _visualize_graph
+from agents.chatbot.tooling import equip_tooling
+from agents.chatbot.utils import  _visualize_graph
 
 
 def graph_state(state_definition, entry_point, node):

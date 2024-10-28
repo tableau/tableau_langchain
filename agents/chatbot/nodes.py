@@ -2,8 +2,8 @@ import os
 
 from langchain_openai import ChatOpenAI
 
-from agents.research_agent.state import ChatbotState
-from agents.research_agent.tooling import equip_tooling
+from agents.chatbot.state import ChatbotState
+from agents.chatbot.tooling import equip_tooling
 
 
 def chatbot(state: ChatbotState):
