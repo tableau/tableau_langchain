@@ -1,6 +1,6 @@
 import os, requests, json
 from modules.headless import query
-from prompts.nlq_to_vds import prompt
+from modules.prompts import nlq_to_vds
 
 # request metadata of declared datasource (READ_METADATA)
 def read():
@@ -29,9 +29,6 @@ def read():
         print(response.text)
 
 def get_values(column_name):
-     # read in prompt
-     if column_name == 'PatientStatus1':
-        return ""
      column_values = {'columns': [{'columnName': column_name}]}
      output = query(column_values)
      if output is None:
@@ -41,9 +38,6 @@ def get_values(column_name):
 
 def instantiate_prompt():
     datasource_metadata = read()
-
-    # convert headless bi prompt string to a json object
-    # headless_bi_prompt = prompt
 
     data_model = []
 
@@ -60,5 +54,5 @@ def instantiate_prompt():
         data_model.append(column_dict)
 
     # add the datasource metadata of the connected datasource to the system prompt
-    prompt['data_model'] = data_model
-    return json.dumps(prompt, indent=2)
+    nlq_to_vds.prompt['data_model'] = data_model
+    return json.dumps(nlq_to_vds.prompt, indent=2)

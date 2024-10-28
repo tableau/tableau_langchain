@@ -2,4 +2,5 @@
 * @stephenlprice @joeconstantino
 
 # queryData tool
-tools/queryData/* @sf-jfluckiger @josephflu
+tools/query_data/* @sf-jfluckiger @josephflu
+tools/search_datasources/* @wjsutton
