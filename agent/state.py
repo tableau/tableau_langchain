@@ -1,4 +1,5 @@
 import os
+import operator
 
 from typing import Annotated
 
@@ -6,16 +7,36 @@ from typing_extensions import TypedDict
 
 from langgraph.graph import StateGraph
 from langgraph.graph.message import add_messages
+from langchain_core.agents import AgentAction
+from langchain_core.messages import BaseMessage
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import ToolNode, tools_condition
 
 from tools import equip_tooling
 from utils import  _visualize_graph
 
-
-class State(TypedDict):
+class AgentState(TypedDict):
     """
-    Defines the State of the Agent Graph
+    Defines the State of the Tableau Langchain Agent
+    It consists of the graph schema and reducer functions applying updates to state.
+
+    input: the user's most recent query. Generally, this is a data or analytics related question
+
+    chat_history: supports multiple coherent conversation by using previous interactions to contextualize
+    the current query by storing it in agent state
+
+    intermediate_steps: records all steps taken by the agent to generate a final answer.
+    Steps can include "search knowledge base", "query data source", "search the web", etc.
+    These records form a coherent path of actions to anwser user queries
+    """
+    input: str
+    chat_history: list[BaseMessage]
+    intermediate_steps: Annotated[list[tuple[AgentAction, str]], operator.add]
+
+
+class ChatbotState(TypedDict):
+    """
+    Defines the State of a base Chatbot
     It consists of the graph schema and reducer functions applying updates to state.
     The messages key is annotated with the add_messages reducer function,
     which tells LangGraph to append new messages to the existing list, rather than overwriting it.
@@ -24,7 +45,7 @@ class State(TypedDict):
     messages: Annotated[list, add_messages]
 
 
-def chatbot(state: State):
+def chatbot(state: ChatbotState):
     """
     Graph Node
     Takes the current State as input and returns a dictionary containing an updated messages list
@@ -49,6 +70,9 @@ def chatbot(state: State):
 
 
 def graph_state():
+    # Select which state definition to use
+    State = ChatbotState
+
     graph_builder = StateGraph(State)
     # The first argument is the unique node name
     # The second argument is the function or object that will be called whenever the node is used.
