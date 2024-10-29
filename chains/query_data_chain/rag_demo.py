@@ -58,10 +58,6 @@ else:
         # Remove any nested data structures from metadata (e.g., lists, dicts)
         metadata = {k: convert_to_string(v) for k, v in metadata.items() if isinstance(v, (str, int, float, bool, dict, list))}
 
-        # Embedding step not need, using auto with Chroma
-        #embedding = get_embedding_openai(text_to_embed)
-        #embeddings.append(embedding)
-
         documents.append(text_to_embed)
         ids.append(unique_id)
         
