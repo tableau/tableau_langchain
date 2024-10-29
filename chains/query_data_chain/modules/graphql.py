@@ -15,7 +15,7 @@ def get_tableau_client():
 def fetch_dashboard_data(server, auth):
     with server.auth.sign_in(auth):
         # Read the GraphQL query from the file
-        query_file_path = os.path.join('tools','queryData','prompts', 'tab_dashboard_fields.graphql')
+        query_file_path = os.path.join('query_data_chain','modules','prompts', 'tab_dashboard_fields.graphql')
         with open(query_file_path, 'r') as f:
             query = f.read()
         # Query the Metadata API and store the response in resp
@@ -25,7 +25,7 @@ def fetch_dashboard_data(server, auth):
 def fetch_sheets_data(server, auth):
     with server.auth.sign_in(auth):
         # Read the GraphQL query from the file
-        query_file_path = os.path.join('tools','queryData','prompts', 'tab_sheets.graphql')
+        query_file_path = os.path.join('query_data_chain','modules','prompts','tab_sheets.graphql')
         with open(query_file_path, 'r') as f:
             query = f.read()
         # Query the Metadata API and store the response in resp
@@ -36,7 +36,7 @@ def fetch_datasources(server, auth):
     with server.auth.sign_in(auth):
 
         # Read the GraphQL query from the file
-        query_file_path = os.path.join('tools','queryData','prompts', 'tab_datasources.graphql')
+        query_file_path = os.path.join('query_data_chain','modules','prompts','tab_datasources.graphql')
         with open(query_file_path, 'r') as f:
             query = f.read()
 
