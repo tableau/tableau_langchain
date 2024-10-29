@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <title>Search Tableau Datasources</title>
+    <!-- Link to external CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Search Tableau Datasources</h1>
-    <form action="/search" method="post">
-        <label for="query">Enter your search query:</label><br><br>
-        <input type="text" id="query" name="query" size="50" required><br><br>
-        <input type="submit" value="Search">
-    </form>
+    <div class="container">
+        <h1>Search Tableau Datasources</h1>
+        <form action="/search" method="post">
+            <div class="input-group">
+                <input type="text" id="query" name="query" placeholder="Enter your search query" required>
+                <button type="submit"><span>Search</span></button>
+            </div>
+        </form>
+    </div>
 </body>
 </html>

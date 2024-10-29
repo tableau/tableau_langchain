@@ -1,0 +1,116 @@
+/* styles.css */
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #f9fafb;
+    color: #1f2937;
+}
+
+.container {
+    max-width: 800px;
+    margin: 80px auto;
+    padding: 0 20px;
+}
+
+h1 {
+    text-align: center;
+    font-weight: 600;
+    font-size: 2.5rem;
+    color: #111827;
+    margin-bottom: 40px;
+}
+
+h2 {
+    text-align: center;
+    font-weight: 500;
+    font-size: 1.5rem;
+    color: #6b7280;
+    margin-bottom: 30px;
+}
+
+form .input-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+form .input-group input {
+    width: 60%;
+    padding: 15px 20px;
+    font-size: 1rem;
+    border: 1px solid #d1d5db;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    outline: none;
+}
+
+form .input-group button {
+    padding: 15px 25px;
+    font-size: 1rem;
+    background-color: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form .input-group button:hover {
+    background-color: #2563eb;
+}
+
+form .input-group button span {
+    pointer-events: none;
+}
+
+.results-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.result-item {
+    background-color: #fff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.result-item h3 {
+    margin-top: 0;
+    color: #111827;
+    font-weight: 600;
+}
+
+.result-item p {
+    margin: 8px 0;
+    font-size: 1rem;
+}
+
+.result-item p strong {
+    color: #374151;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 20px;
+    background-color: #e5e7eb;
+    color: #1f2937;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.3s;
+}
+
+.back-button:hover {
+    background-color: #d1d5db;
+}
+
+.search-form {
+    margin-bottom: 40px;
+}
+
+.search-form .input-group {
+    margin-top: 20px;
+}
