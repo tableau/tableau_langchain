@@ -1,0 +1,28 @@
+query GetPublishedDatasources {
+    publishedDatasources{
+      id
+      luid
+      uri
+      vizportalId
+      vizportalUrlId
+      name
+      hasExtracts
+      createdAt
+      updatedAt
+      extractLastUpdateTime
+      extractLastRefreshTime
+      extractLastIncrementalUpdateTime
+      projectName
+      containerName
+      isCertified
+      description
+      fields {
+        id
+        name
+        fullyQualifiedName
+        description
+        isHidden
+        folderName
+      }
+    }
+}
