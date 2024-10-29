@@ -1,26 +1,43 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "your_project"
+[metadata]
+name = "tableau_langchain"
 version = "0.1.0"
-description = "A project with two installable modules."
-readme = "README.md"
-requires-python = ">=3.6"
-license = {file = "LICENSE"}
-authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[options]
+packages = ["find:"]  # Adjust as necessary to include your packages
+python_requires = ">=3.12.2"
+
+[options.dependencies]
+notebook = "*"
+nb_conda_kernels = "*"
+ipykernel = "*"
+python-dotenv = "*"
+pyjwt = "*"
+fastapi = "*"
+tabulate = "*"
+
+[options.extras]
+pip = [
+    "langchain",
+    "langgraph",
+    "langsmith",
+    "langgraph-cli",
+    "langchain_anthropic",
+    "langchain_openai",
+    "langchain-pinecone",
+    "langserve[all]",
+    "langchain_community",
+    "llama-index",
+    "llama-index-vector-stores-pinecone",
+    "pinecone-client[grpc]",
+    "semantic-router",
+    "tavily-python"
 ]
 
-[project.urls]
-"Homepage" = "https://example.com"
-"Documentation" = "https://example.com/docs"
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[project.scripts]
-query-data = "queryData.module1:main"  # Replace with actual entry point
-search-datasources = "searchDatasources.module2:main"  # Replace with actual entry point
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["queryData", "searchDatasources"]
+[tool.conda]
+channels = ["conda-forge", "defaults"]
