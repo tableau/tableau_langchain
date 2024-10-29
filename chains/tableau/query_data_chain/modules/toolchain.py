@@ -11,7 +11,7 @@ from modules import metadata
 # defines query_data_chain
 def create_chain():
     # Check if the environment variable ENV is set to 'development'
-    if os.getenv('DEBUG') == 'True':
+    if os.getenv('DEBUG') == 1:
         set_verbose(True)
     else:
         set_verbose(False)

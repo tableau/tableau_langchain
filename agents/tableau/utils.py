@@ -55,4 +55,5 @@ def stream_graph_updates(user_input: str, graph):
     """
     for event in graph.stream({"messages": [("user", user_input)]}):
         for value in event.values():
-            print("Assistant:", value["messages"][-1].content)
+            if (os.environ["DEBUG"] == 1):
+                print("Graph Stream:", value["messages"][-1].content)

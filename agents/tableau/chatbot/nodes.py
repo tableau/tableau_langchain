@@ -27,4 +27,10 @@ def chatbot(state: ChatbotState):
 
     llm = llm_config.bind_tools(tools)
 
-    return {"messages": [llm.invoke(state["messages"])]}
+    message = llm.invoke(state["messages"])
+    content = message.content
+
+    if content:
+        print('Chatbot: \n', message.content)
+
+    return {"messages": [message]}

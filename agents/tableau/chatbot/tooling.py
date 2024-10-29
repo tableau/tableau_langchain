@@ -1,20 +1,23 @@
 import os
 import time
 
-from pinecone import Pinecone, ServerlessSpec
-
-from semantic_router.encoders import OpenAIEncoder
-
 from langchain_core.tools import tool
 from langchain_community.tools.tavily_search import TavilySearchResults
 
+from llama_index.core import VectorStoreIndex
+from llama_index.core.retrievers import VectorIndexRetriever
+from llama_index.vector_stores.pinecone import PineconeVectorStore
+
+from pinecone import Pinecone, ServerlessSpec
+from pinecone.grpc import PineconeGRPC
+
+
+from semantic_router.encoders import OpenAIEncoder
+
 
 def equip_tooling():
-    # Web Search tool
-    web_search = tavily_tool()
-
     # Knowledge Base tool
-    knowledge_base = pinecone_vectorstore
+    knowledge_base = llamaindex_pinecone_retriever
 
     # Example usage of query_data tool
     # tool = QueryTableauData()
@@ -27,6 +30,9 @@ def equip_tooling():
     # })
     # print(result)
 
+    # Web Search tool
+    web_search = tavily_tool()
+
     # List of tools used to build the state graph and for binding them to nodes
     tools = [knowledge_base, web_search]
 
@@ -38,8 +44,56 @@ def tavily_tool():
     tavily = TavilySearchResults(tavily_api_key=tavily_api_key, max_results=2)
     return tavily
 
-@tool("pinecone_vectorstore")
-def pinecone_vectorstore(query: str):
+
+@tool("llamaindex_pinecone_retriever")
+def llamaindex_pinecone_retriever(query: str):
+    """
+    Finds specialist information from the organization's knowledge base using a natural language query.
+    """
+    pinecone_api_key = os.environ["PINECONE_API_KEY"]
+    index_name = os.environ["PINECONE_INDEX_NAME"]
+    index_region = os.environ["PINECONE_ENVIRONMENT"]
+
+    # Initialize connection to Pinecone
+    pc = PineconeGRPC(api_key=pinecone_api_key)
+
+    # search for matching index in list of available indexes to client
+    existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
+    # if the index does not exist, create one - no matches is better than broken tools
+    if index_name not in existing_indexes:
+        pc.create_index(
+            name=index_name,
+            dimension=1536,
+            metric="cosine",
+            spec=ServerlessSpec(cloud="aws", region=index_region),
+        )
+        while not pc.describe_index(index_name).status["ready"]:
+            time.sleep(1)
+
+    # Initialize your index
+    pinecone_index = pc.Index(index_name)
+
+    # Initialize VectorStore
+    vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+
+    # Instantiate VectorStoreIndex object from your vector_store object
+    vector_index = VectorStoreIndex.from_vector_store(vector_store=vector_store)
+
+    # Grab 5 search results
+    retriever = VectorIndexRetriever(index=vector_index, similarity_top_k=5)
+
+    # Query vector DB
+    answer = retriever.retrieve(query)
+
+    # Inspect results
+    if (os.environ["DEBUG"] == 1):
+        print([i.get_content() for i in answer])
+
+    return answer
+
+
+@tool("semantic_pinecone_retriever")
+def semantic_pinecone_retriever(query: str):
     """
     Finds specialist information from the organization's knowledge base using a natural language query.
     """
@@ -79,6 +133,7 @@ def pinecone_vectorstore(query: str):
     )
     context_str = xc["matches"]
     return context_str
+
 
 @tool("final_answer")
 def final_answer(
