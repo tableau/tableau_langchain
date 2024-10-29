@@ -2,8 +2,8 @@ import os
 
 from langchain_openai import ChatOpenAI
 
-from agents.tableau.research_agent.state import ResearchAgentState
-from agents.tableau.research_agent.tooling import equip_tooling
+from community.agents.tableau.research_agent.state import ResearchAgentState
+from community.agents.tableau.research_agent.tooling import equip_tooling
 
 
 def chatbot(state: ResearchAgentState):

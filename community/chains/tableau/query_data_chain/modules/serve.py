@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+
 from langserve import add_routes
 
 def query_data(chain):

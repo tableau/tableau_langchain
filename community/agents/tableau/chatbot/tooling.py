@@ -1,4 +1,4 @@
-from tools.others import llamaindex_pinecone_retriever, tavily_tool
+from community.tools.others import llamaindex_pinecone_retriever, tavily_tool
 
 
 def equip_tooling():
