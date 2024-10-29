@@ -1,0 +1,17 @@
+query sheets{
+  sheets {
+    id
+    luid
+    name
+    path
+    createdAt
+    updatedAt
+    index
+    workbook {
+      luid
+    }
+    containedInDashboards {
+      luid
+    }
+  }
+}
