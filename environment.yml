@@ -21,5 +21,8 @@ dependencies:
         - langchain-pinecone
         - "langserve[all]"
         - langchain_community
+        - llama-index
+        - llama-index-vector-stores-pinecone
+        - pinecone-client[grpc]
         - semantic-router
         - tavily-python

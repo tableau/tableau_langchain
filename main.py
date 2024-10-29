@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 
 from agents.tableau.chatbot.agent import initialize_agent
-from agents.tableau.chatbot.utils import _set_env, stream_graph_updates
+from agents.tableau.utils import _set_env, stream_graph_updates
 
 
 def main():
@@ -47,7 +47,7 @@ def main():
         except:
             # fallback if input() is not available
             user_input = "average discount, total sales, profits by region"
-            print("User: " + user_input)
+            print("Default user input: " + user_input)
             stream_graph_updates(user_input, agent)
             break
 
