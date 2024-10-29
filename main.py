@@ -15,7 +15,7 @@ def main():
         - Headless BI (can query a data source for on-demand data sets including aggregations, filters and calculations)
         - Web Search (can incorporate external knowledge from the web)
 
-    Test behavior within different agentic architectures
+    Execute behavior within different agentic architectures
     """
     # environment variables available to current process and sub processes
     load_dotenv()
