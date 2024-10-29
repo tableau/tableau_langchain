@@ -9,6 +9,7 @@ dependencies:
     - ipykernel
     - python-dotenv
     - pyjwt
+    - pandas
     - fastapi
     - tabulate
     - pip=23.3.1
