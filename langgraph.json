@@ -1,0 +1,10 @@
+{
+    "dependencies": [
+        ".",
+        "pyproject.toml"
+    ],
+    "graphs": {
+        "agent": "./community/agents/tableau/chatbot/graph.py:graph"
+    },
+    "env": ".env"
+}
