@@ -34,9 +34,9 @@ def get_data(message):
     headlessbi_data = query(payload)
 
     # Convert to JSON string
-    json_string = json.dumps(headlessbi_data)
+    markdown_table = json_to_markdown(headlessbi_data)
 
-    return json_string
+    return markdown_table
 
 
 def get_payload(output):
@@ -53,3 +53,27 @@ def get_payload(output):
         json_string = match.group(0)
         payload = json.loads(json_string)
         return payload
+
+
+def json_to_markdown(json_data):
+    # Parse the JSON data if it's a string
+    if isinstance(json_data, str):
+        json_data = json.loads(json_data)
+
+    # Check if the JSON data is a list and not empty
+    if not isinstance(json_data, list) or not json_data:
+        return "Invalid JSON data"
+
+    # Extract headers from the first dictionary
+    headers = json_data[0].keys()
+
+    # Create the Markdown table header
+    markdown_table = "| " + " | ".join(headers) + " |\n"
+    markdown_table += "| " + " | ".join(['---'] * len(headers)) + " |\n"
+
+    # Add each row to the Markdown table
+    for entry in json_data:
+        row = "| " + " | ".join(str(entry[header]) for header in headers) + " |"
+        markdown_table += row + "\n"
+
+    return markdown_table
