@@ -6,7 +6,7 @@ from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 from langchain.globals import set_verbose
 
-from modules import metadata
+from modules import metadata, headless
 
 # defines query_data_chain
 def create_chain():
@@ -25,12 +25,15 @@ def create_chain():
     ])
 
     # 2. Chat model (BYOM)
-    llm = ChatOpenAI(model=os.environ['QUERY_AGENT_MODEL'], temperature=0)
+    llm = ChatOpenAI(model=os.environ['AGENT_MODEL'], temperature=0)
 
     # 3. Standard Langchain parser
     output_parser = StrOutputParser()
 
+    # 4. Query Data
+    headlessbi_data = headless.get_data
+
     # this chain defines the flow of data through the system
-    chain = active_prompt_template | llm | output_parser
+    chain = active_prompt_template | llm | headlessbi_data | output_parser
 
     return chain

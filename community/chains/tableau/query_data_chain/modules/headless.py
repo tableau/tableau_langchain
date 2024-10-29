@@ -1,4 +1,4 @@
-import os, requests, json
+import os, requests, json, re, pandas as pd
 
 # define the headless BI query template
 def query(query):
@@ -26,3 +26,30 @@ def query(query):
     else:
         print("Failed to fetch data from the API. Status code:", response.status_code)
         print(response.text)
+
+
+
+def get_data(message):
+    payload = get_payload(message)
+    headlessbi_data = query(payload)
+
+    # Convert to JSON string
+    json_string = json.dumps(headlessbi_data)
+
+    return json_string
+
+
+def get_payload(output):
+    content = output.content
+    # output reasoning
+    print(content.split('JSON_payload')[0])
+    # parse LLM output and query headless BI
+    parsed_output = content.split('JSON_payload')[1]
+
+    print('*** parsed_output ***', parsed_output)
+
+    match = re.search(r'{.*}', parsed_output, re.DOTALL)
+    if match:
+        json_string = match.group(0)
+        payload = json.loads(json_string)
+        return payload

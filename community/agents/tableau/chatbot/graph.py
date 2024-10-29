@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from agents.tableau.chatbot.tooling import equip_tooling
-from agents.tableau.utils import  _visualize_graph
+from community.agents.tableau.chatbot.tooling import equip_tooling
+from community.agents.tableau.utils import  _visualize_graph
 
 
 def graph_state(state_definition, entry_point, node):
