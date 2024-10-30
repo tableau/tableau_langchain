@@ -3,7 +3,7 @@ import os
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
-from langchain_core.output_parsers import StrOutputParser
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain.globals import set_verbose
 
 from modules import metadata, headless
@@ -27,11 +27,14 @@ def create_chain():
     # 2. Chat model (BYOM)
     llm = ChatOpenAI(model=os.environ['AGENT_MODEL'], temperature=0)
 
-    # 3. Standard Langchain parser
+    # 3. Query Data
+    headlessbi_data = headless.get_data
+
+    # 4. Standard Langchain string parser for terminal outputs
     output_parser = StrOutputParser()
 
-    # 4. Query Data
-    headlessbi_data = headless.get_data
+    # 5. Standard Langchain string parser for API responses
+    json_parser = JsonOutputParser
 
     # this chain defines the flow of data through the system
     chain = active_prompt_template | llm | headlessbi_data | output_parser
