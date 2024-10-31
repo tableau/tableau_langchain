@@ -34,9 +34,9 @@ def create_chain():
     output_parser = StrOutputParser()
 
     # 5. Standard Langchain string parser for API responses
-    json_parser = JsonOutputParser
+    json_parser = JsonOutputParser()
 
     # this chain defines the flow of data through the system
-    chain = active_prompt_template | llm | headlessbi_data | output_parser
+    chain = active_prompt_template | llm | headlessbi_data
 
     return chain
