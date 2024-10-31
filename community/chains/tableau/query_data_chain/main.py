@@ -1,4 +1,4 @@
-import argparse, uvicorn
+import argparse, uvicorn, json
 
 from dotenv import load_dotenv
 
@@ -9,7 +9,12 @@ def run_interactive_mode(chain):
     active_utterance = get_utterance()
     while active_utterance != 'stop':
         interaction = chain.invoke(active_utterance)
-        print("****** START LOCAL OUTPUT\n", interaction, "\n****** END LOCAL OUTPUT")
+
+        # mandatory query_plan key
+        print("****** START LOCAL OUTPUT\n", interaction["query_plan"])
+        # optional data key
+        print(interaction.get("data"), "\n****** END LOCAL OUTPUT")
+
         active_utterance = get_utterance()
 
 # runs as a service via Langserve

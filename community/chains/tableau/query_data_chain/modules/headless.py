@@ -31,28 +31,52 @@ def query(query):
 
 def get_data(message):
     payload = get_payload(message)
-    headlessbi_data = query(payload)
+    # when data is available return it and the reasoning behind the query
+    if payload["payload"]:
+        headlessbi_data = query(payload["payload"])
 
-    # Convert to JSON string
-    markdown_table = json_to_markdown(headlessbi_data)
+        # Convert to JSON string
+        markdown_table = json_to_markdown(headlessbi_data)
 
-    return markdown_table
+        # response includes markdown table with data + query plan
+        return {
+            "query_plan": payload["query_plan"],
+            "data": markdown_table
+        }
+    # when the LLM cannot generate a query, the reasoning will explain why
+    else:
+        return {
+            "query_plan": payload["query_plan"],
+        }
 
 
 def get_payload(output):
     content = output.content
-    # output reasoning
-    print(content.split('JSON_payload')[0])
+
+    print('*** Query Generation ***\n', content)
+
+    # LLM reasoning
+    query_plan = content.split('JSON_payload')[0]
+    # print('*** reasoning ***', reasoning)
+
     # parse LLM output and query headless BI
     parsed_output = content.split('JSON_payload')[1]
-
-    print('*** parsed_output ***', parsed_output)
+    # print('*** parsed_output ***', parsed_output)
 
     match = re.search(r'{.*}', parsed_output, re.DOTALL)
     if match:
         json_string = match.group(0)
         payload = json.loads(json_string)
-        return payload
+
+        return {
+            "query_plan": query_plan,
+            "payload": payload
+        }
+    else:
+        # for when no payload is possible to generate
+        return {
+            "query_plan": query_plan
+        }
 
 
 def json_to_markdown(json_data):
