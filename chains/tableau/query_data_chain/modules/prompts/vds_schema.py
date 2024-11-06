@@ -1,15 +1,15 @@
 vds_schema = {
-    "Column": {
+    "fields": {
         "type": "object",
         "anyOf": [
             {
                 "required": [
-                    "columnName"
+                    "fieldCaption"
                 ]
             },
             {
                 "required": [
-                    "columnName",
+                    "fieldCaption",
                     "function"
                 ]
             },
@@ -21,13 +21,9 @@ vds_schema = {
             }
         ],
         "properties": {
-            "columnName": {
+            "fieldCaption": {
                 "type": "string",
                 "description": "The name of the column which must be supplied."
-            },
-            "columnAlias": {
-                "type": "string",
-                "description": "An alternate name to give the column. Will only be used in Object format output."
             },
             "maxDecimalPlaces": {
                 "type": "integer",
@@ -45,7 +41,7 @@ vds_schema = {
             },
             "sortPriority": {
                 "type": "integer",
-                "description": "To enable sorting on a specific Column provide a sortPriority for that Column, and that Column will be sorted. The sortPriority provides a ranking of how to sort Columns when multiple Columns are being sorted. The highest priority (lowest number) Column is sorted first. If only 1 Column is being sorted, then any value may be used for sortPriority. SortPriority should be an integer greater than 0."
+                "description": "To enable sorting on a specific Column provide a sortPriority for that field, and that field will be sorted. The sortPriority provides a ranking of how to sort fields when multiple fields are being sorted. The highest priority (lowest number) field is sorted first. If only 1 field is being sorted, then any value may be used for sortPriority. SortPriority should be an integer greater than 0."
             },
             "function": {
                 "allOf": [
@@ -53,15 +49,15 @@ vds_schema = {
                         "$ref": "#/components/schemas/Function"
                     },
                     {
-                        "description": "Provide a Function for a Column to generate an aggregation against that Columns' values. For example providing the SUM Function will cause an aggregated SUM to be calculated for that Column."
+                        "description": "Provide a Function for a field to generate an aggregation against that fields' values. For example providing the SUM Function will cause an aggregated SUM to be calculated for that field."
                     }
                 ]
             }
         }
     },
-    "ColumnMetadata": {
+    "dataType": {
         "type": "object",
-        "description": "Describes a column in the datasource that can be used to create queries.",
+        "description": "Describes a field in the datasource that can be used to create queries.",
         "properties": {
             "columnName": {
                 "type": "string"
@@ -84,12 +80,6 @@ vds_schema = {
                     "UNRECOGNIZED"
                 ]
             },
-            "columnContainsNulls": {
-                "type": "boolean"
-            },
-            "objectGraphId": {
-                "type": "string"
-            }
         }
     },
     "DateObject": {
@@ -276,13 +266,13 @@ vds_schema = {
         ]
     },
     "Query": {
-        "description": "The Query is the fundamental interface to VDS. It holds the specific semantics to perform against the Data Source. A Query consists of an array of Columns to query against, an optional array of filters to apply to the query, and an optional Metadata field to modify the query behavior.",
+        "description": "The Query is the fundamental interface to VDS. It holds the specific semantics to perform against the Data Source. A Query consists of an array of fields to query against, an optional array of filters to apply to the query, and an optional Metadata field to modify the query behavior.",
         "required": [
-            "columns"
+            "fields"
         ],
         "type": "object",
         "properties": {
-            "columns": {
+            "fields": {
                 "description": "An array of Columns that define the query",
                 "type": "array",
                 "items": {
