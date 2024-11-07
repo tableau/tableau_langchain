@@ -1,6 +1,6 @@
-from hbiQuery import get_data
-from readMetadata import read
-from prompts.nlq_to_vds import prompt
+from .hbiQuery import get_data
+from .readMetadata import read
+from tools.tableau.prompts import prompt
 import json, requests, os
 
 def get_values(caption):

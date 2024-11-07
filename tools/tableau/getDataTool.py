@@ -9,7 +9,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.output_parsers import StrOutputParser
 
-from prompts.nlq_to_vds import prompt
+from .prompts import prompt
 
 @tool
 def get_data(query: str) -> dict:

@@ -1,9 +1,12 @@
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, Type
 
 class QueryInput(BaseModel):
-    api_key: str = Field(description="API key for authentication to Tableau Headless BI")
+    pat_name: str = Field(description="PAT name for authentication to Tableau Headless BI")
+    pat_key: str = Field(description= "PAT token value for authentication to Tableau Headless BI")
+    tab_server_url: str = Field(description="tableau server url")
+    tab_site: str = Field(description="tableau site name")
     datasource_id: str = Field(description="ID of the Tableau datasource")
     metadata: Dict[str, Any] = Field(description="Metadata describing the dataset for accurate querying")
     endpoint: str = Field(description="Headless BI API endpoint for querying the datasource")
@@ -24,6 +27,8 @@ class QueryTableauData(BaseTool):
     Output is a resulting dataset only containing the fields,
     aggregations and calculations needed to answer the user's question.
     """
+    args_schema: Type[BaseModel] = QueryInput  # Specify the argument schema
+
 
     def _run(self, api_key: str, datasource_id: str, metadata: Dict[str, Any], endpoint: str, query: str) -> Dict[str, Any]:
         # Logic to construct the query payload
