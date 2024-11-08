@@ -1,36 +1,57 @@
+query TotalWorkbooks {
+	tableauSites(filter: { name: "Demonstration" }) {
+        workbooksConnection {
+            totalCount
+        }
+    }
+}
+
+
 query GetAllDashboards {
-    dashboards {
-        id
+    tableauSites(filter: { name: "Demonstration" }) {
+    name
+    luid
+    workbooksConnection(first: 100, offset:0) {
+      nodes {
         name
-        path
-        workbook {
+        luid
+        dashboards {
             id
             name
             luid
-            projectName
-            tags {
-                name
-            }
-            sheets {
-                id
-                name
-                createdAt
-                updatedAt
-                sheetFieldInstances {
-                    name
-                    description
-                    isHidden
-                    id
-                }
-                worksheetFields{
-                    name
-                    description
-                    isHidden
-                    formula
-                    aggregation
-                    id
+            path
+            workbook {
+              id
+              name
+              luid
+              projectName
+              tags {
+                  name
+              }
+              sheets {
+                  id
+                  name
+                  luid
+                  createdAt
+                  updatedAt
+                  sheetFieldInstances {
+                      name
+                      description
+                      isHidden
+                      id
+                  }
+                  worksheetFields{
+                      name
+                      description
+                      isHidden
+                      formula
+                      aggregation
+                      id
                 }
             }
         }
     }
+  }
+}
+  }
 }

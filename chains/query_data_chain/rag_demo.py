@@ -1,84 +1,86 @@
-from modules import graphql
-import chromadb
-import numpy as np
-from openai import OpenAI
-from dotenv import load_dotenv
-import os
-load_dotenv()
-import chromadb.utils.embedding_functions as embedding_functions
-
-openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-
-def get_embedding_openai(text, model="text-embedding-3-small"):
-   text = text.replace("\n", " ")
-   return openai_client.embeddings.create(input = [text], model=model).data[0].embedding
-
-
-openai_ef = embedding_functions.OpenAIEmbeddingFunction(
-                api_key=os.getenv('OPENAI_API_KEY'),
-                model_name="text-embedding-3-small"
-            )
-
-def convert_to_string(value):
-    if isinstance(value, dict):
-        return str(value)
-    elif isinstance(value, list):
-        return ', '.join(map(str, value))
-    else:
-        return str(value)
-
+from modules import graphql, vectorstore
+import json 
 server, auth = graphql.get_tableau_client()
-datasources = graphql.fetch_datasources(server, auth)
+tab_datasources = graphql.fetch_datasources(server, auth)
 
-# Initialise Chroma
-chroma_client = chromadb.PersistentClient(path="data")
-collection_name = 'tableau_datasource_RAG_search'
-collection = chroma_client.get_collection(name=collection_name, embedding_function=openai_ef)
+#vectorstore.prepare_documents_for_chroma(tab_datasources, text_field = 'dashboard_overview')
 
-if collection:
-    print("Collection exists.")
-    # Run your series of code here
-else:
-    print("Collection does not exist. Creating collection...")
-    documents = []
-    embeddings = []
-    ids = []
-    metadatas = []
+print('Datasources fetched')
 
-    for datasource in datasources:
-        # Extract the text to embed
-        text_to_embed = datasource['dashboard_overview']
+# try:
+#     filtered_datasource = next(ds for ds in tab_datasources if ds['id'] == '00060764-11dc-4bd4-c3ca-7baec2f16444')
+#     print(filtered_datasource)
+# except StopIteration:
+#     print("Datasource not found")
 
-        # Extract the unique identifier
-        unique_id = datasource['id']
-
-        # Prepare metadata (exclude 'dashboard_overview' and 'id')
-        metadata = {k: v for k, v in datasource.items() if k not in ['dashboard_overview', 'id']}
-
-        # Remove any nested data structures from metadata (e.g., lists, dicts)
-        metadata = {k: convert_to_string(v) for k, v in metadata.items() if isinstance(v, (str, int, float, bool, dict, list))}
-
-        documents.append(text_to_embed)
-        ids.append(unique_id)
-        
-        metadatas.append(metadata)
+# # Helper function to convert values to strings
+# def convert_to_string(value):
+#     if isinstance(value, dict):
+#         return str(value)
+#     elif isinstance(value, list):
+#         return ', '.join(map(str, value))
+#     else:
+#         return str(value)
     
-    # Create vector db with openai embedding
-    collection = chroma_client.get_or_create_collection(name=collection_name, embedding_function=openai_ef)
+# # print(f"\nCreating new collection: {collection_name}")
+# documents = []
+# ids = []
+# metadatas = []
 
-    collection.add(
-        documents=documents,
-        metadatas=metadatas,
-        ids=ids
-    )
+# for i, datasource in enumerate(tab_datasources):
+#     try:
+#         # Extract the text to embed
+#         text_to_embed = datasource.get('dashboard_overview', '')
+#         #print(text_to_embed)
+        
+#         # if debug:
+#         #     print(f"\nProcessing document {i+1}/{len(filtered_datasource)}")
+#         #     print(f"Text length: {len(str(text_to_embed))}")
+#         #     print("First 100 chars of text:", str(text_to_embed)[:100])
+        
+#         # if not text_to_embed:
+#         #     print(f"Warning: Empty dashboard_overview for document {i+1}")
+#         #     continue
+        
+#         # Extract the unique identifier
+#         unique_id = str(datasource.get('id', f'doc_{i}'))
+#         #print(unique_id)
+        
+#         # Prepare metadata (exclude 'dashboard_overview' and 'id')
+#         metadata = {k: v for k, v in datasource.items() 
+#                     if k not in ['dashboard_overview', 'id']}
+        
+#         # Remove any nested data structures from metadata
+#         metadata = {k: convert_to_string(v) for k, v in metadata.items() 
+#                     if isinstance(v, (str, int, float, bool, dict, list))}
+        
+#         # if debug and i == 0:
+#         #     print("\nSample metadata structure:")
+#         #     print(json.dumps(metadata, indent=2)[:200] + "...")
+        
+#         documents.append(text_to_embed)
+#         ids.append(unique_id)
+#         metadatas.append(metadata)
+        
+#     except Exception as e:
+#         print(f"Error processing document {i+1}: {str(e)}")
+#         print(f"Problematic datasource: {json.dumps(datasource, indent=2)}")
+#         raise
 
-# to Reset vector db
-# # chroma_client.delete_collection(name=collection_name)
-# collection = chroma_client.get_or_create_collection(name=collection_name, embedding_function=openai_ef)
+# print(str(len(documents))+ ' documents to upload')
+# print(str(len(ids))+ ' ids to upload')
+# print(str(len(metadatas))+ ' metadatas to upload')
+# print(documents[0])
 
+collection = vectorstore.setup_vector_db(datasources = tab_datasources, mode = 'recreate', debug = True)
+#collection = vectorstore.setup_vector_db(datasources = tab_datasources)
+
+print('Vector store created')
+
+user_query = 'movies'
 results = collection.query(
-    query_texts=["Why is my dashboard slow?"], 
-    n_results=2 
+    query_texts=[user_query], 
+    n_results=10 
 )
 
 metadatas = results['metadatas']
@@ -90,7 +92,7 @@ extracted_data = []
 for meta_list, dist_list in zip(metadatas, distances):
     for metadata, distance in zip(meta_list, dist_list):
         name = metadata.get('name', 'N/A')
-        uri = metadata.get('uri', 'N/A')
+        url = metadata.get('url', 'N/A')
         luid = metadata.get('luid', 'N/A')
         isCertified = metadata.get('isCertified', 'N/A')
         updatedAt = metadata.get('updatedAt', 'N/A')
@@ -98,7 +100,7 @@ for meta_list, dist_list in zip(metadatas, distances):
         # Append the extracted data to the list, including 'distance'
         extracted_data.append({
             'name': name,
-            'uri': uri,
+            'url': url,
             'luid': luid,
             'isCertified': isCertified,
             'updatedAt': updatedAt,
@@ -108,7 +110,7 @@ for meta_list, dist_list in zip(metadatas, distances):
 
 for item in extracted_data:
     print(f"Name: {item['name']}")
-    print(f"URI: {item['uri']}")
+    print(f"URL: {item['url']}")
     print(f"LUID: {item['luid']}")
     print(f"Certified?: {item['isCertified']}")
     print(f"Last Update: {item['updatedAt']}")

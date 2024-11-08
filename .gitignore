@@ -162,3 +162,4 @@ cython_debug/
 .idea/
 
 data/
+chains/query_data_chain/static/dashboard_images/

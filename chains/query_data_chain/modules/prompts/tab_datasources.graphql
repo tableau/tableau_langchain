@@ -1,4 +1,7 @@
 query GetPublishedDatasources {
+  tableauSites(filter: { name: "Demonstration" }) {
+    name
+    luid
     publishedDatasources{
       id
       luid
@@ -25,4 +28,5 @@ query GetPublishedDatasources {
         folderName
       }
     }
+  }
 }
