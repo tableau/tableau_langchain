@@ -39,29 +39,29 @@ def get_data(query: str) -> dict:
     match = re.search(r'{.*}', parsed_output, re.DOTALL)
     if match:
         json_string = match.group(0)
-    payload = json.loads(json_string)
+    query_object = json.loads(json_string)
 
     query_url = os.getenv('QUERY_DATASOURCE')
     datasource_luid = os.getenv('DATASOURCE_LUID')
     auth_secret = os.getenv('AUTH_TOKEN')
+    return('here is the query payload I tried to execute' + str({json_string}))
+    # payload = json.dumps({
+    #     "datasource": {
+    #         "datasourceLuid": datasource_luid
+    #     },
+    #     "query": query_object
+    # })
 
-    payload = json.dumps({
-        "datasource": {
-            "datasourceLuid": datasource_luid
-        },
-        "query": payload
-    })
+    # headers = {
+    #     'X-Tableau-Auth': auth_secret,
+    #     'Content-Type': 'application/json'
+    # }
 
-    headers = {
-        'X-Tableau-Auth': auth_secret,
-        'Content-Type': 'application/json'
-    }
+    # response = requests.post(query_url, headers=headers, data=payload)
 
-    response = requests.post(query_url, headers=headers, data=payload)
-
-    if response.status_code == 200:
-        data = response.json().get('data')
-        return data
-    else:
-        raise Exception(f"Failed to fetch data from the API. Status code: {response.status_code}, Response: {response.text}")
+    # if response.status_code == 200:
+    #     data = response.json().get('data')
+    #     return data
+    # else:
+    #     raise Exception(f"Failed to fetch data from the API. Status code: {response.status_code}, Response: {response.text}")
     

@@ -58,7 +58,9 @@ few_shot = {
                     ],
                     "filters": [
                         {
-                            "fieldCaption": "Sales",
+                            "field": {
+                                "fieldCaption": "Sales"
+                            },
                             "filterType": "TOP",
                             "direction": "TOP",
                             "howMany": 10,
@@ -76,16 +78,21 @@ few_shot = {
                     ],
                     "filters": [
                         {
-                            "fieldCaption": "Category",
+                            "field": {
+                                "fieldCaption": "Category"
+                        },
                             "filterType": "SET",
                             "values": ["Furniture"],
                             "exclude": False
                         },
                         {
-                            "fieldCaption": "Order Date",
+                             "field": {
+                                "fieldCaption": "Order Date"
+                             },
                             "filterType": "DATE",
-                            "units": "MONTHS",
-                            "pastCount": 6
+                            "periodtype": "MONTHS",
+                            "dateRangeType": "LASTN",
+                            "rangeN": 6
                         }
                     ]
                 }
@@ -99,13 +106,17 @@ few_shot = {
                     ],
                     "filters": [
                         {
-                            "fieldCaptione": "Sales",
-                            "filterType": "QUANTITATIVE",
+                            "field": {
+                                "fieldCaption": "Sales",
+                            },
+                            "filterType": "QUANTITATIVE_NUMERICAL",
                             "quantitativeFilterType": "MIN",
                             "min": 1000
                         },
                         {
-                            "fieldCaption": "Segment",
+                            "field": {
+                                "fieldCaption": "Segment"
+                            },
                             "filterType": "SET",
                             "values": ["Consumer"],
                             "exclude": False
@@ -123,13 +134,19 @@ few_shot = {
                     ],
                     "filters": [
                         {
-                            "fieldCaption": "Returned",
+                            "field":
+                            {
+                                "fieldCaption": "Returned"
+                            },
                             "filterType": "SET",
                             "values": [True],
                             "exclude": False
                         },
                         {
-                            "fieldCaption": "Region",
+                           "field":
+                           {
+                                "fieldCaption": "Region"
+                           },
                             "filterType": "SET",
                             "values": ["West"],
                             "exclude": False
@@ -146,13 +163,17 @@ few_shot = {
                     ],
                     "filters": [
                         {
-                            "fieldCaption": "Category",
+                            "field":{
+                                "fieldCaption": "Category"  
+                            },
                             "filterType": "SET",
                             "values": ["Technology"],
                             "exclude": True,
                         },
                         {
-                            "fieldCaption": "Sales",
+                            "field":{
+                                "fieldCaption": "Sales"
+                            },
                             "filterType": "TOP",
                             "direction": "TOP",
                             "howMany": 5,
@@ -169,7 +190,14 @@ few_shot = {
                         {"fieldCaption": "Sales", "function": "SUM", "sortPriority": 1, "sortDirection": "DESC"}
                     ],
                     "filters": [
-                        {"fieldCaption": "Sales", "filterType": "QUANTITATIVE", "quantitativeFilterType": "MIN", "min": 200000}
+                        {
+                            "field":{
+                                "fieldCaption": "Sales"
+                            },
+                            "filterType": "QUANTITATIVE_NUMERICAL", 
+                            "quantitativeFilterType": "MIN",
+                            "min": 200000
+                         }
                     ]
                 }
             }
@@ -205,76 +233,110 @@ Do not filter or reduce any data found in query results so the next link can det
 """
 
 vds_schema = {
-    "fields": {
+    "FieldBase": {
         "type": "object",
-        "anyOf": [
-            {
-                "required": [
-                    "fieldCaption"
-                ]
-            },
-            {
-                "required": [
-                    "fieldCaption",
-                    "function"
-                ]
-            },
-            {
-                "required": [
-                    "columnName",
-                    "calculation"
-                ]
-            }
-        ],
+        "description": "Common properties of a Field. A Field represents a column of data in a published datasource",
+        "required": [ "fieldCaption" ],
         "properties": {
             "fieldCaption": {
                 "type": "string",
-                "description": "The name of the column which must be supplied."
+                "description": "Either the name of a specific Field in the data source, or, in the case of a calculation, a user-supplied name for the calculation."
+            },
+            "fieldAlias": {
+                "type": "string",
+                "description": "An alternative name to give the field. Will only be used in Object format output."
             },
             "maxDecimalPlaces": {
                 "type": "integer",
                 "description": "The maximum number of decimal places. Any trailing 0s will be dropped. The maxDecimalPlaces value must be greater or equal to 0."
             },
             "sortDirection": {
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/SortDirection"
-                    },
-                    {
-                        "description": "The direction of the sort, either ascending or descending. If not supplied the default is ascending"
-                    }
-                ]
+                "$ref": "#/components/schemas/SortDirection"
             },
             "sortPriority": {
                 "type": "integer",
-                "description": "To enable sorting on a specific Column provide a sortPriority for that field, and that field will be sorted. The sortPriority provides a ranking of how to sort fields when multiple fields are being sorted. The highest priority (lowest number) field is sorted first. If only 1 field is being sorted, then any value may be used for sortPriority. SortPriority should be an integer greater than 0."
-            },
-            "function": {
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/Function"
-                    },
-                    {
-                        "description": "Provide a Function for a field to generate an aggregation against that fields' values. For example providing the SUM Function will cause an aggregated SUM to be calculated for that field."
-                    }
-                ]
+                "description": "To enable sorting on a specific Field provide a sortPriority for that field, and that field will be sorted. The sortPriority provides a ranking of how to sort Fields when multiple Fields are being sorted. The highest priority (lowest number) Field is sorted first. If only 1 Field is being sorted, then any value may be used for sortPriority. SortPriority should be an integer greater than 0."
             }
         }
     },
-    "dataType": {
+    "Field": {
+        "oneOf": [
+            {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/FieldBase"
+                    }
+                ],
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "fieldCaption": {},
+                    "fieldAlias": {},
+                    "maxDecimalPlaces": {},
+                    "sortDirection": {},
+                    "sortPriority": {}
+                }
+            },
+            {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/FieldBase"
+                    }
+                ],
+                "type": "object",
+                "required": [
+                    "function"
+                ],
+                "additionalProperties": False,
+                "properties": {
+                    "function": {
+                        "$ref": "#/components/schemas/Function"
+                    },
+                    "fieldCaption": {},
+                    "fieldAlias": {},
+                    "maxDecimalPlaces": {},
+                    "sortDirection": {},
+                    "sortPriority": {}
+                }
+            },
+            {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/FieldBase"
+                    }
+                ],
+                "type": "object",
+                "required": [
+                    "calculation"
+                ],
+                "additionalProperties": False,
+                "properties": {
+                    "calculation": {
+                        "type": "string",
+                        "description": "A Tableau calculation which will be returned as a Field in the Query"
+                    },
+                    "fieldCaption": {},
+                    "fieldAlias": {},
+                    "maxDecimalPlaces": {},
+                    "sortDirection": {},
+                    "sortPriority": {}
+                }
+            }
+        ]
+    },
+    "FieldMetadata": {
         "type": "object",
         "description": "Describes a field in the datasource that can be used to create queries.",
         "properties": {
-            "columnName": {
+            "fieldName": {
                 "type": "string"
             },
-            "caption": {
+            "fieldCaption": {
                 "type": "string"
             },
             "dataType": {
                 "type": "string",
                 "enum": [
-                    "UNSPECIFIED",
                     "INTEGER",
                     "REAL",
                     "STRING",
@@ -282,207 +344,217 @@ vds_schema = {
                     "BOOLEAN",
                     "DATE",
                     "SPATIAL",
-                    "UNKNOWN",
-                    "UNRECOGNIZED"
+                    "UNKNOWN"
                 ]
             },
-        }
-    },
-    "DateObject": {
-        "type": "object",
-        "required": [
-            "day",
-            "month",
-            "year"
-        ],
-        "properties": {
-            "day": {
-                "type": "integer"
-            },
-            "month": {
-                "type": "integer"
-            },
-            "year": {
-                "type": "integer"
+            "logicalTableId": {
+                "type": "string"
             }
         }
     },
     "Filter": {
         "type": "object",
-        "required": [
-            "filterType"
-        ],
+        "description": "A Filter to be used in the Query to filter on the datasource",
+        "required": ["field", "filterType"],
         "properties": {
-            "columnName": {
-                "type": "string"
-            },
-            "column": {
-                "allOf": [
-                    {
-                        "$ref": "#/components/schemas/FilterColumn"
-                    }
-                ]
+            "field": {
+                "$ref": "#/components/schemas/FilterField"
             },
             "filterType": {
                 "type": "string",
                 "enum": [
-                    "QUANTITATIVE",
+                    "QUANTITATIVE_DATE",
+                    "QUANTITATIVE_NUMERICAL",
                     "SET",
+                    "MATCH",
                     "DATE",
                     "TOP"
                 ]
             },
             "context": {
                 "type": "boolean",
-                "default": "false"
+                "description": "Make the given filter a Context Filter, meaning that it's an independent filter. Any other filters that you set are defined as dependent filters because they process only the data that passes through the context filter",
+                "default": False
             }
         },
         "discriminator": {
             "propertyName": "filterType",
             "mapping": {
-                "QUANTITATIVE": "#/components/schemas/QuantitativeFilter",
+                "QUANTITATIVE_DATE": "#/components/schemas/QuantitativeDateFilter",
+                "QUANTITATIVE_NUMERICAL": "#/components/schemas/QuantitativeNumericalFilter",
                 "SET": "#/components/schemas/SetFilter",
+                "MATCH": "#/components/schemas/MatchFilter",
                 "DATE": "#/components/schemas/RelativeDateFilter",
                 "TOP": "#/components/schemas/TopNFilter"
             }
         }
     },
-    "FilterColumn": {
-        "type": "object",
+    "FilterField": {
         "oneOf": [
             {
-                "required": [
-                    "columnName",
-                    "function"
-                ]
+                "required": ["fieldCaption"],
+                "additionalProperties": False,
+                "properties": {
+                    "fieldCaption": {
+                        "type": "string",
+                        "description": "The caption of the field to filter on"
+                    }
+                }
             },
             {
-                "required": [
-                    "calculation"
-                ]
-            }
-        ],
-        "properties": {
-            "columnName": {
-                "type": "string"
-            },
-            "function": {
-                "allOf": [
-                    {
+                "required": ["fieldCaption", "function"],
+                "additionalProperties": False,
+                "properties": {
+                    "fieldCaption": {
+                        "type": "string",
+                        "description": "The caption of the field to filter on"
+                    },
+                    "function": {
                         "$ref": "#/components/schemas/Function"
                     }
-                ]
+                }
             },
-            "calculation": {
-                "type": "string"
+            {
+                "required": ["calculation"],
+                "additionalProperties": False,
+                "properties": {
+                    "calculation": {
+                        "type": "string",
+                        "description": "A Tableau calculation which will be used to Filter on"
+                    }
+                }
             }
-        }
+        ]
     },
     "Function": {
         "type": "string",
-        "description": "The standard set of Tableau aggregations.",
+        "description": "The standard set of Tableau aggregations which can be applied to a Field",
         "enum": [
             "SUM",
             "AVG",
             "MEDIAN",
             "COUNT",
-            "COUNT_DIST",
+            "COUNTD",
             "MIN",
             "MAX",
-            "STD_DEV",
-            "VARIANCE",
-            "CLCT",
-            "DATE_YEAR",
-            "DATE_QTR",
-            "DATE_MONTH",
-            "DATE_WEEK",
-            "DATE_DAY",
-            "DATE_TRUNC_YEAR",
-            "DATE_TRUNC_QTR",
-            "DATE_TRUNC_MONTH",
-            "DATE_TRUNC_WEEK",
-            "DATE_TRUNC_DAY"
+            "STDEV",
+            "VAR",
+            "COLLECT",
+            "YEAR",
+            "QUARTER",
+            "MONTH",
+            "WEEK",
+            "DAY",
+            "TRUNC_YEAR",
+            "TRUNC_QUARTER",
+            "TRUNC_MONTH",
+            "TRUNC_WEEK",
+            "TRUNC_DAY"
         ]
     },
-    "MetadataOutput": {
-        "type": "object",
-        "properties": {
-            "data": {
-                "type": "array",
-                "items": {
-                    "$ref": "#/components/schemas/ColumnMetadata"
-                }
-            }
-        }
-    },
-    "QuantitativeFilter": {
+    "MatchFilter": {
         "allOf": [
             {
                 "$ref": "#/components/schemas/Filter"
             },
             {
                 "type": "object",
-                "required": [
-                    "quantitativeFilterType"
-                ],
+                "description": "A Filter that can be used to match against String Fields",
                 "properties": {
-                    "quantitativeFilterType": {
+                    "contains": {
                         "type": "string",
-                        "enum": [
-                            "RANGE",
-                            "MIN",
-                            "MAX",
-                            "SPECIAL"
-                        ]
+                        "description": "Matches when a Field contains this value"
                     },
-                    "min": {
-                        "type": "number",
-                        "description": "A numerical value, either integer or floating point indicating the minimum value to filter upon. Required for RANGE and MIN"
+                    "startsWith": {
+                        "type": "string",
+                        "description": "Matches when a Field starts with this value"
                     },
-                    "max": {
-                        "type": "number",
-                        "description": "A numerical value, either integer or floating point indicating the maximum value to filter upon. Required for RANGE and MAX"
+                    "endsWith": {
+                        "type": "string",
+                        "description": "Matches when a Field ends with this value"
                     },
-                    "minDate": {
-                        "$ref": "#/components/schemas/DateObject"
-                    },
-                    "maxDate": {
-                        "$ref": "#/components/schemas/DateObject"
-                    },
-                    "quantitativeFilterIncludedValues": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/QuantitativeFilterIncludedValues"
-                            }
-                        ]
+                    "exclude": {
+                        "type": "boolean",
+                        "description": "When true, the inverse of the matching logic will be used",
+                        "default": False
                     }
                 }
             }
         ]
     },
-    "QuantitativeFilterIncludedValues": {
-        "type": "string",
-        "enum": [
-            "ALL",
-            "NON_NULL",
-            "NULL",
-            "IN_RANGE",
-            "IN_RANGE_OR_NULL",
-            "NONE"
+    "QuantitativeFilterBase": {
+        "allOf": [
+            {
+                "$ref": "#/components/schemas/Filter"
+            },
+            {
+                "type": "object",
+                "required": ["quantitativeFilterType"],
+                "properties": {
+                    "quantitativeFilterType": {
+                        "type": "string",
+                        "enum": [ "RANGE", "MIN", "MAX", "ONLY_NULL", "ONLY_NON_NULL" ]
+                    },
+                    "includeNulls": {
+                        "type": "boolean",
+                        "description": "Only applies to RANGE, MIN, and MAX Filters. Should nulls be returned or not. If not provided the default is to not include null values"
+                    }
+                }
+            }
         ]
     },
+    "QuantitativeNumericalFilter": {
+        "allOf": [
+            {
+                "$ref": "#/components/schemas/QuantitativeFilterBase"
+            }
+        ],
+        "type": "object",
+        "description": "A Filter that can be used to find the minimumn, maximumn or range of numerical values of a Field",
+        "properties": {
+            "min": {
+                "type": "number",
+                "description": "A numerical value, either integer or floating point indicating the minimum value to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN"
+            },
+            "max": {
+                "type": "number",
+                "description": "A numerical value, either integer or floating point indicating the maximum value to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN"
+            }
+        }
+    },
+    "QuantitativeDateFilter": {
+        "allOf": [
+            {
+                "$ref": "#/components/schemas/QuantitativeFilterBase"
+            }
+        ],
+        "type": "object",
+        "description": "A Filter that can be used to find the minimum, maximum or range of date values of a Field",
+        "properties": {
+            "minDate": {
+                "type": "string",
+                "format": "date",
+                "description": "An RFC 3339 date indicating the earliest date to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN"
+            },
+            "maxDate": {
+                "type": "string",
+                "format": "date",
+                "description": "An RFC 3339 date indicating the latest date to filter upon. Required if using quantitativeFilterType RANGE or if using quantitativeFilterType MIN"
+            }
+        }
+    },
     "Query": {
-        "description": "The Query is the fundamental interface to VDS. It holds the specific semantics to perform against the Data Source. A Query consists of an array of fields to query against, an optional array of filters to apply to the query, and an optional Metadata field to modify the query behavior.",
+        "description": "The Query is the fundamental interface to Headless BI. It holds the specific semantics to perform against the Data Source. A Query consists of an array of Fields to query against, and an optional array of filters to apply to the query",
         "required": [
             "fields"
         ],
         "type": "object",
         "properties": {
             "fields": {
-                "description": "An array of Columns that define the query",
+                "description": "An array of Fields that define the query",
                 "type": "array",
                 "items": {
-                    "$ref": "#/components/schemas/Column"
+                    "$ref": "#/components/schemas/Field"
                 }
             },
             "filters": {
@@ -492,46 +564,31 @@ vds_schema = {
                     "$ref": "#/components/schemas/Filter"
                 }
             }
-        }
-    },
-    "QueryOutput": {
-        "type": "object",
-        "properties": {
-            "data": {
-                "type": "array",
-                "items": {}
-            }
-        }
-    },
-    "ReturnFormat": {
-        "type": "string",
-        "enum": [
-            "OBJECTS",
-            "ARRAYS"
-        ]
+        },
+        "additionalProperties": False
     },
     "SetFilter": {
         "allOf": [
             {
                 "$ref": "#/components/schemas/Filter"
-            },
-            {
-                "type": "object",
-                "required": [
-                    "values",
-                    "exclude"
-                ],
-                "properties": {
-                    "values": {
-                        "type": "array",
-                        "items": {}
-                    },
-                    "exclude": {
-                        "type": "boolean"
-                    }
-                }
             }
-        ]
+        ],
+        "type": "object",
+        "description": "A Filter that can be used to filter on a specific set of values of a Field",
+        "required": [
+            "values"
+        ],
+        "properties": {
+            "values": {
+                "type": "array",
+                "items": {},
+                "description": "An array of values to filter on"
+            },
+            "exclude": {
+                "type": "boolean",
+                "default": False
+            }
+        }
     },
     "SortDirection": {
         "type": "string",
@@ -548,12 +605,12 @@ vds_schema = {
             },
             {
                 "type": "object",
-                "required": [
-                    "units"
-                ],
+                "description": "A Filter that can be used to filter on dates using a specific anchor and fields that specify a relative date range to that anchor",
+                "required": ["periodType", "dateRangeType"],
                 "properties": {
-                    "units": {
+                    "periodType": {
                         "type": "string",
+                        "description": "The units of time in the relative date range",
                         "enum": [
                             "MINUTES",
                             "HOURS",
@@ -564,21 +621,30 @@ vds_schema = {
                             "YEARS"
                         ]
                     },
-                    "pastCount": {
-                        "type": "integer"
-                    },
-                    "futureCount": {
-                        "type": "integer"
-                    },
-                    "anchor": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/DateObject"
-                            }
+                    "dateRangeType": {
+                        "type": "string",
+                        "description": "The direction in the relative date range",
+                        "enum": [
+                            "CURRENT",
+                            "LAST",
+                            "LASTN",
+                            "NEXT",
+                            "NEXTN",
+                            "TODATE"
                         ]
                     },
+                    "rangeN": {
+                        "type": "integer",
+                        "description": "When dateRangeType is LASTN or NEXTN, this is the N value (how many years, months, etc.)."
+                    },
+                    "anchorDate": {
+                        "type": "string",
+                        "format": "date",
+                        "description": "When this field is not provided, defaults to today."
+                    },
                     "includeNulls": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Should nulls be returned or not. If not provided the default is to not include null values"
                     }
                 }
             }
@@ -591,15 +657,16 @@ vds_schema = {
             },
             {
                 "type": "object",
-                "required": [
-                    "direction, howMany, fieldToMeasure"
-                ],
+                "description": "A Filter that can be used to find the top or bottom number of Fields relative to the values in the fieldToMeasure",
+                "required": ["howMany, fieldToMeasure"],
                 "properties": {
                     "direction": {
+                        "type": "string",
                         "enum": [
-                            "TOP",
-                            "BOTTOM"
-                        ],
+                                "TOP",
+                                "BOTTOM"
+                            ],
+                        "default": "TOP",
                         "description": "Top (Ascending) or Bottom (Descending) N"
                     },
                     "howMany": {
@@ -607,17 +674,14 @@ vds_schema = {
                         "description": "The number of values from the Top or the Bottom of the given fieldToMeasure"
                     },
                     "fieldToMeasure": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/FilterColumn"
-                            }
-                        ]
+                        "$ref": "#/components/schemas/FilterField"
                     }
                 }
             }
         ]
     }
-}
+},
+
 
 prompt = {
     "instructions": instructions,
