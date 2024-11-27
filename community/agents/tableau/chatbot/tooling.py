@@ -1,5 +1,5 @@
 from community.tools.others import llamaindex_pinecone_retriever, tavily_tool
-from community.tools.tableau.query_data import QueryTableauData
+from community.tools.tableau.query_data import QueryTableauData, get_data
 
 
 def equip_tooling():
@@ -7,7 +7,7 @@ def equip_tooling():
     knowledge_base = llamaindex_pinecone_retriever
 
     # Tableau Data Source Query Tool
-    query_datasource = QueryTableauData
+    query_datasource = get_data
 
     # Web Search tool
     web_search = tavily_tool()
