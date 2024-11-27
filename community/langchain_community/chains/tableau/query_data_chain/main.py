@@ -2,7 +2,7 @@ import argparse, uvicorn, json
 
 from dotenv import load_dotenv
 
-from modules import toolchain, serve
+from community.langchain_community.chains.tableau.query_data_chain.modules import toolchain, serve
 
 # runs interactively in the terminal
 def run_interactive_mode(chain):

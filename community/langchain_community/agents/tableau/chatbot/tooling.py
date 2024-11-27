@@ -1,5 +1,5 @@
-from community.tools.others import llamaindex_pinecone_retriever, tavily_tool
-from community.tools.tableau.query_data import QueryTableauData, get_data
+from community.langchain_community.tools.others import llamaindex_pinecone_retriever, tavily_tool
+from community.langchain_community.tools.tableau.query_data import QueryTableauData, get_data
 
 
 def equip_tooling():

@@ -6,7 +6,8 @@ from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain.globals import set_verbose
 
-from modules import metadata, headless
+from community.langchain_community.chains.tableau.query_data_chain.modules import headless, metadata
+
 
 # defines query_data_chain
 def create_chain():

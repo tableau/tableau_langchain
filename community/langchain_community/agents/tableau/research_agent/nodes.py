@@ -2,11 +2,11 @@ import os
 
 from langchain_openai import ChatOpenAI
 
-from community.agents.tableau.chatbot.state import ChatbotState
-from community.agents.tableau.chatbot.tooling import equip_tooling
+from community.langchain_community.agents.tableau.research_agent.state import ResearchAgentState
+from community.langchain_community.agents.tableau.research_agent.tooling import equip_tooling
 
 
-def chatbot(state: ChatbotState):
+def chatbot(state: ResearchAgentState):
     """
     Graph Node
     Takes the current State as input and returns a dictionary containing an updated messages list
@@ -27,10 +27,4 @@ def chatbot(state: ChatbotState):
 
     llm = llm_config.bind_tools(tools)
 
-    message = llm.invoke(state["messages"])
-    content = message.content
-
-    if content:
-        print('Chatbot: \n', message.content)
-
-    return {"messages": [message]}
+    return {"messages": [llm.invoke(state["messages"])]}
