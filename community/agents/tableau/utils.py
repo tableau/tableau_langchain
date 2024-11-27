@@ -37,6 +37,8 @@ def _visualize_graph(graph):
 
 def stream_graph_updates(user_input: str, graph):
     """
+    This function streams responses from Agents to clients such as chat interfaces:
+
     Processes the given user input and streams updates from the state graph.
 
     This function takes a string input from the user and passes it to the state graph's streaming interface.
