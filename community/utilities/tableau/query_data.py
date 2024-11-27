@@ -1,5 +1,11 @@
 import os, requests, json, re
 
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.messages import SystemMessage
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
+
+from langchain_openai import ChatOpenAI
+
 # define the headless BI query template
 def query_vds(query):
     """
@@ -189,3 +195,27 @@ def augment_datasource_metadata(prompt):
     prompt['data_model'] = data_model
 
     return json.dumps(prompt, indent=2)
+
+def query_tool_function(headlessbi_prompt, query):
+    # 1. Prompt template incorporating datasource metadata
+    tool_prompt = augment_datasource_metadata(headlessbi_prompt)
+    # passes instructions and metadata to Langchain prompt template
+    active_prompt_template = ChatPromptTemplate.from_messages([
+        SystemMessage(content=tool_prompt),
+        ("user", "{query}")
+    ])
+
+    # 2. Language model settings
+    llm = ChatOpenAI(model=os.environ['AGENT_MODEL'], temperature=0)
+
+    # 3. Query Data
+    headlessbi_data = get_headlessbi_data
+
+    # this chain defines the flow of data through the system
+    chain = active_prompt_template | llm | headlessbi_data
+
+    # invoke the chain to generate a query and obtain data
+    queried_data = chain.invoke(query)
+
+    # Return the structured output
+    return queried_data
