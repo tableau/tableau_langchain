@@ -1,4 +1,4 @@
-import os, requests, json, re, pandas as pd
+import os, requests, json, re
 
 # define the headless BI query template
 def query(query):
