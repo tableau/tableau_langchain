@@ -1,7 +1,6 @@
 import os, requests, json
 
-from modules.headless import query
-from modules.prompts import nlq_to_vds
+from community.langchain_community.chains.tableau.query_data_chain.modules import headless, prompts
 
 # request metadata of declared datasource (READ_METADATA)
 def read():
@@ -31,7 +30,7 @@ def read():
 
 def get_values(column_name):
      column_values = {'columns': [{'columnName': column_name}]}
-     output = query(column_values)
+     output = headless.query(column_values)
      if output is None:
         return None
      sample_values = [list(item.values())[0] for item in output][:4]
@@ -55,5 +54,5 @@ def instantiate_prompt():
         data_model.append(column_dict)
 
     # add the datasource metadata of the connected datasource to the system prompt
-    nlq_to_vds.prompt['data_model'] = data_model
-    return json.dumps(nlq_to_vds.prompt, indent=2)
+    prompts.nlq_to_vds.prompt['data_model'] = data_model
+    return json.dumps(prompts.nlq_to_vds.prompt, indent=2)

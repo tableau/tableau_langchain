@@ -10,8 +10,8 @@ from langchain_core.messages import SystemMessage
 
 from langchain_openai import ChatOpenAI
 
-from community.tools.tableau.prompts import headlessbi_prompt
-from community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
+from community.langchain_community.tools.tableau.prompts import headlessbi_prompt
+from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
 
 
 class QueryInput(BaseModel):
