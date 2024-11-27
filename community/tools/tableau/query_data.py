@@ -1,12 +1,11 @@
 import os
 
 from pydantic import BaseModel, Field
-from typing import Any, Dict, Tuple, Type, Optional
+from typing import Any, Dict, Type
 
 from langchain_core.tools import BaseTool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
 from langchain_openai import ChatOpenAI
 
@@ -19,6 +18,10 @@ class QueryInput(BaseModel):
     datasource_id: str = Field(description="ID of the Tableau datasource")
     datasource_metadata: Dict[str, Any] = Field(description="Metadata describing the dataset for accurate querying")
     endpoint: str = Field(description="Headless BI API endpoint for querying the datasource")
+    query: str = Field(description="Detailed question about the dataset")
+
+
+class TemporaryQueryInput(BaseModel):
     query: str = Field(description="Detailed question about the dataset")
 
 
@@ -54,25 +57,11 @@ class QueryTableauData(BaseTool):
     """
     # Optional but recommended, and required if using callback handlers. It can be used to provide more information
     # (e.g., few-shot examples) or validation for expected parameters.
-    args_schema: Type[BaseModel] = QueryInput
+    args_schema: Type[BaseModel] = TemporaryQueryInput
 
+    # def _run(self, api_key: str, datasource_id: str, datasource_metadata: Dict[str, Any], endpoint: str, query: str) -> Dict[str, Any]:
 
-    def _run(self, api_key: str, datasource_id: str, datasource_metadata: Dict[str, Any], endpoint: str, query: str) -> Dict[str, Any]:
-        # Logic to construct the query payload
-        # Here you would implement the logic to create the JSON payload based on the inputs
-        # For demonstration, we will create a simple payload
-        payload = {
-            "query": query,
-            "datasource_id": datasource_id,
-            "metadata": datasource_metadata
-        }
-
-        # Justification for the query
-        query_plan = f"""
-        The query was constructed to answer the question: '{query}'.
-        It uses the datasource ID: {datasource_id} and includes relevant metadata.
-        """
-
+    def _run(self, query: str) -> Dict[str, Any]:
         # 1. Prompt template incorporating datasource metadata
         tool_prompt = augment_datasource_metadata(headlessbi_prompt)
         # passes instructions and metadata to Langchain prompt template
@@ -87,17 +76,11 @@ class QueryTableauData(BaseTool):
         # 3. Query Data
         headlessbi_data = get_headlessbi_data
 
-        # 4. Standard Langchain string parser for terminal outputs
-        output_parser = StrOutputParser()
-
-        # 5. Standard Langchain string parser for API responses
-        json_parser = JsonOutputParser()
-
         # this chain defines the flow of data through the system
         chain = active_prompt_template | llm | headlessbi_data
 
+        # invoke the chain to generate a query and obtain data
+        queried_data = chain.invoke(query)
+
         # Return the structured output
-        return {
-            "query_plan": query_plan,
-            "payload": payload
-        }
+        return queried_data
