@@ -34,9 +34,8 @@ def query_vds(query):
         data = response.json()['data']
         return data
     else:
-        print("Failed to fetch data from the API. Status code:", response.status_code)
+        print("Failed to query data source via Tableau VizQL Data Service. Status code:", response.status_code)
         print(response.text)
-
 
 
 def get_headlessbi_data(message):
@@ -151,7 +150,7 @@ def query_metadata():
         data = response.json()['data']
         return data
     else:
-        print("Failed to fetch data from the API. Status code:", response.status_code)
+        print("Failed to obtain data source metadata from VizQL Data Service. Status code:", response.status_code)
         print(response.text)
 
 
