@@ -1,11 +1,5 @@
 import os, requests, json, re
 
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
-
-from langchain_openai import ChatOpenAI
-
 # define the headless BI query template
 def query_vds(query):
     """
