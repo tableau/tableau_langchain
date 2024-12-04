@@ -7,6 +7,7 @@ from typing_extensions import Annotated
 from langchain_core.tools import BaseTool, tool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
+from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
 from langchain_openai import ChatOpenAI
 
@@ -22,7 +23,7 @@ class QueryInput(BaseModel):
     query: str = Field(description="Detailed question about the dataset")
 
 
-class TemporaryQueryInput(BaseModel):
+class StringOnlyQueryInput(BaseModel):
     query: str = Field(description="Detailed question about the dataset")
 
 
@@ -49,7 +50,7 @@ class QueryTableauData(BaseTool):
     """
     # Optional but recommended, and required if using callback handlers. It can be used to provide more information
     # (e.g., few-shot examples) or validation for expected parameters.
-    args_schema: Type[BaseModel] = TemporaryQueryInput
+    args_schema: Type[BaseModel] = StringOnlyQueryInput
 
     # def _run(self, api_key: str, datasource_id: str, datasource_metadata: Dict[str, Any], endpoint: str, query: str) -> Dict[str, Any]:
 
