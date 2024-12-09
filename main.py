@@ -31,6 +31,12 @@ def main():
     _set_env('PINECONE_INDEX_NAME')
     _set_env('RETRIEVER_MODEL')
 
+    # authenticates user to Tableau
+    def authenticate_user(url):
+        """
+        """
+        pass
+
 
     agent = initialize_agent()
 
