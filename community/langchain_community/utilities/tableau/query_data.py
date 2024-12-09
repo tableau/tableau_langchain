@@ -31,7 +31,7 @@ def query_vds(query):
         print("Failed to query data source via Tableau VizQL Data Service. Status code:", response.status_code)
         print(response.text)
 
-
+# sends request to VizQL Data Service with payload written by Agent
 def get_headlessbi_data(message):
     """
     Returns a dictionary containing a data consisting of formatted markdown and a query plan
@@ -119,23 +119,23 @@ def json_to_markdown(json_data):
 
 
 # request metadata of declared datasource (READ_METADATA)
-def query_metadata():
+def query_metadata(**kwargs):
     """
     Gets metadata from the VizQL Data Service endpoint for the specified data source
     """
-    url = os.getenv('READ_METADATA')
+    api_key = kwargs['api_key']
+    datasource_luid = kwargs['datasource_luid']
+    url = kwargs['url']
+
     payload = json.dumps({
-        "connection": {
-            "tableauServerName": os.getenv('TABLEAU_DOMAIN'),
-            "siteId": os.getenv('SITE_NAME'),
-            "datasource": os.getenv('DATA_SOURCE')
+        "datasource": {
+            "datasourceLuid": datasource_luid
         },
     })
 
     headers = {
-    'Credential-Key': os.getenv('PAT_NAME'),
-    'Credential-value': os.getenv('PAT_SECRET'),
-    'Content-Type': 'application/json'
+        'X-Tableau-Auth': api_key,
+        'Content-Type': 'application/json'
     }
     response = requests.request("POST", url, headers=headers, data=payload)
 
@@ -160,14 +160,20 @@ def get_values(column_name):
     return sample_values
 
 
-def augment_datasource_metadata(prompt):
+# obtains datasource metadata to augment the tool prompt
+def augment_datasource_metadata(**kwargs):
     """
     Enhances the provided prompt (expecting a key called "data_model") with metadata
-    describing a Tableau data source
+    describing a Tableau data source such that an Agent can correctly write queries to meet
+    the user's needs with regards to fields, filters and calculations
     """
+    api_key = kwargs['api_key']
+    url = kwargs['url']
+    datasource_luid = kwargs['datasource_luid']
+    prompt = kwargs['prompt']
 
     # get metadata from VizQL Data Service endpoint
-    datasource_metadata = query_metadata()
+    datasource_metadata = query_metadata(api_key, url, datasource_luid)
 
     data_model = []
 
