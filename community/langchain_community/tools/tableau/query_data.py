@@ -106,18 +106,32 @@ def get_data(query: str) -> dict:
     if not query:
         raise ValueError("Query must be provided")
 
-    # 1. Prompt template incorporating datasource metadata
-    tool_prompt = augment_datasource_metadata(headlessbi_prompt)
-    # passes instructions and metadata to Langchain prompt template
+    # 1. Authenticate user to Tableau environment
+    url = os.getenv('QUERY_DATASOURCE')
+    datasource_luid = os.getenv('DATASOURCE_LUID')
+    api_key = ''
+
+    # 2. Prompt is augmented with datasource metadata
+    tool_prompt = augment_datasource_metadata({
+        'api_key': api_key,
+        'url': url,
+        'datasource_luid': datasource_luid,
+        'prompt': headlessbi_prompt
+    })
+
+    # 3. Instructions and metadata are passed Langchain template
     active_prompt_template = ChatPromptTemplate.from_messages([
         SystemMessage(content=tool_prompt),
         ("user", "{query}")
     ])
 
-    # 2. Language model settings
-    llm = ChatOpenAI(model=os.environ['AGENT_MODEL'], temperature=0)
+    # 4. Instantiate language model
+    llm = ChatOpenAI(
+        model=os.environ['AGENT_MODEL'],
+        temperature=0
+    )
 
-    # 3. Query Data
+    # 5. Query data from Tableau's VizQL Data Service
     headlessbi_data = get_headlessbi_data
 
     # this chain defines the flow of data through the system
