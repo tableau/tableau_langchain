@@ -25,7 +25,7 @@ async def main():
     # checks for values in .env, else prompts user before initializing
     _set_env('OPENAI_API_KEY')
     _set_env('TABLEAU_DOMAIN')
-    _set_env('SITE_NAME')
+    _set_env('TABLEAU_SITE')
     _set_env('DATA_SOURCE')
     _set_env('TAVILY_API_KEY')
     _set_env('PINECONE_API_KEY')

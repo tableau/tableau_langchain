@@ -6,7 +6,7 @@ def query(query):
     payload = json.dumps({
         "connection": {
             "tableauServerName": os.getenv('TABLEAU_DOMAIN'),
-            "siteId": os.getenv('SITE_NAME'),
+            "siteId": os.getenv('TABLEAU_SITE'),
             "datasource": os.getenv('DATA_SOURCE')
         },
         "query": query
