@@ -69,7 +69,7 @@ async def authenticate():
         "credentials": {
         "jwt": token,
         "site": {
-            "contentUrl": os.environ['SITE_NAME'],
+            "contentUrl": os.environ['TABLEAU_SITE'],
         }
         }
     }
