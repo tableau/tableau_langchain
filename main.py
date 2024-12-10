@@ -1,10 +1,12 @@
+import asyncio
+
 from dotenv import load_dotenv
 
 from community.langchain_community.agents.tableau.chatbot.agent import initialize_agent
 from community.langchain_community.agents.tableau.utils import _set_env, stream_graph_updates
 
 
-def main():
+async def main():
     """
     TABLEAU AGENT STAGING PLATFORM
 
@@ -31,14 +33,15 @@ def main():
     _set_env('PINECONE_INDEX_NAME')
     _set_env('RETRIEVER_MODEL')
 
-    # authenticates user to Tableau
-    def authenticate_user(url):
-        """
-        """
-        pass
 
-
+    # initialize one of the repo's custom agents
     agent = initialize_agent()
+
+    credentials = {
+        "api_key": "your_api_key",
+        "username": "your_username",
+        "password": "your_password"
+    }
 
     # User input loop
     while True:
@@ -48,14 +51,14 @@ def main():
                 print("Exiting Tableau Headless BI Agent...")
                 print("Goodbye!")
                 break
+            stream_graph_updates(user_input, agent, tableau_credentials=credentials)
 
-            stream_graph_updates(user_input, agent)
         except:
             # fallback if input() is not available
             user_input = "average discount, total sales, profits by region"
             print("Default user input: " + user_input)
-            stream_graph_updates(user_input, agent)
+            stream_graph_updates(user_input, agent, tableau_credentials=credentials)
             break
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
