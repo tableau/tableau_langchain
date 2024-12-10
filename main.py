@@ -1,9 +1,11 @@
-import asyncio
+import os, asyncio
 
 from dotenv import load_dotenv
 
 from community.langchain_community.agents.tableau.chatbot.agent import initialize_agent
 from community.langchain_community.agents.tableau.utils import _set_env, stream_graph_updates
+
+from utils import authenticate_tableau_user
 
 
 async def main():
@@ -26,7 +28,7 @@ async def main():
     _set_env('OPENAI_API_KEY')
     _set_env('TABLEAU_DOMAIN')
     _set_env('TABLEAU_SITE')
-    _set_env('DATA_SOURCE')
+    _set_env('DATASOURCE_LUID')
     _set_env('TAVILY_API_KEY')
     _set_env('PINECONE_API_KEY')
     _set_env('PINECONE_ENVIRONMENT')
@@ -37,10 +39,20 @@ async def main():
     # initialize one of the repo's custom agents
     agent = initialize_agent()
 
+    tableau_session = authenticate_tableau_user(
+        client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
+        jwt_secret_id=os.environ['TABLEAU_REST_JWT_SECRET_ID'],
+        jwt_secret=os.environ['TABLEAU_REST_JWT_SECRET'],
+        tableau_domain=os.environ['TABLEAU_DOMAIN'],
+        tableau_site=os.environ['TABLEAU_SITE'],
+        tableau_api=os.environ['TABLEAU_API'],
+        tableau_user=os.environ['TABLEAU_USER'],
+    )
+
     credentials = {
-        "api_key": "your_api_key",
-        "username": "your_username",
-        "password": "your_password"
+        "api_key": tableau_session,
+        "url": os.environ['TABLEAU_DOMAIN'],
+        "datasource_luid": os.environ['DATASOURCE_LUID']
     }
 
     # User input loop
