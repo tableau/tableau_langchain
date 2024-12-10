@@ -1,26 +1,28 @@
 import os, requests, json, re
 
 # define the headless BI query template
-def query_vds(query):
+def query_vds(**kwargs):
     """
     Queries Tableau's VizQL Data Service with a parameterized query in the payload
     Returns data sets to the end user as well as metadata used before querying
     """
-    url = os.getenv('HEADLESSBI_URL')
+    api_key = kwargs['api_key']
+    datasource_luid = kwargs['datasource_luid']
+    url = kwargs['url']
+    query = kwargs['query']
+
     payload = json.dumps({
-        "connection": {
-            "tableauServerName": os.getenv('TABLEAU_DOMAIN'),
-            "siteId": os.getenv('SITE_NAME'),
-            "datasource": os.getenv('DATA_SOURCE')
+        "datasource": {
+            "datasourceLuid": datasource_luid
         },
         "query": query
     })
 
     headers = {
-    'Credential-Key': os.getenv('PAT_NAME'),
-    'Credential-value': os.getenv('PAT_SECRET'),
-    'Content-Type': 'application/json'
+        'X-Tableau-Auth': api_key,
+        'Content-Type': 'application/json'
     }
+
     response = requests.request("POST", url, headers=headers, data=payload)
 
     # Check if the request was successful (status code 200)
@@ -32,31 +34,40 @@ def query_vds(query):
         print(response.text)
 
 # sends request to VizQL Data Service with payload written by Agent
-def get_headlessbi_data(message):
+def get_headlessbi_data(message, **kwargs):
     """
     Returns a dictionary containing a data consisting of formatted markdown and a query plan
     describing the reasoning and steps the model performed in order to generate the query payload
     """
-    payload = get_payload(message)
+    agent_response = get_payload(message)
+    payload = agent_response["payload"]
+    query_plan = agent_response["query_plan"]
+
     # when data is available return it and the reasoning behind the query
-    if payload["payload"]:
-        headlessbi_data = query_vds(payload["payload"])
+    if payload:
+        headlessbi_data = query_vds(
+            api_key = kwargs['api_key'],
+            datasource_luid = kwargs['datasource_luid'],
+            url = kwargs['url'],
+            query=payload
+        )
 
         # Convert to JSON string
         markdown_table = json_to_markdown(headlessbi_data)
 
         # response includes markdown table with data + query plan
         return {
-            "query_plan": payload["query_plan"],
+            "query_plan": query_plan,
             "data": markdown_table
         }
     # when the LLM cannot generate a query, the reasoning will explain why
     else:
         return {
-            "query_plan": payload["query_plan"],
+            "query_plan": query_plan,
+            "data": None
         }
 
-
+# separates the written payload from the Agent's reasoning
 def get_payload(output):
     """
     Extracts the LLM generated payload to query Tableau VizQL Data Service on behalf of
@@ -90,7 +101,7 @@ def get_payload(output):
             "query_plan": query_plan
         }
 
-
+# convert JSON responses to formatted markdown
 def json_to_markdown(json_data):
     """
     Parses a JSON response from Tableau's VizQL Data Service into formatted markdown
@@ -116,7 +127,6 @@ def json_to_markdown(json_data):
         markdown_table += row + "\n"
 
     return markdown_table
-
 
 # request metadata of declared datasource (READ_METADATA)
 def query_metadata(**kwargs):
@@ -147,7 +157,7 @@ def query_metadata(**kwargs):
         print("Failed to obtain data source metadata from VizQL Data Service. Status code:", response.status_code)
         print(response.text)
 
-
+# extract column or field values
 def get_values(column_name):
     """
     Returns the available members or column values of a data source field
@@ -158,7 +168,6 @@ def get_values(column_name):
         return None
     sample_values = [list(item.values())[0] for item in output][:4]
     return sample_values
-
 
 # obtains datasource metadata to augment the tool prompt
 def augment_datasource_metadata(**kwargs):
