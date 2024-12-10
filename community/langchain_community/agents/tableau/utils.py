@@ -55,7 +55,10 @@ def stream_graph_updates(user_input: str, graph, tableau_credentials: dict):
     Returns:
     None. The function's primary side effect is to print the assistant's response to the console.
     """
+    print('*** tableau_credentials ***', tableau_credentials)
+
     for event in graph.stream({"messages": [("user", user_input)], "tableau_credentials": tableau_credentials}):
+        print('*** EVENT ***\n', event, '\n')
         for value in event.values():
             if (os.environ["DEBUG"] == 1):
                 print("*** DEBUG MODE ***", "Graph Stream:", value["messages"][-1].content)

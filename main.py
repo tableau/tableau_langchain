@@ -39,10 +39,10 @@ async def main():
     # initialize one of the repo's custom agents
     agent = initialize_agent()
 
-    tableau_session = authenticate_tableau_user(
-        client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
-        jwt_secret_id=os.environ['TABLEAU_REST_JWT_SECRET_ID'],
-        jwt_secret=os.environ['TABLEAU_REST_JWT_SECRET'],
+    tableau_session = await authenticate_tableau_user(
+        jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
+        jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
+        jwt_secret=os.environ['TABLEAU_JWT_SECRET'],
         tableau_domain=os.environ['TABLEAU_DOMAIN'],
         tableau_site=os.environ['TABLEAU_SITE'],
         tableau_api=os.environ['TABLEAU_API'],
@@ -63,6 +63,7 @@ async def main():
                 print("Exiting Tableau Headless BI Agent...")
                 print("Goodbye!")
                 break
+
             stream_graph_updates(user_input, agent, tableau_credentials=credentials)
 
         except:
