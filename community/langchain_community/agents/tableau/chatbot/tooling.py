@@ -1,12 +1,12 @@
 from community.langchain_community.tools.others import llamaindex_pinecone_retriever, tavily_tool
-from community.langchain_community.tools.tableau.query_data import QueryTableauData, get_data
+from community.langchain_community.tools.tableau.query_data import get_data
 
 
 def equip_tooling():
     # Knowledge Base tool
     knowledge_base = llamaindex_pinecone_retriever
 
-    # Tableau Data Source Query Tool
+    # Tableau VizQL Data Service Query Tool
     query_datasource = get_data
 
     # Web Search tool
