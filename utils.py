@@ -1,4 +1,4 @@
-import os, jwt, json
+import jwt, json
 import aiohttp
 from datetime import datetime, timedelta, timezone
 
@@ -36,11 +36,11 @@ async def authenticate_tableau_user(**kwargs):
     # Encode the payload and secret key to generate the JWT
     token = jwt.encode(
         {
-        "iss": kwargs['TABLEAU_JWT_CLIENT_ID'],
+        "iss": kwargs['jwt_client_id'],
         "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
         "jti": str(uuid4()),
         "aud": "tableau",
-        "sub": kwargs['TABLEAU_USER'],
+        "sub": kwargs['tableau_user'],
         "scp": [
             "tableau:content:read",
             "tableau:insights:read",
@@ -49,16 +49,16 @@ async def authenticate_tableau_user(**kwargs):
             "tableau:metric_subscriptions:read",
         ]
         },
-        kwargs['TABLEAU_REST_JWT_SECRET'],
+        kwargs['jwt_secret'],
         algorithm = "HS256",
         headers = {
-        'kid': kwargs['TABLEAU_REST_JWT_SECRET_ID'],
-        'iss': kwargs['TABLEAU_JWT_CLIENT_ID']
+        'kid': kwargs['jwt_secret_id'],
+        'iss': kwargs['jwt_client_id']
         }
     )
 
     # authentication endpoint + request headers & payload
-    endpoint = f"{kwargs['TABLEAU_DOMAIN']}/api/{kwargs['TABLEAU_API']}/auth/signin"
+    endpoint = f"{kwargs['tableau_domain']}/api/{kwargs['tableau_api']}/auth/signin"
 
     headers = {
         'Content-Type': 'application/json',
@@ -69,7 +69,7 @@ async def authenticate_tableau_user(**kwargs):
         "credentials": {
         "jwt": token,
         "site": {
-            "contentUrl": kwargs['TABLEAU_SITE'],
+            "contentUrl": kwargs['tableau_site'],
         }
         }
     }
