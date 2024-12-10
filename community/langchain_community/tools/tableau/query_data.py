@@ -9,6 +9,8 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
+from langgraph.prebuilt import InjectedStore
+
 from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import headlessbi_prompt
@@ -16,7 +18,7 @@ from community.langchain_community.utilities.tableau.query_data import augment_d
 
 
 @tool
-def get_data(query: str, tableau_credentials: Annotated[dict, InjectedToolArg]) -> dict:
+def get_data(query: str, tableau_credentials: Annotated[dict, InjectedStore]) -> dict:
     """
     A tool to query Tableau data sources on-demand using natural language.
 
