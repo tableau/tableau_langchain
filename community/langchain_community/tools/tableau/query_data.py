@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from typing import Any, Dict, Type
 from typing_extensions import Annotated
 
-from langchain_core.tools import BaseTool, tool
+from langchain_core.tools import BaseTool, tool, InjectedToolArg
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
@@ -13,6 +13,66 @@ from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import headlessbi_prompt
 from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
+
+
+@tool
+def get_data(query: str, tableau_credentials: Annotated[dict, InjectedToolArg]) -> dict:
+    """
+    A tool to query Tableau data sources on-demand using natural language.
+
+    Input to this tool is a natural language query from a human User or external Agent and
+    additional details required to query the target Tableau data source via the VizQL Data Service
+    using HTTP and JSON.
+
+    Output is a resulting dataset containing only the fields of data, aggregations and calculations
+    needed to answer the input query.
+
+    Args:
+        query (str): A natural language query describing the data to retrieve or an open-ended question
+        that can be answered using information contained in a Tableau data source.
+
+    Returns:
+        dict: A data set relevant to the user's query obtained from Tableau's VizQL Data Service
+    """
+    # Ensure that the query is validated or processed here
+    if not query:
+        raise ValueError("Query must be provided")
+
+    # Augment the prompt template instructing the tool to query a datasource with the required metadata
+    datasource_metadata = augment_datasource_metadata({
+        'api_key': tableau_credentials['api_key'],
+        'url': tableau_credentials['url'],
+        'datasource_luid': tableau_credentials['datasource_luid'],
+        'prompt': headlessbi_prompt
+    })
+
+    # 1. Initialize Langchain chat template with augmented prompt with desired parameters
+    query_data_prompt = ChatPromptTemplate.from_messages([
+        SystemMessage(content=datasource_metadata),
+        ("user", "{query}")
+    ])
+
+    # 2. Instantiate language model and execute the prompt to write a VizQL Data Service query
+    query_writer = ChatOpenAI(
+        model=os.getenv('AGENT_MODEL'),
+        temperature=0
+    )
+
+    # 3. Query data from Tableau's VizQL Data Service using the dynamically written payload
+    request_data = get_headlessbi_data(
+        api_key = tableau_credentials['api_key'],
+        url = tableau_credentials['url'],
+        datasource_luid = tableau_credentials['datasource_luid']
+    )
+
+    # this chain defines the flow of data through the system
+    chain = query_data_prompt | query_writer | request_data
+
+    # invoke the chain to generate a query and obtain data
+    vizql_data = chain.invoke(query)
+
+    # Return the structured output
+    return vizql_data
 
 
 class QueryInput(BaseModel):
@@ -81,64 +141,3 @@ class QueryTableauData(BaseTool):
 
         # Return the structured output
         return queried_data
-
-
-@tool
-def get_data(query: str) -> dict:
-    """
-    A tool to query Tableau data sources on-demand using natural language.
-
-    Input to this tool is a natural language query from a human User or external Agent and
-    additional details required to query the target Tableau data source via the VizQL Data Service
-    using HTTP and JSON.
-
-    Output is a resulting dataset containing only the fields of data, aggregations and calculations
-    needed to answer the input query.
-
-    Args:
-        query (str): A natural language query describing the data to retrieve or an open-ended question
-        that can be answered using information contained in a Tableau data source.
-
-    Returns:
-        dict: A data set relevant to the user's query obtained from Tableau's VizQL Data Service
-    """
-    # Ensure that the query is validated or processed here
-    if not query:
-        raise ValueError("Query must be provided")
-
-    # 1. Authenticate user to Tableau environment
-    url = os.getenv('QUERY_DATASOURCE')
-    datasource_luid = os.getenv('DATASOURCE_LUID')
-    api_key = ''
-
-    # 2. Prompt is augmented with datasource metadata
-    tool_prompt = augment_datasource_metadata({
-        'api_key': api_key,
-        'url': url,
-        'datasource_luid': datasource_luid,
-        'prompt': headlessbi_prompt
-    })
-
-    # 3. Instructions and metadata are passed Langchain template
-    active_prompt_template = ChatPromptTemplate.from_messages([
-        SystemMessage(content=tool_prompt),
-        ("user", "{query}")
-    ])
-
-    # 4. Instantiate language model
-    llm = ChatOpenAI(
-        model=os.environ['AGENT_MODEL'],
-        temperature=0
-    )
-
-    # 5. Query data from Tableau's VizQL Data Service
-    headlessbi_data = get_headlessbi_data
-
-    # this chain defines the flow of data through the system
-    chain = active_prompt_template | llm | headlessbi_data
-
-    # invoke the chain to generate a query and obtain data
-    queried_data = chain.invoke(query)
-
-    # Return the structured output
-    return queried_data
