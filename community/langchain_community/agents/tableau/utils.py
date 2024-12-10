@@ -35,7 +35,7 @@ def _visualize_graph(graph):
 
 
 
-def stream_graph_updates(user_input: str, graph, tableau_credentials: dict):
+def stream_graph_updates(message: dict, graph):
     """
     This function streams responses from Agents to clients such as chat interfaces:
 
@@ -55,9 +55,10 @@ def stream_graph_updates(user_input: str, graph, tableau_credentials: dict):
     Returns:
     None. The function's primary side effect is to print the assistant's response to the console.
     """
-    print('*** tableau_credentials ***', tableau_credentials)
+    print('*** tableau_credentials ***', message['tableau_credentials'])
 
-    for event in graph.stream({"messages": [("user", user_input)], "tableau_credentials": tableau_credentials}):
+
+    for event in graph.stream({"messages": [("user", message['user_message'])]}):
         print('*** EVENT ***\n', event, '\n')
         for value in event.values():
             if (os.environ["DEBUG"] == 1):
