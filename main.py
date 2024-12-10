@@ -64,13 +64,18 @@ async def main():
                 print("Goodbye!")
                 break
 
-            stream_graph_updates(user_input, agent, tableau_credentials=credentials)
+            message = {
+                "user_message": user_input,
+                "tableau_credentials": credentials
+            }
+
+            stream_graph_updates(message, agent)
 
         except:
             # fallback if input() is not available
             user_input = "average discount, total sales, profits by region"
             print("Default user input: " + user_input)
-            stream_graph_updates(user_input, agent, tableau_credentials=credentials)
+            stream_graph_updates(message, agent)
             break
 
 if __name__ == "__main__":
