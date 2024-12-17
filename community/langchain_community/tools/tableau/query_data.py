@@ -10,6 +10,7 @@ from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
 from langgraph.prebuilt import InjectedStore
+from langgraph.store.base import BaseStore
 
 from langchain_openai import ChatOpenAI
 
@@ -18,7 +19,7 @@ from community.langchain_community.utilities.tableau.query_data import augment_d
 
 
 @tool
-def get_data(query: str, tableau_credentials: Annotated[dict, InjectedStore]) -> dict:
+def get_data(query: str, tableau_credentials: Annotated[BaseStore, InjectedStore]) -> dict:
     """
     A tool to query Tableau data sources on-demand using natural language.
 
