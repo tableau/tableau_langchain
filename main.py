@@ -3,9 +3,9 @@ import os, asyncio
 from dotenv import load_dotenv
 
 from agents.chatbot.agent import initialize_agent
-from agents.utils import _set_env, stream_graph_updates
+from agents.utils import stream_graph_updates
 
-from utils import authenticate_tableau_user
+from utils import _set_env, authenticate_tableau_user
 
 
 async def main():

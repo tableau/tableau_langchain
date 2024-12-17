@@ -1,8 +1,16 @@
-import jwt, json
-import aiohttp
+import jwt, json, aiohttp, os, getpass
+
 from datetime import datetime, timedelta, timezone
 
 from uuid import uuid4
+
+
+def _set_env(var: str):
+    """
+    if environment variable not set, safely prompts user for value returns the newly resolved variable
+    """
+    if not os.environ.get(var):
+        os.environ[var] = getpass.getpass(f"{var}: ")
 
 # reusable asynchronous HTTP GET requests
 async def http_get(endpoint, headers):
