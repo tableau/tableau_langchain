@@ -2,8 +2,8 @@ import os, asyncio
 
 from dotenv import load_dotenv
 
-from community.langchain_community.agents.tableau.chatbot.agent import initialize_agent
-from community.langchain_community.agents.tableau.utils import _set_env, stream_graph_updates
+from agents.chatbot.agent import initialize_agent
+from agents.utils import _set_env, stream_graph_updates
 
 from utils import authenticate_tableau_user
 

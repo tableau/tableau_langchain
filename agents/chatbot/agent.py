@@ -1,4 +1,4 @@
-from community.langchain_community.agents.tableau.chatbot import graph, state, nodes
+from agents.chatbot import graph, state, nodes
 
 def initialize_agent():
     """
