@@ -1,4 +1,7 @@
-from agents.chatbot import graph, state, nodes
+from agents.chatbot.graph import graph_state
+from agents.chatbot.state import ChatbotState
+from agents.chatbot.nodes import chatbot, tools
+
 
 def initialize_agent():
     """
@@ -11,9 +14,14 @@ def initialize_agent():
         - Headless BI (can query a data source for on-demand data sets including aggregations, filters and calculations)
         - Web Search (can incorporate external knowledge from the web)
 
-    Intended to be a simple example of Chatbot.
+    Intended to be a simple example of a Chatbot.
     """
     # LangGraph Agents rely on graphs to describe state
-    agent = graph.graph_state(state.ChatbotState, "chatbot", nodes.chatbot)
+    agent = graph_state(
+        state_definition=ChatbotState,
+        entry_point_name="chatbot",
+        entry_point_node=chatbot,
+        tool_node=tools
+    )
 
     return agent
