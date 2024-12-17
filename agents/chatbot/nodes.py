@@ -1,5 +1,6 @@
 import os
 
+from langgraph.prebuilt import ToolNode
 from langchain_openai import ChatOpenAI
 
 from agents.chatbot.state import ChatbotState
@@ -34,3 +35,7 @@ def chatbot(state: ChatbotState):
         print('Chatbot: \n', message.content)
 
     return {"messages": [message]}
+
+def tools():
+    tool_node = ToolNode(tools=equip_tooling())
+    return tool_node
