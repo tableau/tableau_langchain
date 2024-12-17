@@ -13,6 +13,6 @@ def equip_tooling():
     web_search = tavily_tool()
 
     # List of tools used to build the state graph and for binding them to nodes
-    tools = [knowledge_base, query_datasource, web_search]
+    tools = [knowledge_base, web_search]
 
     return tools
