@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 from langgraph.store.memory import InMemoryStore
 
-from agents.chatbot.agent import initialize_agent
+from agents.cra import initialize_agent
 from agents.utils import stream_graph_updates
 
 from utils import _set_env, authenticate_tableau_user
@@ -62,17 +62,18 @@ async def main():
         "datasource_luid": os.environ['DATASOURCE_LUID']
     })
 
-    print('*** tableau_store ***', tableau_store)
-
     # initialize one of the repo's custom agents
     agent = initialize_agent(tableau_store)
+
+    print("\nWelcome to the Tableau Agent Staging Environment!")
+    print("Enter a prompt or type 'exit' to end \n")
 
     # User input loop
     while True:
         try:
             user_input = input("User: ")
-            if user_input.lower() in ["quit", "exit", "q", "stop"]:
-                print("Exiting Tableau Headless BI Agent...")
+            if user_input.lower() in ["quit", "exit", "q", "stop", "end"]:
+                print("Exiting Tableau Agent Staging Environment...")
                 print("Goodbye!")
                 break
 
