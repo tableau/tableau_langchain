@@ -14,7 +14,7 @@ def initialize_agent(chatbot_store):
         - Headless BI (can query a data source for on-demand data sets including aggregations, filters and calculations)
         - Web Search (can incorporate external knowledge from the web)
 
-    Intended to be a simple example of a Chatbot.
+    Intended to be a simple example of a chatbot inspired by the Langgraph prebuilt `create_react_agent`
     """
     # LangGraph Agents rely on graphs to describe state
     agent = graph_state(
