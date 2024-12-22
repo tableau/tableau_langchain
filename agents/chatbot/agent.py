@@ -3,7 +3,7 @@ from agents.chatbot.state import ChatbotState
 from agents.chatbot.nodes import chatbot, tools
 
 
-def initialize_agent():
+def initialize_agent(chatbot_store):
     """
     TABLEAU CHATBOT AGENT
 
@@ -21,7 +21,8 @@ def initialize_agent():
         state_definition=ChatbotState,
         entry_point_name="chatbot",
         entry_point_node=chatbot,
-        tool_node=tools
+        tool_node=tools,
+        store=chatbot_store
     )
 
     return agent
