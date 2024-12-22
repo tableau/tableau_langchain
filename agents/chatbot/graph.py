@@ -19,8 +19,11 @@ def graph_state(state_definition, entry_point_name, entry_point_node, tool_node)
         entry_point_name,
         tools_condition,
     )
+
     # Any time a tool is called, we return to the chatbot to decide the next step
     graph_builder.add_edge("tools", entry_point_name)
+
+    # Set entry point for the graph
     graph_builder.set_entry_point(entry_point_name)
 
     # creates a "CompiledGraph" we can invoke on our state
