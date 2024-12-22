@@ -2,6 +2,8 @@ import os, asyncio
 
 from dotenv import load_dotenv
 
+from langgraph.store.memory import InMemoryStore
+
 from agents.chatbot.agent import initialize_agent
 from agents.utils import stream_graph_updates
 
@@ -36,9 +38,6 @@ async def main():
     _set_env('RETRIEVER_MODEL')
 
 
-    # initialize one of the repo's custom agents
-    agent = initialize_agent()
-
     tableau_session = await authenticate_tableau_user(
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
@@ -54,6 +53,19 @@ async def main():
         "url": os.environ['TABLEAU_DOMAIN'],
         "datasource_luid": os.environ['DATASOURCE_LUID']
     }
+
+    tableau_store = InMemoryStore()
+
+    tableau_store.put("credentials", "User A", {
+        "api_key": tableau_session,
+        "url": os.environ['TABLEAU_DOMAIN'],
+        "datasource_luid": os.environ['DATASOURCE_LUID']
+    })
+
+    print('*** tableau_store ***', tableau_store)
+
+    # initialize one of the repo's custom agents
+    agent = initialize_agent(tableau_store)
 
     # User input loop
     while True:
