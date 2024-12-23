@@ -8,7 +8,7 @@ def query_vds(**kwargs):
     """
     api_key = kwargs['api_key']
     datasource_luid = kwargs['datasource_luid']
-    url = kwargs['url'] + '/query-datasource'
+    url = kwargs['url'] + '/api/v1/vizql-data-service/query-datasource'
     query = kwargs['query']
 
     payload = json.dumps({
@@ -135,7 +135,7 @@ def query_metadata(**kwargs):
     """
     api_key = kwargs['api_key']
     datasource_luid = kwargs['datasource_luid']
-    url = kwargs['url'] + '/read-metadata'
+    url = kwargs['url'] + '/api/v1/vizql-data-service/read-metadata'
 
     payload = json.dumps({
         "datasource": {
@@ -182,7 +182,11 @@ def augment_datasource_metadata(**kwargs):
     prompt = kwargs['prompt']
 
     # get metadata from VizQL Data Service endpoint
-    datasource_metadata = query_metadata(api_key, url, datasource_luid)
+    datasource_metadata = query_metadata(
+        api_key=api_key,
+        url=url,
+        datasource_luid=datasource_luid
+    )
 
     data_model = []
 
@@ -202,4 +206,6 @@ def augment_datasource_metadata(**kwargs):
     # add the datasource metadata of the connected datasource to the system prompt
     prompt['data_model'] = data_model
 
-    return json.dumps(prompt, indent=2)
+    print(json.dumps(prompt, indent=2))
+
+    return prompt
