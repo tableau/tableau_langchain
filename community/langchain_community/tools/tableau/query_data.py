@@ -1,4 +1,5 @@
 import os
+import json
 
 from pydantic import BaseModel, Field
 from typing import Any, Dict, Type
@@ -7,11 +8,12 @@ from typing_extensions import Annotated
 from langchain_core.tools import BaseTool, tool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
+from langchain_core.output_parsers import StrOutputParser
+
+from langchain_openai import ChatOpenAI
 
 from langgraph.store.base import BaseStore
 from langgraph.prebuilt import InjectedStore, InjectedState
-
-from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import headlessbi_prompt
 from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
@@ -37,22 +39,22 @@ def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState("tab
     Returns:
         dict: A data set relevant to the user's query obtained from Tableau's VizQL Data Service
     """
-    # print('\n*** START query ***\n', query, '\n*** END query ***\n')
-    # print('\n*** START tableau_credentials ***\n', tableau_credentials, '\n*** END tableau_credentials ***\n')
-
+    tableau_auth = tableau_credentials['session']['credentials']['token']
+    tableau_url = tableau_credentials['url']
+    tableau_datasource = tableau_credentials['datasource_luid']
 
     # 0. Augment the prompt template instructing the tool to query a datasource with the required metadata
     datasource_metadata = augment_datasource_metadata(
-        api_key=tableau_credentials['session']['credentials']['token'],
-        url=tableau_credentials['url'],
-        datasource_luid=tableau_credentials['datasource_luid'],
+        api_key=tableau_auth,
+        url=tableau_url,
+        datasource_luid=tableau_datasource,
         prompt=headlessbi_prompt
     )
 
     # 1. Initialize Langchain chat template with augmented prompt with desired parameters
     query_data_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=datasource_metadata),
-        ("user", "{query}")
+        SystemMessage(content=json.dumps(datasource_metadata)),
+        ("user", "{utterance}")
     ])
 
     # 2. Instantiate language model and execute the prompt to write a VizQL Data Service query
@@ -62,14 +64,19 @@ def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState("tab
     )
 
     # 3. Query data from Tableau's VizQL Data Service using the dynamically written payload
-    request_data = get_headlessbi_data(
-        api_key = tableau_credentials['api_key'],
-        url = tableau_credentials['url'],
-        datasource_luid = tableau_credentials['datasource_luid']
-    )
+    def get_data(vds_query):
+        return get_headlessbi_data(
+            api_key=tableau_auth,
+            url=tableau_url,
+            datasource_luid=tableau_datasource,
+            payload=vds_query.content
+        )
+
+    # 4. Parse chain output
+    output_parser = StrOutputParser()
 
     # this chain defines the flow of data through the system
-    chain = query_data_prompt | query_writer | request_data
+    chain = query_data_prompt | query_writer | get_data | output_parser
 
     # invoke the chain to generate a query and obtain data
     vizql_data = chain.invoke(query)
