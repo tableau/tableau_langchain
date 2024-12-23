@@ -7,7 +7,6 @@ from typing_extensions import Annotated
 from langchain_core.tools import BaseTool, tool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
-from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
 from langgraph.store.base import BaseStore
 from langgraph.prebuilt import InjectedStore, InjectedState
@@ -20,7 +19,7 @@ from community.langchain_community.utilities.tableau.query_data import augment_d
 # target_datasource: Annotated[BaseStore, InjectedStore]
 
 @tool
-def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState]) -> dict:
+def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState("tableau_credentials")]) -> dict:
     """
     A tool to query Tableau data sources on-demand using natural language.
 
@@ -38,13 +37,13 @@ def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState]) ->
     Returns:
         dict: A data set relevant to the user's query obtained from Tableau's VizQL Data Service
     """
-    # Ensure that the query is validated or processed here
-    if not query:
-        raise ValueError("Query must be provided")
+    # print('\n*** START query ***\n', query, '\n*** END query ***\n')
+    # print('\n*** START tableau_credentials ***\n', tableau_credentials, '\n*** END tableau_credentials ***\n')
 
-    # Augment the prompt template instructing the tool to query a datasource with the required metadata
+
+    # 0. Augment the prompt template instructing the tool to query a datasource with the required metadata
     datasource_metadata = augment_datasource_metadata({
-        'api_key': tableau_credentials['api_key'],
+        'api_key': tableau_credentials['api_key']['token'],
         'url': tableau_credentials['url'],
         'datasource_luid': tableau_credentials['datasource_luid'],
         'prompt': headlessbi_prompt
