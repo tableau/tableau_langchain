@@ -40,14 +40,19 @@ def initialize_agent(chatbot_store):
         # allow_dangerous_code=True,
     )
 
-    # For this tutorial we will use custom tool that returns pre-defined values for weather in two cities (NYC & SF)
+    # For demonstration purposes, this tool returns pre-defined values for weather in 3 cities
     @tool
-    def get_weather(city: Literal["nyc", "sf"]):
-        """Use this to get weather information."""
+    def get_weather(city: Literal["nyc", "sf", "atx"]):
+        """
+        Use this to get weather information. If the city is not provided ask the user to confirm which city
+        they want to know more about from the list of available cities.
+        """
         if city == "nyc":
-            return "It might be cloudy in nyc"
+            return "It might be cloudy in ny"
         elif city == "sf":
             return "It's always sunny in sf"
+        elif city == "atx":
+            return "It's running hot in atx"
         else:
             raise AssertionError("Unknown city")
 
