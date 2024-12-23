@@ -158,12 +158,18 @@ def query_metadata(**kwargs):
         print(response.text)
 
 # extract column or field values
-def get_values(column_name):
+def get_values(**kwargs):
     """
     Returns the available members or column values of a data source field
     """
-    column_values = {'columns': [{'columnName': column_name}]}
-    output = query_vds(column_values)
+
+    column_values = {'fields': [{'fieldCaption': kwargs['caption']}]}
+    output = query_vds(
+        api_key = kwargs['api_key'],
+        datasource_luid = kwargs['datasource_luid'],
+        url = kwargs['url'],
+        query=column_values
+    )
     if output is None:
         return None
     sample_values = [list(item.values())[0] for item in output][:4]
@@ -188,23 +194,29 @@ def augment_datasource_metadata(**kwargs):
         datasource_luid=datasource_luid
     )
 
-    data_model = []
+    counter = 0
 
     for field in datasource_metadata:
-        column_dict = {}
-        del field['objectGraphId']
-        column_dict['caption'] = field['caption']
-        column_dict['colName'] = field['columnName']
+        if counter == 1:
+            print("reading in your field metadata...")
+        elif counter == 10:
+            print("looking up field values...")
+        del field['fieldName']
+        del field['logicalTableId']
         if field['dataType'] == 'STRING':
-            # get available members or column values of a data source field
-            string_values = get_values(field['columnName'])
-            column_dict['sampleValues'] = string_values
-        else:
-            column_dict['sampleValues'] = ""
-        data_model.append(column_dict)
+            string_values = get_values(
+                api_key = api_key,
+                url = url,
+                datasource_luid = datasource_luid,
+                caption=field['fieldCaption']
+            )
+            field['sampleValues'] = string_values
+        counter+=1
+        if counter == len(datasource_metadata) - 1:
+            print("prompt is ready!")
 
     # add the datasource metadata of the connected datasource to the system prompt
-    prompt['data_model'] = data_model
+    prompt['data_model'] = datasource_metadata
 
     print(json.dumps(prompt, indent=2))
 
