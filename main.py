@@ -49,7 +49,7 @@ async def main():
     )
 
     credentials = {
-        "api_key": tableau_session,
+        "session": tableau_session,
         "url": os.environ['TABLEAU_DOMAIN'],
         "datasource_luid": os.environ['DATASOURCE_LUID']
     }
