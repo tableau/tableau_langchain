@@ -1,4 +1,4 @@
-import os, requests, json, re
+import requests, json, re
 
 # define the headless BI query template
 def query_vds(**kwargs):
@@ -8,7 +8,7 @@ def query_vds(**kwargs):
     """
     api_key = kwargs['api_key']
     datasource_luid = kwargs['datasource_luid']
-    url = kwargs['url']
+    url = kwargs['url'] + '/query-datasource'
     query = kwargs['query']
 
     payload = json.dumps({
@@ -135,7 +135,7 @@ def query_metadata(**kwargs):
     """
     api_key = kwargs['api_key']
     datasource_luid = kwargs['datasource_luid']
-    url = kwargs['url']
+    url = kwargs['url'] + '/read-metadata'
 
     payload = json.dumps({
         "datasource": {
