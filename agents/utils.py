@@ -57,21 +57,30 @@ def stream_graph_updates(message: dict, graph):
     - None. The function's primary side effect is to print the assistant's response to the console.
     """
 
+    query_string = json.dumps(message['user_message'])
+    tableau_string = message['tableau_credentials']
+    input_stream = {
+        "messages": [("user", query_string)],
+        "tableau_credentials": tableau_string
+    }
+
+    print('\n*** START MESSAGE ***\n', json.dumps(message, indent=4), '\n*** END MESSAGE ***\n')
+
     # gets value DEBUG value or sets it to empty string, condition applies if string is empty or 0
     if os.environ.get("DEBUG", "") in ["0", ""]:
         # streams events from the agent graph started by the client input containing user queries
-        for event in graph.stream({"messages": [("user", json.dumps(message))]}):
+        for event in graph.stream(input_stream):
             agent_output = event.get('agent')
             if event.get('agent'):
                 agent_message = agent_output["messages"][0].content
                 if len(agent_message) > 0:
-                    print("\nAgent: \n")
+                    print("\nAgent:")
                     print(f"{agent_message} \n")
 
-    if (os.environ["DEBUG"] == "1"):
+    elif (os.environ["DEBUG"] == "1"):
         # display tableau credentials to prove access to the environment
         print('*** tableau_credentials ***', message['tableau_credentials'])
 
-        for event in graph.stream({"messages": [("user", message['user_message'])]}):
+        for event in graph.stream(input_stream):
             print(f"*** EVENT *** type: {type(event)}")
             print(event)
