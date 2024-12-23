@@ -76,7 +76,7 @@ def initialize_agent(chatbot_store):
     web_search = tavily_tool()
 
     # List of tools used to build the state graph and for binding them to nodes
-    tools = [knowledge_base, web_search, get_weather]
+    tools = [knowledge_base, query_datasource, web_search, get_weather]
 
     if os.getenv('DEBUG') == '1':
         debugging = True
