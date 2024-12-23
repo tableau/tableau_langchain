@@ -69,7 +69,7 @@ async def main():
     # User input loop
     while True:
         try:
-            user_input = input("User: ")
+            user_input = input("User: \n")
             if user_input.lower() in ["quit", "exit", "q", "stop", "end"]:
                 print("Exiting Tableau Agent Staging Environment...")
                 print("Goodbye!")
