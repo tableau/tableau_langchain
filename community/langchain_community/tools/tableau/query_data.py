@@ -4,22 +4,23 @@ from pydantic import BaseModel, Field
 from typing import Any, Dict, Type
 from typing_extensions import Annotated
 
-from langchain_core.tools import BaseTool, tool, InjectedToolArg
+from langchain_core.tools import BaseTool, tool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 
-from langgraph.prebuilt import InjectedStore
 from langgraph.store.base import BaseStore
+from langgraph.prebuilt import InjectedStore, InjectedState
 
 from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import headlessbi_prompt
 from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
 
+# target_datasource: Annotated[BaseStore, InjectedStore]
 
 @tool
-def get_data(query: str, tableau_credentials: Annotated[BaseStore, InjectedStore]) -> dict:
+def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState]) -> dict:
     """
     A tool to query Tableau data sources on-demand using natural language.
 
