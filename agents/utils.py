@@ -64,8 +64,6 @@ def stream_graph_updates(message: dict, graph):
         "tableau_credentials": tableau_string
     }
 
-    print('\n*** START MESSAGE ***\n', json.dumps(message, indent=4), '\n*** END MESSAGE ***\n')
-
     # gets value DEBUG value or sets it to empty string, condition applies if string is empty or 0
     if os.environ.get("DEBUG", "") in ["0", ""]:
         # streams events from the agent graph started by the client input containing user queries
