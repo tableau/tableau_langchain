@@ -1,11 +1,15 @@
 
 import os
-from typing import Literal
+from typing import Literal, TypedDict, Annotated, Sequence
 
 from langchain_openai import ChatOpenAI
-from langchain_core.tools import tool
 
+from langchain_core.tools import tool
+from langchain_core.messages import BaseMessage
+
+from langgraph.graph.message import add_messages
 from langgraph.prebuilt import create_react_agent
+from langgraph.managed import IsLastStep
 
 # Tableau Community tools
 from community.langchain_community.tools.tableau.query_data import get_data
@@ -29,7 +33,13 @@ def initialize_agent(chatbot_store):
     Intended the most straightforward implementation of Tableau tooling for Langgraph.
     """
 
-    model = ChatOpenAI(
+    class CustomState(TypedDict):
+        messages: Annotated[Sequence[BaseMessage], add_messages]
+        is_last_step: IsLastStep
+        # messages: List[BaseMessage]
+        tableau_credentials: dict
+
+    llm = ChatOpenAI(
         model=os.environ["AGENT_MODEL"],
         api_key=os.environ["OPENAI_API_KEY"],
         temperature=0,
@@ -68,8 +78,18 @@ def initialize_agent(chatbot_store):
     # List of tools used to build the state graph and for binding them to nodes
     tools = [knowledge_base, web_search, get_weather]
 
-    # Define the graph
-    cra_agent = create_react_agent(model, tools=tools)
+    if os.getenv('DEBUG') == '1':
+        debugging = True
+    else:
+        debugging = False
+
+    # Define the agent graph
+    cra_agent = create_react_agent(
+        model=llm,
+        state_schema=CustomState,
+        tools=tools,
+        debug=debugging
+    )
 
     # outputs a mermaid diagram of the graph in png format
     _visualize_graph(cra_agent)
