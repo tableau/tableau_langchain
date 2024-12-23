@@ -42,12 +42,12 @@ def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState("tab
 
 
     # 0. Augment the prompt template instructing the tool to query a datasource with the required metadata
-    datasource_metadata = augment_datasource_metadata({
-        'api_key': tableau_credentials['api_key']['token'],
-        'url': tableau_credentials['url'],
-        'datasource_luid': tableau_credentials['datasource_luid'],
-        'prompt': headlessbi_prompt
-    })
+    datasource_metadata = augment_datasource_metadata(
+        api_key=tableau_credentials['session']['credentials']['token'],
+        url=tableau_credentials['url'],
+        datasource_luid=tableau_credentials['datasource_luid'],
+        prompt=headlessbi_prompt
+    )
 
     # 1. Initialize Langchain chat template with augmented prompt with desired parameters
     query_data_prompt = ChatPromptTemplate.from_messages([
