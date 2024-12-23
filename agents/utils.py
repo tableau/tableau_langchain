@@ -1,4 +1,5 @@
 import os
+import json
 
 from IPython.display import Image, display
 
@@ -59,7 +60,7 @@ def stream_graph_updates(message: dict, graph):
     # gets value DEBUG value or sets it to empty string, condition applies if string is empty or 0
     if os.environ.get("DEBUG", "") in ["0", ""]:
         # streams events from the agent graph started by the client input containing user queries
-        for event in graph.stream({"messages": [("user", message['user_message'])]}):
+        for event in graph.stream({"messages": [("user", json.dumps(message))]}):
             agent_output = event.get('agent')
             if event.get('agent'):
                 agent_message = agent_output["messages"][0].content
