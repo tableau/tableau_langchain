@@ -56,9 +56,7 @@ async def main():
 
     tableau_store = InMemoryStore()
 
-    tableau_store.put("credentials", "User A", {
-        "api_key": tableau_session,
-        "url": os.environ['TABLEAU_DOMAIN'],
+    tableau_store.put("target_datasource", "User A", {
         "datasource_luid": os.environ['DATASOURCE_LUID']
     })
 
