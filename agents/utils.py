@@ -3,8 +3,6 @@ import json
 
 from IPython.display import Image, display
 
-from langchain_core.messages import AIMessage
-
 
 def _visualize_graph(graph):
     """
