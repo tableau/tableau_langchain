@@ -13,7 +13,7 @@ from langgraph.managed import IsLastStep
 from langgraph.store.base import BaseStore
 
 # Tableau Community tools
-from community.langchain_community.tools.tableau.query_data import get_data
+from community.langchain_community.tools.tableau.query_data import query_data
 # other tools
 from community.langchain_community.tools.others import llamaindex_pinecone_retriever, tavily_tool
 
@@ -61,7 +61,7 @@ def initialize_agent(memory_store):
     knowledge_base = llamaindex_pinecone_retriever
 
     # Tableau VizQL Data Service Query Tool
-    query_datasource = get_data
+    query_datasource = query_data
 
     # Web Search tool
     web_search = tavily_tool()
@@ -85,7 +85,7 @@ def initialize_agent(memory_store):
             raise AssertionError("Unknown city")
 
     # List all tools used to build the state graph and for binding them to nodes
-    tools = [knowledge_base, query_datasource, web_search, get_weather]
+    tools = [ knowledge_base, query_datasource, web_search, get_weather ]
 
     if os.getenv('DEBUG') == '1':
         debugging = True
