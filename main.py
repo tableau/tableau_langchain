@@ -60,16 +60,14 @@ async def main():
 
     # initialize a memory store
     tableau_store = InMemoryStore()
-    # inserting user credentials
+    # insert user credentials
     tableau_store.put('user_data', "credentials", {
-        "credentials": credentials
+        "session": tableau_session,
+        "url": domain,
+        "site": site
     })
-    # inserting a datasource for VDS querying
-    tableau_store.put('user_data', "analytics", {
-        "datasource_luid": datasource_luid
-    })
-    # inserting personalized vector stores
-    tableau_store.put('user_data', "vectors", {
+    # insert personalized vector stores for RAG
+    tableau_store.put('rag', "vectors", {
         "metrics": {
             "index": None,
             "description": ""
@@ -90,6 +88,20 @@ async def main():
             "index": None,
             "description": ""
         },
+    })
+    # insert a datasource placeholder for VDS querying
+    tableau_store.put('analytics', "datasource", {
+        "luid": datasource_luid,
+        "name": None,
+        "description": None
+    })
+    # insert a workbook placeholder for writing embeds
+    tableau_store.put('analytics', "workbook", {
+        "luid": None,
+        "name": None,
+        "description": None,
+        "sheets": [],
+        "viz_url": None
     })
 
     # initialize one of the repo's custom agents
