@@ -15,7 +15,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.store.base import BaseStore
 from langgraph.prebuilt import InjectedStore, InjectedState
 
-from community.langchain_community.tools.tableau.prompts import headlessbi_prompt
+from community.langchain_community.tools.tableau.prompts import vds_prompt
 from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
 
 # target_datasource: Annotated[BaseStore, InjectedStore]
@@ -48,7 +48,7 @@ def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState("tab
         api_key=tableau_auth,
         url=tableau_url,
         datasource_luid=tableau_datasource,
-        prompt=headlessbi_prompt
+        prompt=vds_prompt
     )
 
     # 1. Initialize Langchain chat template with augmented prompt with desired parameters
@@ -76,7 +76,7 @@ def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState("tab
     output_parser = StrOutputParser()
 
     # this chain defines the flow of data through the system
-    chain = query_data_prompt | query_writer | get_data | output_parser
+    chain = query_data_prompt | query_writer | get_data
 
     # invoke the chain to generate a query and obtain data
     vizql_data = chain.invoke(query)
@@ -130,7 +130,7 @@ class QueryTableauData(BaseTool):
             raise ValueError("Query must be provided")
 
         # 1. Prompt template incorporating datasource metadata
-        tool_prompt = augment_datasource_metadata(headlessbi_prompt)
+        tool_prompt = augment_datasource_metadata(vds_prompt)
         # passes instructions and metadata to Langchain prompt template
         active_prompt_template = ChatPromptTemplate.from_messages([
             SystemMessage(content=tool_prompt),
