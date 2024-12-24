@@ -4,8 +4,8 @@ from dotenv import load_dotenv
 
 from langgraph.store.memory import InMemoryStore
 
-from agents.cra import initialize_agent
-from agents.utils import stream_graph_updates
+from agents.cra.agent import initialize_agent
+from agents.utils.agent_utils import stream_graph_updates
 
 from utils import _set_env, authenticate_tableau_user
 

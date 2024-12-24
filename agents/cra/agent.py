@@ -17,7 +17,7 @@ from community.langchain_community.tools.tableau.query_data import query_data
 # other tools
 from community.langchain_community.tools.others import llamaindex_pinecone_retriever, tavily_tool
 
-from agents.utils import  _visualize_graph
+from agents.utils.agent_utils import  _visualize_graph
 
 
 def initialize_agent(memory_store):
