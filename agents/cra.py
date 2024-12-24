@@ -29,16 +29,19 @@ def initialize_agent(chatbot_store):
         - Data Sources (describes sources of data available for querying and exploration)
         - Headless BI (can query a data source for on-demand data sets including aggregations, filters and calculations)
         - Web Search (can incorporate external knowledge from the web)
+        - Weather (can provide current weather reports on certain cities)
 
     Intended the most straightforward implementation of Tableau tooling for Langgraph.
     """
 
+    # define custom state for the cra agent
     class CustomState(TypedDict):
         messages: Annotated[Sequence[BaseMessage], add_messages]
         is_last_step: IsLastStep
         # messages: List[BaseMessage]
         tableau_credentials: dict
 
+    # configure running model for the agent
     llm = ChatOpenAI(
         model=os.environ["AGENT_MODEL"],
         api_key=os.environ["OPENAI_API_KEY"],
@@ -50,22 +53,7 @@ def initialize_agent(chatbot_store):
         # allow_dangerous_code=True,
     )
 
-    # For demonstration purposes, this tool returns pre-defined values for weather in 3 cities
-    @tool
-    def get_weather(city: Literal["nyc", "sf", "atx"]):
-        """
-        Use this to get weather information. If the city is not provided ask the user to confirm which city
-        they want to know more about from the list of available cities.
-        """
-        if city == "nyc":
-            return "It might be cloudy in ny"
-        elif city == "sf":
-            return "It's always sunny in sf"
-        elif city == "atx":
-            return "It's running hot in atx"
-        else:
-            raise AssertionError("Unknown city")
-
+    # incorporate all the agent tools
     # Knowledge Base tool
     knowledge_base = llamaindex_pinecone_retriever
 
@@ -75,7 +63,26 @@ def initialize_agent(chatbot_store):
     # Web Search tool
     web_search = tavily_tool()
 
-    # List of tools used to build the state graph and for binding them to nodes
+    # For demonstration purposes, this tool returns pre-defined values for weather in 3 cities
+    @tool
+    def get_weather(city: Literal["nyc", "sf", "atx", "sea"]):
+        """
+        Use this to get weather information. If the city is not provided ask the user to confirm which city
+        they want to know more about from the list of available cities.
+        """
+        if city == "nyc":
+            return "It might be cloudy in New York, NY"
+        elif city == "sf":
+            return "It's always sunny in San Francisco, CA"
+        elif city == "atx":
+            return "It's running hot in Austin, TX"
+        elif city == "sea":
+            return "It's quite rainy in Seattle, WA"
+        else:
+            raise AssertionError("Unknown city")
+
+
+    # List all tools used to build the state graph and for binding them to nodes
     tools = [knowledge_base, query_datasource, web_search, get_weather]
 
     if os.getenv('DEBUG') == '1':
