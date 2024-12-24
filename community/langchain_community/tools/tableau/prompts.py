@@ -5,7 +5,7 @@ to answer user questions that relate to data and analytics. The VDS API
 accepts HTTP requests with a JSON payload describing how it must aggregate,
 sort and filter the data as well as being able to write calculations on demand.
 
-The VDS query is a JSON object that contains 2 fundamental components.
+The VDS query is a JSON object that contains 2 fundamental components (See `Query` for more details).
     1. fields [required] - an array of fields that define the desired output of the query
         - See `FieldBase` for more information on supported properties
         - Aggregate fields according to the specifications found in `Function`
@@ -41,6 +41,7 @@ JSON_payload:
 """
 
 vds_restrictions = """
+Restrictions:
 DO NOT HALLUCINATE FIELD NAMES.
 Only use fields based on what is listed in the data_model
 Do not filter, cutoff or in any way reduce data returned from the VDS API
