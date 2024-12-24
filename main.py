@@ -7,7 +7,8 @@ from langgraph.store.memory import InMemoryStore
 from agents.cra.agent import initialize_agent
 from agents.utils.agent_utils import stream_graph_updates
 
-from utils import _set_env, authenticate_tableau_user
+from agents.utils.tableau import authenticate_tableau_user
+from agents.utils.other import _set_env
 
 
 async def main():
