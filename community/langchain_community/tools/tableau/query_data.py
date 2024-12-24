@@ -8,7 +8,6 @@ from typing_extensions import Annotated
 from langchain_core.tools import BaseTool, tool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
-from langchain_core.output_parsers import StrOutputParser
 
 from langchain_openai import ChatOpenAI
 
@@ -71,9 +70,6 @@ def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState("tab
             datasource_luid=tableau_datasource,
             payload=vds_query.content
         )
-
-    # 4. Parse chain output
-    output_parser = StrOutputParser()
 
     # this chain defines the flow of data through the system
     chain = query_data_prompt | query_writer | get_data
