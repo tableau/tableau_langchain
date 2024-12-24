@@ -1,7 +1,6 @@
 import os
 import json
 
-from typing import Any, Dict, Type
 from typing_extensions import Annotated
 
 from langchain_core.tools import tool
@@ -11,15 +10,14 @@ from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
 
 from langgraph.store.base import BaseStore
-from langgraph.prebuilt import InjectedStore, InjectedState
+from langgraph.prebuilt import InjectedStore
 
 from community.langchain_community.tools.tableau.prompts import vds_prompt
 from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
 
 @tool
-def get_data(
+def query_data(
     query: str,
-    tableau_credentials: Annotated[dict, InjectedState("tableau_credentials")],
     store: Annotated[BaseStore, InjectedStore]
 ) -> dict:
     """
@@ -37,11 +35,22 @@ def get_data(
     Returns:
         dict: A data set relevant to the user's query
     """
-    tableau_auth = tableau_credentials['session']['credentials']['token']
-    tableau_url = tableau_credentials['url']
-    tableau_datasource = tableau_credentials['datasource_luid']
 
-    # 0. Augment the prompt template instructing the tool to query a datasource with the required metadata
+    # user store for credentials to access Tableau environment
+    user_namespace = ("user_data", "credentials")
+    credentials_key = "user_credentials"
+    user_store = store.get(user_namespace, credentials_key)
+    tableau_auth = user_store.value["session"]["credentials"]["token"]
+    tableau_url = user_store.value["url"]
+
+    # data source store for VDS querying
+    datasource_namespace = ("analytics", "datasource")
+    datasource_key = "detail"
+    data_store = store.get(datasource_namespace, datasource_key)
+    tableau_datasource = data_store.value["luid"]
+
+
+    # augment the prompt template instructing the tool to query a datasource with the required metadata
     datasource_metadata = augment_datasource_metadata(
         api_key=tableau_auth,
         url=tableau_url,
