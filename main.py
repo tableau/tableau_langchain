@@ -60,14 +60,20 @@ async def main():
 
     # initialize a memory store
     tableau_store = InMemoryStore()
+
     # insert user credentials
-    tableau_store.put('user_data', "credentials", {
+    user_namespace = ("user_data", "credentials")
+    credentials_key = "user_credentials"
+    tableau_store.put(user_namespace, credentials_key, {
         "session": tableau_session,
         "url": domain,
         "site": site
     })
-    # insert personalized vector stores for RAG
-    tableau_store.put('rag', "vectors", {
+
+    # insert analytics vector stores for RAG
+    rag_analytics_namespace = ("rag", "analytics")
+    vectors_key = "vectors"
+    tableau_store.put(rag_analytics_namespace, vectors_key, {
         "metrics": {
             "index": None,
             "description": ""
@@ -79,24 +85,34 @@ async def main():
         "datasources": {
             "index": None,
             "description": ""
-        },
-        "tableau_kb": {
+        }
+    })
+    # insert knowledge base vector stores for RAG
+    rag_kb_namespace = ("rag", "knowledge_base")
+    tableau_store.put(rag_kb_namespace, vectors_key, {
+        "tableau": {
             "index": None,
             "description": ""
         },
-        "agent_kb": {
+        "agent": {
             "index": None,
             "description": ""
         },
     })
+
     # insert a datasource placeholder for VDS querying
-    tableau_store.put('analytics', "datasource", {
+    datasource_namespace = ("analytics", "datasource")
+    datasource_key = "detail"
+    tableau_store.put(datasource_namespace, datasource_key, {
         "luid": datasource_luid,
         "name": None,
         "description": None
     })
+
     # insert a workbook placeholder for writing embeds
-    tableau_store.put('analytics', "workbook", {
+    datasource_namespace = ("analytics", "workbook")
+    datasource_key = "detail"
+    tableau_store.put(datasource_namespace, datasource_key, {
         "luid": None,
         "name": None,
         "description": None,
@@ -113,11 +129,17 @@ async def main():
     # User input loop
     while True:
         try:
-            user_input = input("User: \n")
+            user_input = input("User: \n").strip()  # Use .strip() to remove leading/trailing whitespace
+
             if user_input.lower() in ["quit", "exit", "q", "stop", "end"]:
                 print("Exiting Tableau Agent Staging Environment...")
                 print("Goodbye!")
                 break
+
+            # If user input is empty, set to default string
+            if not user_input:
+                user_input = "show me average discount, total sales and profits by region sorted by profit\n"
+                print("Test input: " + user_input)
 
             message = {
                 "user_message": user_input,
@@ -126,10 +148,17 @@ async def main():
 
             stream_graph_updates(message, agent)
 
-        except:
-            # fallback if input() is not available
-            user_input = "average discount, total sales and profits by region sorted by profit"
-            print("Default user input: " + user_input)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            # Use diagnostic string in case of an error
+            user_input = f"The previous operation failed with this error: {e}.\n Write a query to test this tool again and describe the issue"
+            print("Retrying with diagnostics input: " + user_input)
+
+            message = {
+                "user_message": user_input,
+                "tableau_credentials": credentials
+            }
+
             stream_graph_updates(message, agent)
             break
 
