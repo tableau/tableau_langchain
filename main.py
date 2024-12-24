@@ -37,27 +37,59 @@ async def main():
     _set_env('PINECONE_INDEX_NAME')
     _set_env('RETRIEVER_MODEL')
 
+    domain = os.environ['TABLEAU_DOMAIN']
+    site = os.environ['TABLEAU_SITE']
+    datasource_luid = os.environ['DATASOURCE_LUID']
 
     tableau_session = await authenticate_tableau_user(
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
         jwt_secret=os.environ['TABLEAU_JWT_SECRET'],
-        tableau_domain=os.environ['TABLEAU_DOMAIN'],
-        tableau_site=os.environ['TABLEAU_SITE'],
         tableau_api=os.environ['TABLEAU_API'],
         tableau_user=os.environ['TABLEAU_USER'],
+        tableau_domain=domain,
+        tableau_site=site,
     )
 
     credentials = {
         "session": tableau_session,
-        "url": os.environ['TABLEAU_DOMAIN'],
-        "datasource_luid": os.environ['DATASOURCE_LUID']
+        "url": domain,
+        "site": site,
+        "datasource_luid": datasource_luid
     }
 
+    # initialize a memory store
     tableau_store = InMemoryStore()
-
-    tableau_store.put("target_datasource", "User A", {
-        "datasource_luid": os.environ['DATASOURCE_LUID']
+    # inserting user credentials
+    tableau_store.put('user_data', "credentials", {
+        "credentials": credentials
+    })
+    # inserting a datasource for VDS querying
+    tableau_store.put('user_data', "analytics", {
+        "datasource_luid": datasource_luid
+    })
+    # inserting personalized vector stores
+    tableau_store.put('user_data', "vectors", {
+        "metrics": {
+            "index": None,
+            "description": ""
+        },
+        "workbooks": {
+            "index": None,
+            "description": ""
+        },
+        "datasources": {
+            "index": None,
+            "description": ""
+        },
+        "tableau_kb": {
+            "index": None,
+            "description": ""
+        },
+        "agent_kb": {
+            "index": None,
+            "description": ""
+        },
     })
 
     # initialize one of the repo's custom agents
@@ -84,7 +116,7 @@ async def main():
 
         except:
             # fallback if input() is not available
-            user_input = "average discount, total sales and profits by region"
+            user_input = "average discount, total sales and profits by region sorted by profit"
             print("Default user input: " + user_input)
             stream_graph_updates(message, agent)
             break
