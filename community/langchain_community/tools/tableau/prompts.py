@@ -1,31 +1,37 @@
 vds_instructions = """
-You are an expert at writing API requests to Tableau’s VizQL Data Service API to
-answer user questions that relate to data and analytics.
-The VDS API can return aggregated data, apply filters & perform calculations.
-The API requires a request body, payload or query to return the desired output.
-
-Your task is to write this payload to retrieve data relevant the user's question.
-Query as much data as might useful, even if additional transformation and actions are needed.
-Always aggregate data to avoid returning too granular of a result.
-Return query results verbatim
+Task:
+Your job is to write requests to Tableau’s VizQL Data Service (VDS) API
+to answer user questions that relate to data and analytics. The VDS API
+accepts HTTP requests with a JSON payload describing how it must aggregate,
+sort and filter the data as well as being able to write calculations on demand.
 
 The VDS query is a JSON object that contains 2 fundamental components.
     1. fields [required] - an array of fields that define the desired output of the query
-    (See `FieldBase` for more information on supported properties)
+        - See `FieldBase` for more information on supported properties
+        - Aggregate fields according to the specifications found in `Function`
+        - Refer to `SortDirection` for instructions on sorting
+        - Find the necessary `fieldCaptions` to write the query by checking the `data_model` key
+        containing additional metadata describing the data source
     2. filters [optional] - an array of filters to apply to the query. They can include fields
     that are not in the fields array. Supported filter types include:
-    [ Filter, MatchFilter, QuantitativeFilterBase, QuantitativeNumericalFilter, QuantitativeDateFilter, SetFilter, RelativeDateFilter, TopNFilter ]
+        - [ Filter, MatchFilter, QuantitativeFilterBase, QuantitativeNumericalFilter, QuantitativeDateFilter, SetFilter, RelativeDateFilter, TopNFilter ]
 
-You can find the necessary `fieldCaptions` to write the query by checking the `data_model` key
-containing additional metadata describing the data source.
+Guidelines:
+- Your task is to write the payload to retrieve data relevant to the user's question.
+- Query all of the fields that seem useful or interesting including those that may only be
+contextually related to the topics mentioned by the user even if additional transformations
+or other actions are needed.
+- Always aggregate data to avoid returning too granular of a result.
+- Return query results verbatim
 
-Your output must contain:
+Output:
+Your output must contain two sections
     1. "Query Plan": where you describe your reasoning: why you queried these fields,
     why you aggregated the data and why filters were applied to it. How does this satisfy the user query?
     2. "JSON_payload": the VDS payload you wrote to satisfy the user query according to the query plan and
     the instructions provided in the prompt
 
-Your must output be structured according to this format:
+This is the template you must use:
 
 Query Plan:
 {insert query plan here}
@@ -491,7 +497,7 @@ vds_schema = {
 },
 
 vds_few_shot = {
-    "columns": {
+    "fields": {
         1: {
             "query": "Show me sales by segment",
             "JSON": {
@@ -538,6 +544,33 @@ vds_few_shot = {
                 ]
             },
         },
+        6: {
+            "query": "Average discount, total sales and profits by region sorted by profit",
+            "JSON": {
+                "fields": [
+                    {
+                        "fieldCaption": "Region"
+                    },
+                    {
+                        "fieldCaption": "Discount",
+                        "function": "AVG",
+                        "maxDecimalPlaces": 2
+                    },
+                    {
+                        "fieldCaption": "Sales",
+                        "function": "SUM",
+                        "maxDecimalPlaces": 2
+                    },
+                    {
+                        "fieldCaption": "Profit",
+                        "function": "SUM",
+                        "maxDecimalPlaces": 2,
+                        "sortPriority": 1,
+                        "sortDirection": "DESC"
+                    }
+                ]
+            }
+        }
     },
     "filters": {
         1: {
@@ -677,8 +710,15 @@ vds_few_shot = {
             "query": "Top selling sub-categories with a minimum of $200,000",
             "JSON": {
                 "fields": [
-                    {"fieldCaption": "Sub-Category"},
-                    {"fieldCaption": "Sales", "function": "SUM", "sortPriority": 1, "sortDirection": "DESC"}
+                    {
+                        "fieldCaption": "Sub-Category"
+                    },
+                    {
+                        "fieldCaption": "Sales",
+                        "function": "SUM",
+                        "sortPriority": 1,
+                        "sortDirection": "DESC"
+                    }
                 ],
                 "filters": [
                     {
