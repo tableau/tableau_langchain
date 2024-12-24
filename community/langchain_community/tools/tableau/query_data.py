@@ -16,10 +16,12 @@ from langgraph.prebuilt import InjectedStore, InjectedState
 from community.langchain_community.tools.tableau.prompts import vds_prompt
 from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
 
-# target_datasource: Annotated[BaseStore, InjectedStore]
-
 @tool
-def get_data(query: str, tableau_credentials: Annotated[dict, InjectedState("tableau_credentials")]) -> dict:
+def get_data(
+    query: str,
+    tableau_credentials: Annotated[dict, InjectedState("tableau_credentials")],
+    store: Annotated[BaseStore, InjectedStore]
+) -> dict:
     """
     A tool to query Tableau data sources via the VizQL Data Service HTTP API. The tool will return a data set
     with fields aggregated and filtered to provide insights to the end user. Use this tool to answer questions
