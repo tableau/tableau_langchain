@@ -24,186 +24,6 @@ Only use fields based on what is listed in the data_model
 Do not filter or reduce any data found in query results so the next link can determine future steps.
 """
 
-vds_few_shot = {
-    "superstore": {
-        "columns": {
-            1: {
-                "query": "Show me sales by segment",
-                "JSON": {
-                    "columns": [
-                    {"columnName": "Segment"},
-                    {"columnName": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                ]
-                },
-            },
-            2: {
-                "query": "What are the total sales and profit for each product category?",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "Category"},
-                        {"columnName": "Sales", "function": "SUM", "maxDecimalPlaces": 2},
-                        {"columnName": "Profit", "function": "SUM", "maxDecimalPlaces": 2}
-                    ]
-                },
-            },
-            3: {
-                "query": "Display the number of orders by ship mode",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "Ship Mode"},
-                        {"columnName": "Order ID", "function": "COUNT", "columnAlias": "Number of Orders"}
-                    ]
-                },
-            },
-            4: {
-                "query": "Show me the average sales per customer by segment",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "Segment"},
-                        {"columnName": "Sales", "function": "AVG", "maxDecimalPlaces": 2, "columnAlias": "Average Sales per Customer"}
-                    ]
-                },
-            },
-            5: {
-                "query": "What are the total sales for each state or province?",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "State/Province"},
-                        {"columnName": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                    ]
-                },
-            },
-        },
-        "filters": {
-            1: {
-                "query": "Show me sales for the top 10 cities",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "City"},
-                        {"columnName": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                    ],
-                    "filters": [
-                        {
-                            "columnName": "Sales",
-                            "filterType": "TOP",
-                            "direction": "TOP",
-                            "howMany": 10,
-                            "fieldToMeasure": {"columnName": "Sales", "function": "SUM"}
-                        }
-                    ]
-                }
-            },
-            2: {
-                "query": "What are the sales for furniture products in the last 6 months?",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "Product Name"},
-                        {"columnName": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                    ],
-                    "filters": [
-                        {
-                            "columnName": "Category",
-                            "filterType": "SET",
-                            "values": ["Furniture"],
-                            "exclude": False
-                        },
-                        {
-                            "columnName": "Order Date",
-                            "filterType": "DATE",
-                            "units": "MONTHS",
-                            "pastCount": 6
-                        }
-                    ]
-                }
-            },
-            3: {
-                "query": "List customers who have made purchases over $1000 in the Consumer segment",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "Customer Name"},
-                        {"columnName": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                    ],
-                    "filters": [
-                        {
-                            "columnName": "Sales",
-                            "filterType": "QUANTITATIVE",
-                            "quantitativeFilterType": "MIN",
-                            "min": 1000
-                        },
-                        {
-                            "columnName": "Segment",
-                            "filterType": "SET",
-                            "values": ["Consumer"],
-                            "exclude": False
-                        }
-                    ]
-                }
-            },
-            4: {
-                "query": "Show me the orders that were returned in the West region",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "Order ID"},
-                        {"columnName": "Product Name"},
-                        {"columnName": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                    ],
-                    "filters": [
-                        {
-                            "columnName": "Returned",
-                            "filterType": "SET",
-                            "values": [True],
-                            "exclude": False
-                        },
-                        {
-                            "columnName": "Region",
-                            "filterType": "SET",
-                            "values": ["West"],
-                            "exclude": False
-                        }
-                    ]
-                }
-            },
-            5: {
-                "query": "What are the top 5 sub-categories by sales, excluding the Technology category?",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "Sub-Category"},
-                        {"columnName": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                    ],
-                    "filters": [
-                        {
-                            "columnName": "Category",
-                            "filterType": "SET",
-                            "values": ["Technology"],
-                            "exclude": True,
-                        },
-                        {
-                            "columnName": "Sales",
-                            "filterType": "TOP",
-                            "direction": "TOP",
-                            "howMany": 5,
-                            "fieldToMeasure": {"columnName": "Sales", "function": "SUM"}
-                        }
-                    ]
-                }
-            },
-            6: {
-                "query": "Top selling sub-categories with a minimum of $200,000",
-                "JSON": {
-                    "columns": [
-                        {"columnName": "Sub-Category"},
-                        {"columnName": "Sales", "function": "SUM", "sortPriority": 1, "sortDirection": "DESC"}
-                    ],
-                    "filters": [
-                        {"columnName": "Sales", "filterType": "QUANTITATIVE", "quantitativeFilterType": "MIN", "min": 200000}
-                    ]
-                }
-            }
-        },
-        "calculations": {},
-    }
-}
-
 vds_schema = {
     "FieldBase": {
         "type": "object",
@@ -654,10 +474,216 @@ vds_schema = {
     }
 },
 
+vds_few_shot = {
+    "columns": {
+        1: {
+            "query": "Show me sales by segment",
+            "JSON": {
+                "fields": [
+                {"fieldCaption": "Segment"},
+                {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+            ]
+            },
+        },
+        2: {
+            "query": "What are the total sales and profit for each product category?",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "Category"},
+                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2},
+                    {"fieldCaption": "Profit", "function": "SUM", "maxDecimalPlaces": 2}
+                ]
+            },
+        },
+        3: {
+            "query": "Display the number of orders by ship mode",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "Ship Mode"},
+                    {"fieldCaption": "Order ID", "function": "COUNT", "columnAlias": "Number of Orders"}
+                ]
+            },
+        },
+        4: {
+            "query": "Show me the average sales per customer by segment",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "Segment"},
+                    {"fieldCaption": "Sales", "function": "AVG", "maxDecimalPlaces": 2, "columnAlias": "Average Sales per Customer"}
+                ]
+            },
+        },
+        5: {
+            "query": "What are the total sales for each state or province?",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "State/Province"},
+                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+                ]
+            },
+        },
+    },
+    "filters": {
+        1: {
+            "query": "Show me sales for the top 10 cities",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "City"},
+                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+                ],
+                "filters": [
+                    {
+                        "field": {
+                            "fieldCaption": "Sales"
+                        },
+                        "filterType": "TOP",
+                        "direction": "TOP",
+                        "howMany": 10,
+                        "fieldToMeasure": {"fieldCaption": "Sales", "function": "SUM"}
+                    }
+                ]
+            }
+        },
+        2: {
+            "query": "What are the sales for furniture products in the last 6 months?",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "Product Name"},
+                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+                ],
+                "filters": [
+                    {
+                        "field": {
+                            "fieldCaption": "Category"
+                    },
+                        "filterType": "SET",
+                        "values": ["Furniture"],
+                        "exclude": False
+                    },
+                    {
+                            "field": {
+                            "fieldCaption": "Order Date"
+                            },
+                        "filterType": "DATE",
+                        "periodtype": "MONTHS",
+                        "dateRangeType": "LASTN",
+                        "rangeN": 6
+                    }
+                ]
+            }
+        },
+        3: {
+            "query": "List customers who have made purchases over $1000 in the Consumer segment",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "Customer Name"},
+                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+                ],
+                "filters": [
+                    {
+                        "field": {
+                            "fieldCaption": "Sales",
+                        },
+                        "filterType": "QUANTITATIVE_NUMERICAL",
+                        "quantitativeFilterType": "MIN",
+                        "min": 1000
+                    },
+                    {
+                        "field": {
+                            "fieldCaption": "Segment"
+                        },
+                        "filterType": "SET",
+                        "values": ["Consumer"],
+                        "exclude": False
+                    }
+                ]
+            }
+        },
+        4: {
+            "query": "Show me the orders that were returned in the West region",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "Order ID"},
+                    {"fieldCaption": "Product Name"},
+                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+                ],
+                "filters": [
+                    {
+                        "field":
+                        {
+                            "fieldCaption": "Returned"
+                        },
+                        "filterType": "SET",
+                        "values": [True],
+                        "exclude": False
+                    },
+                    {
+                        "field":
+                        {
+                            "fieldCaption": "Region"
+                        },
+                        "filterType": "SET",
+                        "values": ["West"],
+                        "exclude": False
+                    }
+                ]
+            }
+        },
+        5: {
+            "query": "What are the top 5 sub-categories by sales, excluding the Technology category?",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "Sub-Category"},
+                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+                ],
+                "filters": [
+                    {
+                        "field":{
+                            "fieldCaption": "Category"
+                        },
+                        "filterType": "SET",
+                        "values": ["Technology"],
+                        "exclude": True,
+                    },
+                    {
+                        "field":{
+                            "fieldCaption": "Sales"
+                        },
+                        "filterType": "TOP",
+                        "direction": "TOP",
+                        "howMany": 5,
+                        "fieldToMeasure": {"fieldCaption": "Sales", "function": "SUM"}
+                    }
+                ]
+            }
+        },
+        6: {
+            "query": "Top selling sub-categories with a minimum of $200,000",
+            "JSON": {
+                "fields": [
+                    {"fieldCaption": "Sub-Category"},
+                    {"fieldCaption": "Sales", "function": "SUM", "sortPriority": 1, "sortDirection": "DESC"}
+                ],
+                "filters": [
+                    {
+                        "field":{
+                            "fieldCaption": "Sales"
+                        },
+                        "filterType": "QUANTITATIVE_NUMERICAL",
+                        "quantitativeFilterType": "MIN",
+                        "min": 200000
+                        }
+                ]
+            }
+        }
+    },
+    "calculations": {}
+}
+
 vds_prompt = {
     "instructions": vds_instructions,
     "restrictions": vds_restrictions,
-    "data_model": {},
     "vds_schema": vds_schema,
-    "few_shot_examples": None
+    "few_shot_examples": vds_few_shot,
+    "data_model": {}
 }
