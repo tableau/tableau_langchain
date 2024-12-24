@@ -1,7 +1,7 @@
 from langgraph.graph import StateGraph
 from langgraph.prebuilt import tools_condition
 
-from agents.utils import  _visualize_graph
+from agents.utils.agent_utils import  _visualize_graph
 
 
 def graph_state(state_definition, entry_point_name, entry_point_node, tool_node):
