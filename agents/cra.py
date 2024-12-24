@@ -8,8 +8,9 @@ from langchain_core.tools import tool
 from langchain_core.messages import BaseMessage
 
 from langgraph.graph.message import add_messages
-from langgraph.prebuilt import create_react_agent
+from langgraph.prebuilt import create_react_agent, InjectedStore
 from langgraph.managed import IsLastStep
+from langgraph.store.base import BaseStore
 
 # Tableau Community tools
 from community.langchain_community.tools.tableau.query_data import get_data
@@ -19,7 +20,7 @@ from community.langchain_community.tools.others import llamaindex_pinecone_retri
 from agents.utils import  _visualize_graph
 
 
-def initialize_agent(chatbot_store):
+def initialize_agent(memory_store):
     """
     TABLEAU CRA AGENT
 
@@ -38,7 +39,9 @@ def initialize_agent(chatbot_store):
     class CustomState(TypedDict):
         messages: Annotated[Sequence[BaseMessage], add_messages]
         is_last_step: IsLastStep
-        # messages: List[BaseMessage]
+        user_context: str
+        application_context: str
+        language: str
         tableau_credentials: dict
 
     # configure running model for the agent
@@ -53,7 +56,7 @@ def initialize_agent(chatbot_store):
         # allow_dangerous_code=True,
     )
 
-    # incorporate all the agent tools
+    # incorporate all agent tools
     # Knowledge Base tool
     knowledge_base = llamaindex_pinecone_retriever
 
@@ -81,7 +84,6 @@ def initialize_agent(chatbot_store):
         else:
             raise AssertionError("Unknown city")
 
-
     # List all tools used to build the state graph and for binding them to nodes
     tools = [knowledge_base, query_datasource, web_search, get_weather]
 
@@ -95,6 +97,7 @@ def initialize_agent(chatbot_store):
         model=llm,
         state_schema=CustomState,
         tools=tools,
+        store=memory_store,
         debug=debugging
     )
 
