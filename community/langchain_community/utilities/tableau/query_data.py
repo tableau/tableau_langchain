@@ -40,7 +40,6 @@ def get_headlessbi_data(**kwargs):
     describing the reasoning and steps the model performed in order to generate the query payload
     """
     agent_response = get_payload(kwargs['payload'])
-    print('\n*** AGENT RESPONSE ***\n', agent_response)
     vds_payload = agent_response["payload"]
     query_plan = agent_response["query_plan"]
 
