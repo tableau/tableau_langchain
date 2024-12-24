@@ -1,4 +1,4 @@
-from community.langchain_community.tools.others import llamaindex_pinecone_retriever, tavily_tool
+from agents.tools import llamaindex_pinecone_retriever, tavily_tool
 from community.langchain_community.tools.tableau.query_data import get_data
 
 
