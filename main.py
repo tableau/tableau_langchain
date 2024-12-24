@@ -84,7 +84,7 @@ async def main():
 
         except:
             # fallback if input() is not available
-            user_input = "average discount, total sales, profits by region"
+            user_input = "average discount, total sales and profits by region"
             print("Default user input: " + user_input)
             stream_graph_updates(message, agent)
             break
