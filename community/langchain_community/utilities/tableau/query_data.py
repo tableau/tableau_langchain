@@ -192,10 +192,11 @@ def augment_datasource_metadata(**kwargs):
     counter = 0
 
     for field in datasource_metadata:
-        if counter == 3:
+        if counter == 0:
             print("\nAgent:")
-        elif counter == 6:
-            print("Ok, first I'll get as much metadata as I can about this data source...")
+            print("Ok")
+        elif counter == 3:
+            print("First I'll get as much metadata as I can about this data source...")
         elif counter == 9:
             print("I'll index field values so I can filter the data according to your specifications...")
         del field['fieldName']
