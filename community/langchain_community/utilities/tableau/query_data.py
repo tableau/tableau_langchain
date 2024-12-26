@@ -123,7 +123,7 @@ def json_to_markdown(json_data):
 
     return markdown_table
 
-# request metadata of declared datasource (READ_METADATA)
+# request metadata of declared datasource
 def query_metadata(**kwargs):
     """
     Gets metadata from the VizQL Data Service endpoint for the specified data source
