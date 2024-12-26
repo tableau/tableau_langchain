@@ -39,6 +39,12 @@ async def main():
     site = os.environ['TABLEAU_SITE']
     datasource_luid = os.environ['DATASOURCE_LUID']
 
+    # define required authorizations to Tableau resources to support Agent operations
+    access_scopes = [
+        "tableau:content:read", # for quering Tableau Metadata API
+        "tableau:viz_data_service:read" # for querying VizQL Data Service
+    ]
+
     tableau_session = await authenticate_tableau_user(
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
@@ -47,6 +53,7 @@ async def main():
         tableau_user=os.environ['TABLEAU_USER'],
         tableau_domain=domain,
         tableau_site=site,
+        scopes=access_scopes
     )
 
     sample_inputs = {
