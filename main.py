@@ -28,7 +28,6 @@ async def main():
     _set_env('OPENAI_API_KEY')
     _set_env('TABLEAU_DOMAIN')
     _set_env('TABLEAU_SITE')
-    _set_env('DATASOURCE_LUID')
     _set_env('TAVILY_API_KEY')
     _set_env('PINECONE_API_KEY')
     _set_env('PINECONE_ENVIRONMENT')
@@ -37,7 +36,7 @@ async def main():
 
     domain = os.environ['TABLEAU_DOMAIN']
     site = os.environ['TABLEAU_SITE']
-    datasource_luid = os.environ['DATASOURCE_LUID']
+    datasource_luid = '0965e61b-a072-43cf-994c-8c6cf526940d'
 
     # define required authorizations to Tableau resources to support Agent operations
     access_scopes = [
