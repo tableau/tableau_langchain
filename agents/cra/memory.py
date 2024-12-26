@@ -98,22 +98,27 @@ def initialize_memory(memory_inputs: Dict[str, Any]) -> InMemoryStore:
     workbook = memory_inputs.get('workbook')
     rag = memory_inputs.get('rag')
 
-    # store tableau credentials to access the environment with tools
-    set_tableau_credentials(
-        store=memory,
-        tableau_session=credentials['session'],
-        domain=credentials['url'],
-        site=credentials['site']
-    )
-    # store datasource for VDS querying, content recommendations and Q&A
-    set_target_datasource(
+    if credentials:
+        # store tableau credentials to access the environment with tools
+        set_tableau_credentials(
+            store=memory,
+            tableau_session=credentials['session'],
+            domain=credentials['url'],
+            site=credentials['site']
+        )
+
+    if datasource:
+        # store datasource for VDS querying, content recommendations and Q&A
+        set_target_datasource(
         store=memory,
         luid=datasource.get('luid'),
         name=datasource.get('name'),
         description=datasource.get('description')
     )
-    # store workbook for content recommendations and Q&A
-    set_target_workbook(
+
+    if workbook:
+        # store workbook for content recommendations and Q&A
+        set_target_workbook(
         store=memory,
         luid=workbook.get('luid'),
         name=workbook.get('name'),
@@ -121,18 +126,22 @@ def initialize_memory(memory_inputs: Dict[str, Any]) -> InMemoryStore:
         sheets=workbook.get('sheets'),
         viz_url=workbook.get('viz_url')
     )
-    # store references to vector indexes on analytical topics
-    set_vector_store(
-        store=memory,
-        topic='analytics',
-        data=rag.get('analytics')
-    )
-    # store references to vector indexes on knowledge base topics
-    set_vector_store(
-        store=memory,
-        topic='knowledge_base',
-        data=rag.get('knowledge_base')
-    )
+
+    if rag:
+        if rag.get('analytics'):
+            # store references to vector indexes on analytical topics
+            set_vector_store(
+                store=memory,
+                topic='analytics',
+                data=rag.get('analytics')
+            )
+        if rag.get('knowledge_base'):
+            # store references to vector indexes on knowledge base topics
+            set_vector_store(
+                store=memory,
+                topic='knowledge_base',
+                data=rag.get('knowledge_base')
+            )
 
     return memory
 
