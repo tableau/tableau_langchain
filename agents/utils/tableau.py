@@ -15,14 +15,7 @@ async def authenticate_tableau_user(**kwargs):
         "jti": str(uuid4()),
         "aud": "tableau",
         "sub": kwargs['tableau_user'],
-        "scp": [
-            "tableau:content:read", # for quering Tableau Metadata API
-            "tableau:insights:read", # for quering Tableau Pulse
-            "tableau:insight_definitions_metrics:read", # for quering Tableau Pulse
-            "tableau:insight_metrics:read", # for quering Tableau Pulse
-            "tableau:metric_subscriptions:read", # for quering Tableau Pulse
-            "tableau:viz_data_service:read" # for querying VizQL Data Service
-        ]
+        "scp": kwargs['scopes']
         },
         kwargs['jwt_secret'],
         algorithm = "HS256",
