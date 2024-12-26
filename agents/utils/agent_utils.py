@@ -56,10 +56,8 @@ def stream_graph_updates(message: dict, graph):
     """
 
     query_string = json.dumps(message['user_message'])
-    tableau_string = message['tableau_credentials']
     input_stream = {
         "messages": [("user", query_string)],
-        "tableau_credentials": tableau_string
     }
 
     # gets value DEBUG value or sets it to empty string, condition applies if string is empty or 0
