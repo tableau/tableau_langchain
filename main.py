@@ -2,11 +2,8 @@ import os, asyncio
 
 from dotenv import load_dotenv
 
-from langgraph.store.memory import InMemoryStore
-
 from agents.cra.agent import initialize_agent
 from agents.utils.agent_utils import stream_graph_updates
-
 from agents.utils.tableau import authenticate_tableau_user
 from agents.utils.other import _set_env
 
@@ -52,77 +49,40 @@ async def main():
         tableau_site=site,
     )
 
-    credentials = {
-        "session": tableau_session,
-        "url": domain,
-        "site": site,
-        "datasource_luid": datasource_luid
+    sample_inputs = {
+        'tableau_credentials': {
+            "session": tableau_session,
+            "url": domain,
+            "site": site,
+        },
+        'datasource': {
+            "luid": datasource_luid,
+            "name": None,
+            "description": None
+        },
+        'workbook': {
+            "luid": None,
+            "name": None,
+            "description": None,
+            'sheets': None,
+            'viz_url': None
+        },
+        'rag': {
+            'analytics': {
+                "metrics": None,
+                "workbooks": None,
+                "datasources": None
+            },
+            'knowledge_base': {
+                "tableau": None,
+                "agent": None,
+                'app': None
+            }
+        }
     }
 
-    # initialize a memory store
-    tableau_store = InMemoryStore()
-
-    # insert user credentials
-    user_namespace = ("user_data", "credentials")
-    credentials_key = "user_credentials"
-    tableau_store.put(user_namespace, credentials_key, {
-        "session": tableau_session,
-        "url": domain,
-        "site": site
-    })
-
-    # insert analytics vector stores for RAG
-    rag_analytics_namespace = ("rag", "analytics")
-    vectors_key = "vectors"
-    tableau_store.put(rag_analytics_namespace, vectors_key, {
-        "metrics": {
-            "index": None,
-            "description": ""
-        },
-        "workbooks": {
-            "index": None,
-            "description": ""
-        },
-        "datasources": {
-            "index": None,
-            "description": ""
-        }
-    })
-    # insert knowledge base vector stores for RAG
-    rag_kb_namespace = ("rag", "knowledge_base")
-    tableau_store.put(rag_kb_namespace, vectors_key, {
-        "tableau": {
-            "index": None,
-            "description": ""
-        },
-        "agent": {
-            "index": None,
-            "description": ""
-        },
-    })
-
-    # insert a datasource placeholder for VDS querying
-    datasource_namespace = ("analytics", "datasource")
-    datasource_key = "detail"
-    tableau_store.put(datasource_namespace, datasource_key, {
-        "luid": datasource_luid,
-        "name": None,
-        "description": None
-    })
-
-    # insert a workbook placeholder for writing embeds
-    datasource_namespace = ("analytics", "workbook")
-    datasource_key = "detail"
-    tableau_store.put(datasource_namespace, datasource_key, {
-        "luid": None,
-        "name": None,
-        "description": None,
-        "sheets": [],
-        "viz_url": None
-    })
-
     # initialize one of the repo's custom agents
-    agent = initialize_agent(tableau_store)
+    agent = initialize_agent(agent_inputs=sample_inputs)
 
     print("\nWelcome to the Tableau Agent Staging Environment!")
     print("Enter a prompt or type 'exit' to end \n")
@@ -144,7 +104,6 @@ async def main():
 
             message = {
                 "user_message": user_input,
-                "tableau_credentials": credentials
             }
 
             stream_graph_updates(message, agent)
@@ -157,7 +116,6 @@ async def main():
 
             message = {
                 "user_message": user_input,
-                "tableau_credentials": credentials
             }
 
             stream_graph_updates(message, agent)
