@@ -1,17 +1,18 @@
+from typing import Dict, Any
 import os
 
 from langchain_openai import ChatOpenAI
 
 from langgraph.prebuilt import create_react_agent
 
-
 from agents.cra.state import CustomState
 from agents.cra.tooling import tools
+from agents.cra.memory import initialize_memory
 
 from agents.utils.agent_utils import  _visualize_graph
 
 
-def initialize_agent(memory_store):
+def initialize_agent(agent_inputs: Dict[str, Any]) -> Any:
     """
     TABLEAU CRA AGENT
 
@@ -37,17 +38,21 @@ def initialize_agent(memory_store):
         # allow_dangerous_code=True,
     )
 
+    # initialize memory
+    memory = initialize_memory(memory_inputs=agent_inputs)
+
+    # set agent debugging state
     if os.getenv('DEBUG') == '1':
         debugging = True
     else:
         debugging = False
 
-    # Define the agent graph
+    # define the agent graph
     cra_agent = create_react_agent(
         model=llm,
         state_schema=CustomState,
         tools=tools,
-        store=memory_store,
+        store=memory,
         debug=debugging
     )
 
