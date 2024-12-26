@@ -55,9 +55,9 @@ def stream_graph_updates(message: dict, graph):
     - None. The function's primary side effect is to print the assistant's response to the console.
     """
 
-    query_string = json.dumps(message['user_message'])
+    message_string = json.dumps(message['user_message'])
     input_stream = {
-        "messages": [("user", query_string)],
+        "messages": [("user", message_string)],
     }
 
     # gets value DEBUG value or sets it to empty string, condition applies if string is empty or 0
