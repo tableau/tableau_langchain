@@ -9,7 +9,6 @@ dependencies:
     - ipykernel
     - python-dotenv
     - pyjwt
-    - pandas
     - fastapi
     - tabulate
     - pip=23.3.1
@@ -23,6 +22,7 @@ dependencies:
         - langchain-pinecone
         - "langserve[all]"
         - langchain_community
+        - langchain_experimental
         - llama-index
         - llama-index-vector-stores-pinecone
         - pinecone-client[grpc]
