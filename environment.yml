@@ -16,7 +16,7 @@ dependencies:
         - langchain
         - langgraph
         - langsmith
-        - langgraph-cli
+        - langgraph-cli[inmem]
         - langchain_anthropic
         - langchain_openai
         - langchain-pinecone
