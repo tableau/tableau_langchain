@@ -1,19 +1,39 @@
-[metadata]
+[project]
 name = "tableau_langchain"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "A community project to stage, test and build Tableau tools for Agents built with the Langgraph framework"
+authors = [
+    { name = "Stephen Price" },
+    { name = "Joe Constantino" }
+]
+requires-python = ">=3.12.2"
+license = "MIT"
+readme = "README.md"
 
-[options]
-packages = ["find:"]  # Adjust as necessary to include your packages
-python_requires = ">=3.12.2"
-
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+dependencies = [
+    "notebook",
+    "ipykernel",
+    "python-dotenv",
+    "pyjwt",
+    "fastapi",
+    "tabulate",
+    "langchain",
+    "langgraph",
+    "langsmith",
+    { name = "langgraph-cli", extras = ["inmem"] },
+    "langchain-anthropic",
+    "langchain-openai",
+    "langchain-pinecone",
+    { name = "langserve", extras = ["all"] },
+    "langchain-community",
+    "langchain-experimental",
+    "llama-index",
+    "llama-index-vector-stores-pinecone",
+    { name = "pinecone-client", extras = ["grpc"] },
+    "semantic-router",
+    "tavily-python"
+]
 
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
-
-[tool.conda]
-channels = ["conda-forge", "defaults"]
