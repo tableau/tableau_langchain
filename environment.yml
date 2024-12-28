@@ -8,15 +8,12 @@ dependencies:
     - conda-forge::nb_conda_kernels
     - ipykernel
     - python-dotenv
-    - pyjwt
-    - fastapi
-    - tabulate
+    - langchain
+    - langsmith
     - pip=23.3.1
     - pip:
-        - langchain
         - langgraph
-        - langsmith
-        - langgraph-cli[inmem]
+        - langgraph-cli
         - langchain_anthropic
         - langchain_openai
         - langchain-pinecone
@@ -25,6 +22,6 @@ dependencies:
         - langchain_experimental
         - llama-index
         - llama-index-vector-stores-pinecone
-        - pinecone-client[grpc]
+        - "pinecone-client[grpc]"
         - semantic-router
         - tavily-python
