@@ -117,11 +117,11 @@ async def main():
         except Exception as e:
             print(f"An error occurred: {e}")
             # Use diagnostic string in case of an error
-            user_input = f"The previous operation failed with this error: {e}.\n Write a query to test this tool again and describe the issue"
-            print("Retrying with diagnostics input: " + user_input)
+            diagnostic_input = f"The previous operation '{user_input}', failed with this error: {e}.\n Write a query to test this tool again and describe the issue"
+            print("Retrying with diagnostics input: " + diagnostic_input)
 
             message = {
-                "user_message": user_input,
+                "user_message": diagnostic_input,
             }
 
             stream_graph_updates(message, agent)
