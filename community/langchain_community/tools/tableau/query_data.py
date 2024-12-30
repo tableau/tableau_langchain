@@ -37,8 +37,14 @@ def query_data(
     # credentials to access Tableau environment on behalf of the user
     tableau_auth =  runtime_values['tableau_credentials']['session']["credentials"]["token"]
     tableau_url = runtime_values['tableau_credentials']['url']
+    if not tableau_auth or not tableau_url:
+        # lets the Agent know this error cannot be resolved by the end user
+        raise KeyError("Critical Error: Tableau credentials were not provided by the client application. The user cannot provide them either since they come from RunnableConfig")
     # data source for VDS querying
     tableau_datasource = runtime_values['datasource']['luid']
+    if not tableau_datasource:
+        # lets the Agent know that the LUID is missing and it needs to use an alternative tool
+        raise KeyError("The Datasource LUID was not provided by the user. Use the search_datasources tool to find an appropriate query target.")
 
     # augment the prompt template instructing the tool to query a datasource with the required metadata
     datasource_metadata = augment_datasource_metadata(
