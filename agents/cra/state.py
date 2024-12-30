@@ -8,9 +8,6 @@ from langgraph.managed import IsLastStep
 
 
 # define custom state for the cra agent
-class CustomState(TypedDict):
+class TableauAgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
     is_last_step: IsLastStep # required to customize create_react_agent
-    user_context: str
-    application_context: str
-    language: str
