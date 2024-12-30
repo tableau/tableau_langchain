@@ -110,6 +110,7 @@ async def main():
 
             message = {
                 "user_message": user_input,
+                "agent_inputs": sample_inputs
             }
 
             stream_graph_updates(message, agent)
@@ -122,6 +123,7 @@ async def main():
 
             message = {
                 "user_message": diagnostic_input,
+                "agent_inputs": sample_inputs
             }
 
             stream_graph_updates(message, agent)

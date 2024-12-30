@@ -14,7 +14,6 @@ from pinecone.grpc import PineconeGRPC
 
 from semantic_router.encoders import OpenAIEncoder
 
-
 def tavily_tool():
     tavily_api_key = os.environ.get('TAVILY_API_KEY')
     tavily = TavilySearchResults(tavily_api_key=tavily_api_key, max_results=2)
