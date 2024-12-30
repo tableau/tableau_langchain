@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI
 
 from langgraph.prebuilt import create_react_agent
 
-from agents.cra.state import CustomState
+from agents.cra.state import TableauAgentState
 from agents.cra.tooling import tools
 from agents.cra.memory import initialize_memory
 
@@ -50,7 +50,7 @@ def initialize_agent(agent_inputs: Dict[str, Any]) -> Any:
     # define the agent graph
     cra_agent = create_react_agent(
         model=llm,
-        state_schema=CustomState,
+        state_schema=TableauAgentState,
         tools=tools,
         store=memory,
         debug=debugging
