@@ -57,13 +57,17 @@ def stream_graph_updates(message: dict, graph):
 
     message_string = json.dumps(message['user_message'])
     input_stream = {
-        "messages": [("user", message_string)],
+        "messages": [("user", message_string)]
+    }
+
+    agent_config = {
+        "configurable": message['agent_inputs']
     }
 
     # gets value DEBUG value or sets it to empty string, condition applies if string is empty or 0
     if os.environ.get("DEBUG", "") in ["0", ""]:
         # streams events from the agent graph started by the client input containing user queries
-        for event in graph.stream(input_stream):
+        for event in graph.stream(input_stream, agent_config):
             agent_output = event.get('agent')
             if event.get('agent'):
                 agent_message = agent_output["messages"][0].content
