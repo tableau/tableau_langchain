@@ -1,18 +1,16 @@
-from typing import Dict, Any
+from typing import Any
 import os
 
 from langchain_openai import ChatOpenAI
 
 from langgraph.prebuilt import create_react_agent
+from langgraph.store.memory import InMemoryStore
 
 from agents.cra.state import TableauAgentState
 from agents.cra.tooling import tools
-from agents.cra.memory import initialize_memory
-
-from agents.utils.agent_utils import  _visualize_graph
 
 
-def initialize_agent(agent_inputs: Dict[str, Any]) -> Any:
+def initialize_agent() -> Any:
     """
     TABLEAU CRA AGENT
 
@@ -38,8 +36,8 @@ def initialize_agent(agent_inputs: Dict[str, Any]) -> Any:
         # allow_dangerous_code=True,
     )
 
-    # initialize memory
-    memory = initialize_memory(memory_inputs=agent_inputs)
+    # initialize a memory store
+    memory = InMemoryStore()
 
     # set agent debugging state
     if os.getenv('DEBUG') == '1':
@@ -55,8 +53,5 @@ def initialize_agent(agent_inputs: Dict[str, Any]) -> Any:
         store=memory,
         debug=debugging
     )
-
-    # outputs a mermaid diagram of the graph in png format
-    _visualize_graph(cra_agent)
 
     return cra_agent
