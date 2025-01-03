@@ -4,7 +4,7 @@
         "pyproject.toml"
     ],
     "graphs": {
-        "agent": "./community/agents/tableau/chatbot/graph.py:graph"
+        "agent": "./agents/cra/agent.py:cra_agent"
     },
     "env": ".env"
 }
