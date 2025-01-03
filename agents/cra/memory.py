@@ -110,22 +110,22 @@ def initialize_memory(memory_inputs: Dict[str, Any]) -> InMemoryStore:
     if datasource:
         # store datasource for VDS querying, content recommendations and Q&A
         set_target_datasource(
-        store=memory,
-        luid=datasource.get('luid'),
-        name=datasource.get('name'),
-        description=datasource.get('description')
-    )
+            store=memory,
+            luid=datasource.get('luid'),
+            name=datasource.get('name'),
+            description=datasource.get('description')
+        )
 
     if workbook:
         # store workbook for content recommendations and Q&A
         set_target_workbook(
-        store=memory,
-        luid=workbook.get('luid'),
-        name=workbook.get('name'),
-        description=workbook.get('description'),
-        sheets=workbook.get('sheets'),
-        viz_url=workbook.get('viz_url')
-    )
+            store=memory,
+            luid=workbook.get('luid'),
+            name=workbook.get('name'),
+            description=workbook.get('description'),
+            sheets=workbook.get('sheets'),
+            viz_url=workbook.get('viz_url')
+        )
 
     if rag:
         if rag.get('analytics'):
