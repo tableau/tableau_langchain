@@ -3,7 +3,7 @@ import os, asyncio
 from dotenv import load_dotenv
 
 from agents.cra.agent import initialize_agent
-from agents.utils.agent_utils import stream_graph_updates
+from agents.utils.agent_utils import stream_graph_updates, _visualize_graph
 from agents.utils.tableau import authenticate_tableau_user
 from agents.utils.other import _set_env
 
@@ -88,7 +88,10 @@ async def main():
     }
 
     # initialize one of the repo's custom agents
-    agent = initialize_agent(agent_inputs=sample_inputs)
+    agent = initialize_agent()
+
+    # outputs a mermaid diagram of the graph in png format
+    _visualize_graph(agent)
 
     print("\nWelcome to the Tableau Agent Staging Environment!")
     print("Enter a prompt or type 'exit' to end \n")
