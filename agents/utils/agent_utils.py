@@ -1,3 +1,4 @@
+from typing import Dict, TypedDict, Optional
 import os
 import json
 
@@ -28,7 +29,6 @@ def _visualize_graph(graph):
         print(f"Failed to generate PNG: {str(e)}")
 
 
-
 def stream_graph_updates(message: dict, graph):
     """
     This function streams responses from Agents to clients, such as chat interfaces, by processing
@@ -56,18 +56,21 @@ def stream_graph_updates(message: dict, graph):
     """
 
     message_string = json.dumps(message['user_message'])
-    input_stream = {
-        "messages": [("user", message_string)]
-    }
 
-    agent_config = {
-        "configurable": message['agent_inputs']
+    tableau_credentials = message['agent_inputs']['tableau_credentials']
+    datasource = message['agent_inputs']['datasource']
+
+    # this is how client apps should format their requests to the Agent API
+    input_stream = {
+        "messages": [("user", message_string)],
+        "tableau_credentials": tableau_credentials,
+        "datasource": datasource
     }
 
     # gets value DEBUG value or sets it to empty string, condition applies if string is empty or 0
     if os.environ.get("DEBUG", "") in ["0", ""]:
         # streams events from the agent graph started by the client input containing user queries
-        for event in graph.stream(input_stream, agent_config):
+        for event in graph.stream(input_stream):
             agent_output = event.get('agent')
             if event.get('agent'):
                 agent_message = agent_output["messages"][0].content
