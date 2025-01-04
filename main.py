@@ -44,7 +44,7 @@ async def main():
         "tableau:viz_data_service:read" # for querying VizQL Data Service
     ]
 
-    tableau_session = await authenticate_tableau_user(
+    tableau_auth = await authenticate_tableau_user(
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
         jwt_secret=os.environ['TABLEAU_JWT_SECRET'],
@@ -54,6 +54,8 @@ async def main():
         tableau_site=site,
         scopes=access_scopes
     )
+
+    tableau_session = tableau_auth['credentials']['token']
 
     sample_inputs = {
         'tableau_credentials': {
