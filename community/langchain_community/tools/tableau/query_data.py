@@ -13,7 +13,7 @@ from langgraph.prebuilt import InjectedState
 from community.langchain_community.tools.tableau.prompts import vds_prompt
 from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
 
-@tool
+@tool("Query Tableau Data Source")
 def query_data(
     query: str,
     tableau_credentials: Annotated[Dict, InjectedState("tableau_credentials")],
@@ -35,9 +35,8 @@ def query_data(
         tableau_credentials (Dict): Access credentials obtained from InjectedState to interact with a
         Tableau environment on behalf of the user
 
-        datasource (Dict): Metadata about the target datasource obtained from InjectedState. The luid
+        datasource (Dict): Metadata about the target data source obtained from InjectedState. The luid
         attribute is mandatory for this tool to work
-
 
     Returns:
         dict: A data set relevant to the user's query
