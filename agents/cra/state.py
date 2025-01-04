@@ -1,5 +1,5 @@
 
-from typing import TypedDict, Annotated, Sequence, Dict, Optional
+from typing import TypedDict, Annotated, Sequence, Optional
 
 from pydantic import BaseModel, Field
 
@@ -22,15 +22,15 @@ class TableauCredentials(BaseModel):
 
 class TableauDatasource(BaseModel):
     """
-    Metadata for a specific Tableau datasource tracked via the Agent state so that it can carry multiple
-    conversations about the same datasource and target it for tool calls such as querying. This class and
+    Metadata for a specific Tableau data source tracked via the Agent state so that it can carry multiple
+    conversations about the same data source and target it for tool calls such as querying. This class and
     all its inputs should be optional to account for scenarios when client apps or the user do not know beforehand
-    which datasource is relevant to their needs or on the otherhand account for when the client app does know
-    the context such as when a user is interacting visually with datasources on the browser
+    which data source is relevant to their needs or on the otherhand account for when the client app does know
+    the context such as when a user is interacting visually with data sources on the browser
     """
-    luid: str = Field(None, description="Unique identifier of a datasource, used to perform VDS queries")
-    name: str = Field(None, description="A user friendly name for the datasource")
-    description: str = Field(None, description="A description used to help Agents understand the purpose and use of the datasource")
+    luid: str = Field(None, description="Unique identifier of a data source, used to perform VDS queries")
+    name: str = Field(None, description="A user friendly name for the data source")
+    description: str = Field(None, description="A description used to help Agents understand the purpose and use of the data source")
 
 # define custom state for the cra agent
 class TableauAgentState(TypedDict):
