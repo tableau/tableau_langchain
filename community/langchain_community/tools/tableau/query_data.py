@@ -13,7 +13,7 @@ from langgraph.prebuilt import InjectedState
 from community.langchain_community.tools.tableau.prompts import vds_prompt
 from community.langchain_community.utilities.tableau.query_data import augment_datasource_metadata, get_headlessbi_data
 
-@tool("Query Tableau Data Source")
+@tool("query_tableau_datasource")
 def query_data(
     query: str,
     tableau_credentials: Annotated[Dict, InjectedState("tableau_credentials")],
