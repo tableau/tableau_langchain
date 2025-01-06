@@ -20,7 +20,7 @@ def tavily_tool():
     return tavily
 
 
-@tool("Tableau Pulse Metrics")
+@tool("tableau_metrics")
 def tableau_metrics(query: str):
     """
     Query a vector database for relevant information to the user query regarding
@@ -79,7 +79,7 @@ def tableau_metrics(query: str):
     return answer
 
 
-@tool("Tableau Data Sources Catalog")
+@tool("tableau_datasources_catalog")
 def tableau_datasources(query: str):
     """
     Query a vector database to find the most relevant or useful Tableau data source to answer
@@ -138,7 +138,7 @@ def tableau_datasources(query: str):
     return answer
 
 
-@tool("Tableau Workbooks Catalog")
+@tool("tableau_workbooks_catalog")
 def tableau_workbooks(query: str):
     """
     Query a vector database to find the most relevant or useful Tableau workbooks to answer
