@@ -28,10 +28,8 @@ async def main():
     _set_env('OPENAI_API_KEY')
     _set_env('TABLEAU_DOMAIN')
     _set_env('TABLEAU_SITE')
-    _set_env('TAVILY_API_KEY')
     _set_env('PINECONE_API_KEY')
     _set_env('PINECONE_ENVIRONMENT')
-    _set_env('PINECONE_INDEX_NAME')
     _set_env('RETRIEVER_MODEL')
 
     domain = os.environ['TABLEAU_DOMAIN']
