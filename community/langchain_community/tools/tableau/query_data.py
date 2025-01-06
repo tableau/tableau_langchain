@@ -27,19 +27,6 @@ def query_data(
 
     Output is a resulting dataset containing only the fields of data, aggregations and calculations
     needed to answer the input query
-
-    Args:
-        query (str): A natural language query describing the data to retrieve or an open-ended question
-        that can be answered using information contained in the data source
-
-        tableau_credentials (Dict): Access credentials obtained from InjectedState to interact with a
-        Tableau environment on behalf of the user
-
-        datasource (Dict): Metadata about the target data source obtained from InjectedState. The luid
-        attribute is mandatory for this tool to work
-
-    Returns:
-        dict: A data set relevant to the user's query
     """
 
     # credentials to access Tableau environment on behalf of the user
