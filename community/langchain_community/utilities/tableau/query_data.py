@@ -189,16 +189,7 @@ def augment_datasource_metadata(**kwargs):
         datasource_luid=datasource_luid
     )
 
-    counter = 0
-
     for field in datasource_metadata:
-        if counter == 0:
-            print("\nAgent:")
-            print("Ok")
-        elif counter == 3:
-            print("First I'll get as much metadata as I can about this data source...")
-        elif counter == 9:
-            print("I'll index field values so I can filter the data according to your specifications...")
         del field['fieldName']
         del field['logicalTableId']
         if field['dataType'] == 'STRING':
@@ -209,9 +200,8 @@ def augment_datasource_metadata(**kwargs):
                 caption=field['fieldCaption']
             )
             field['sampleValues'] = string_values
-        counter+=1
-        if counter == len(datasource_metadata) - 1:
-            print("I have the necessary metadata and will write an API query for you")
+
+    print('\n*** START FIELD METADATA ***\n', datasource_metadata ,'\n*** END FIELD METADATA ***\n')
 
     # add the datasource metadata of the connected datasource to the system prompt
     prompt['data_model'] = datasource_metadata
