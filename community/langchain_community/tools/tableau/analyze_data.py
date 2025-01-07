@@ -10,23 +10,21 @@ from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import InjectedState
 
 from community.langchain_community.tools.tableau.prompts import vds_prompt
-from community.langchain_community.utilities.tableau.analyze_data import augment_datasource_metadata, get_headlessbi_data
+from community.langchain_community.utilities.tableau.analyze_data import AnalyzeDataInputs, augment_datasource_metadata, get_headlessbi_data
 
 @tool("analyze_tableau_datasource")
 def analyze_data(
     query: str,
-    user_provided_datasource_luid: Optional[str],
     tableau_credentials: Annotated[Dict, InjectedState("tableau_credentials")],
     datasource_state: Annotated[Dict, InjectedState("datasource")]
 ) -> dict:
     """
-    Queries Tableau data sources for analytical Q&A. Returns a data set with fields or calculations aggregated
-    and filtered to provide insights to the end user. You need a data source to target to use this tool, which
-    should be stored in the Agent State. If a target data source is unknown, use a data source search tool to
-    find the right resource and retry with more information.
+    Queries Tableau data sources for analytical Q&A. Returns a data set you can use to answer user questions.
+    You need a data source to target to use this tool. If a target data source is unknown, use a data source
+    search tool to find the right resource and retry with more information or ask the user to provide it.
 
-    Prioritize this tool if the user mentions analyzing, querying or exploring data. This tool includes Agent
-    summarization and is not meant for direct data set exports.
+    Prioritize this tool if the user asks you to analyze and explore data. This tool includes Agent summarization
+    and is not meant for direct data set exports.
     """
 
     # credentials to access Tableau environment on behalf of the user
@@ -39,14 +37,10 @@ def analyze_data(
     # Getting data source for VDS querying from InjectedState
     tableau_datasource = datasource_state['luid'] if datasource_state and 'luid' in datasource_state else None
 
-    # Prioritize InjectedState, conditionally fallback here to user-provided LUID
-    if not tableau_datasource:
-        tableau_datasource = user_provided_datasource_luid
-
     # Check if we have a valid datasource
     if not tableau_datasource:
         # Lets the Agent know that the LUID is missing and it needs to use an alternative tool
-        raise KeyError("The Datasource LUID was not provided by the user. Use the data source search tool to find an appropriate query target or ask the user to provide a datasource luid.")
+        raise KeyError("The Datasource LUID is missing. Use a data source search tool to find an appropriate query target that matches the user query.")
 
     # 1. Initialize Langchain chat template with an augmented prompt containing metadata for the datasource
     query_data_prompt = ChatPromptTemplate.from_messages([
