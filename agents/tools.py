@@ -24,18 +24,13 @@ def tavily_tool():
 def tableau_metrics(query: str):
     """
     Query a vector database for relevant information to the user query regarding
-    how their metrics, KPIs or OKRs are performing. This reference contains machine
-    learning insights use to provide up to date and reliable data regarding all kinds
-    of aspects related to the user's subscribed metrics
+    how their metrics performing. This reference contains machine learning insights
+    used to provide up to date and reliable data regarding all kinds of aspects related
+    to the user's subscribed metrics.
+
+    Prioritize using this tool if the user mentions metrics, KPIs, OKRs or similar.
 
     Output is various chunks of text in vector format for summarization.
-
-    Args:
-        query (str): A natural language query describing the data to retrieve or an open-ended question
-        that can be answered using information contained in the data source
-
-    Returns:
-        dict: A data set relevant to the user's query
     """
     pinecone_api_key = os.environ["PINECONE_API_KEY"]
     index_name = os.environ["PINECONE_METRICS_INDEX"]
