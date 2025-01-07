@@ -1,4 +1,6 @@
-import requests, json, re
+import requests, json, re, aiohttp
+from typing import Dict, Annotated
+
 
 # define the headless BI query template
 def query_vds(**kwargs):
@@ -170,17 +172,33 @@ def get_values(**kwargs):
     sample_values = [list(item.values())[0] for item in output][:4]
     return sample_values
 
+
+async def query_metadata_api(query: str, token: str, domain: str):
+    url = f"{domain}/api/metadata/graphql"
+
+    payload = json.dumps({
+        "query": query,
+        "variables": {}
+    })
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Tableau-Auth': token
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers=headers, data=payload) as response:
+            return await response.text()
+
+
 # obtains datasource metadata to augment the tool prompt
-def augment_datasource_metadata(**kwargs):
+def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, prompt: Dict[str, str]):
     """
     Enhances the provided prompt (expecting a key called "data_model") with metadata
     describing a Tableau data source such that an Agent can correctly write queries to meet
     the user's needs with regards to fields, filters and calculations
     """
-    api_key = kwargs['api_key']
-    url = kwargs['url']
-    datasource_luid = kwargs['datasource_luid']
-    prompt = kwargs['prompt']
 
     # get metadata from VizQL Data Service endpoint
     datasource_metadata = query_metadata(
