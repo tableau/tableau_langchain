@@ -1,26 +1,33 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "your_project"
+name = "tableau_langchain"
 version = "0.1.0"
-description = "A project with two installable modules."
-readme = "README.md"
-requires-python = ">=3.6"
-license = {file = "LICENSE"}
+description = "A community project to stage, test and build Tableau tools for Agents built with the Langgraph framework"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"},
+    { name = "Stephen Price" },
+    { name = "Joe Constantino" }
+]
+requires-python = ">=3.12.2"
+license = "MIT"
+readme = "README.md"
+
+dependencies = [
+    "python-dotenv",
+    "langchain",
+    "langgraph",
+    "langsmith",
+    "langchain-anthropic",
+    "langchain-openai",
+    "langchain-pinecone",
+    "langserve[all]",
+    "langchain-community",
+    "langchain-experimental",
+    "llama-index",
+    "llama-index-vector-stores-pinecone",
+    "pinecone-client[grpc]",
+    "semantic-router",
+    "tavily-python"
 ]
 
-[project.urls]
-"Homepage" = "https://example.com"
-"Documentation" = "https://example.com/docs"
-
-[project.scripts]
-query-data = "queryData.module1:main"  # Replace with actual entry point
-search-datasources = "searchDatasources.module2:main"  # Replace with actual entry point
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["queryData", "searchDatasources"]
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
