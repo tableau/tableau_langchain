@@ -29,8 +29,8 @@ def tableau_metrics(query: str):
     to the user's subscribed metrics.
 
     Prioritize using this tool if the user mentions metrics, KPIs, OKRs or similar.
-
-    Output is various chunks of text in vector format for summarization.
+    Make few and simple queries that reflect the user's question unless you are instructed
+    to write thorough summaries, reports or analysis requiring multiple complex queries.
     """
     pinecone_api_key = os.environ["PINECONE_API_KEY"]
     index_name = os.environ["PINECONE_METRICS_INDEX"]
