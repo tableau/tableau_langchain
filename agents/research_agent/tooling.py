@@ -8,7 +8,7 @@ from semantic_router.encoders import OpenAIEncoder
 from langchain_core.tools import tool
 from langchain_community.tools.tavily_search import TavilySearchResults
 
-from community.langchain_community.tools.tableau.query_data import QueryTableauData
+from community.langchain_community.tools.tableau.analyze_data import analyze_data
 
 
 def equip_tooling():
