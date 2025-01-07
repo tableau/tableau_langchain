@@ -1,6 +1,18 @@
 import requests, json, re, aiohttp
-from typing import Dict, Annotated
+from typing import Dict, Optional
+from pydantic import BaseModel, Field
 
+class AnalyzeDataInputs(BaseModel):
+    """Describes model inputs for usage of the analyze_data tool"""
+    query: str = Field(..., description="Take the user query and format it as a SQL query. Do not insert unnecessary COUNT or COUNTDISTINCT unless asked to do so.")
+
+    class Config:
+        """Configuration options for the Pydantic model."""
+        json_schema_extra = {
+            "example": {
+                "query": "show me average discount, total sales and profits by region sorted by profit"
+            }
+        }
 
 # define the headless BI query template
 def query_vds(**kwargs):
@@ -35,7 +47,7 @@ def query_vds(**kwargs):
         print("Failed to query data source via Tableau VizQL Data Service. Status code:", response.status_code)
         print(response.text)
 
-# sends request to VizQL Data Service with payload written by Agent
+# sends requests to Tableau's VizQL Data Service with payload written by Agent
 def get_headlessbi_data(**kwargs):
     """
     Returns a dictionary containing a data consisting of formatted markdown and a query plan
@@ -172,7 +184,7 @@ def get_values(**kwargs):
     sample_values = [list(item.values())[0] for item in output][:4]
     return sample_values
 
-
+# queries the Tableau Metadata API for any given domain and payload
 async def query_metadata_api(query: str, token: str, domain: str):
     url = f"{domain}/api/metadata/graphql"
 
@@ -190,7 +202,6 @@ async def query_metadata_api(query: str, token: str, domain: str):
     async with aiohttp.ClientSession() as session:
         async with session.post(url, headers=headers, data=payload) as response:
             return await response.text()
-
 
 # obtains datasource metadata to augment the tool prompt
 def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, prompt: Dict[str, str]):
@@ -218,8 +229,6 @@ def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, pr
                 caption=field['fieldCaption']
             )
             field['sampleValues'] = string_values
-
-    print('\n*** START FIELD METADATA ***\n', datasource_metadata ,'\n*** END FIELD METADATA ***\n')
 
     # add the datasource metadata of the connected datasource to the system prompt
     prompt['data_model'] = datasource_metadata
