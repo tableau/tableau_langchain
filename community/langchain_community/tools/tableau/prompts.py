@@ -44,7 +44,6 @@ vds_restrictions = """
 Restrictions:
 DO NOT HALLUCINATE FIELD NAMES.
 Only use fields based on what is listed in the data_model
-Do not filter, cutoff or in any way reduce data returned from the VDS API
 """
 
 vds_schema = {
@@ -743,4 +742,187 @@ vds_prompt = {
     "vds_schema": vds_schema,
     "few_shot_examples": vds_few_shot,
     "data_model": {}
+}
+
+fields_instructions = f"""
+Task:
+- Your job is to write the main body of a request to Tableau’s VizQL Data Service (VDS) API
+to answer user questions with data and analytics
+- Query all of the fields that seem useful or interesting including those that may only be
+contextually related to the topics mentioned by the user even if additional transformations
+or other actions are needed such as calculations on top of existing fields
+- Always perform aggregations according to the needs of the user to avoid returning too many rows of data
+- Include sorting as often as possible to highlight a field of interest to the query
+
+Restrictions:
+- DO NOT HALLUCINATE FIELD NAMES.
+- Only use fields based on what is listed in the `data_model` key
+
+The VDS query is a JSON object and to write it you must follow these steps:
+
+1. Find the necessary `fieldCaptions` to write the query check the `data_model` key containing
+additional metadata describing available fields on the data source
+
+2. Structure the overall payload or request body according to this spec:
+Query: \n{vds_schema.get('Query', None)}
+
+3. Declare fields to query that help answer the user question following this spec:
+FieldBase: \n{vds_schema.get('FieldBase', None)}
+FieldMetadata: \n{vds_schema.get('FieldMetadata', None)}
+Field: \n{vds_schema.get('Field', None)}
+
+4. Aggregate fields to match the granularity needed by the user per this spec:
+Function: \n{vds_schema.get('Function', None)}
+
+5. Sort fields to prioritize the display specified by the user using this spec:
+SortDirection: \n{vds_schema.get('SortDirection', None)}
+
+Few-shot Examples:
+1. query: "Average discount, total sales and profits by region sorted by profit"
+"JSON": {{
+    "fields": [
+        {
+            "fieldCaption": "Region"
+        },
+        {
+            "fieldCaption": "Discount",
+            "function": "AVG",
+            "maxDecimalPlaces": 2
+        },
+        {
+            "fieldCaption": "Sales",
+            "function": "SUM",
+            "maxDecimalPlaces": 2
+        },
+        {
+            "fieldCaption": "Profit",
+            "function": "SUM",
+            "maxDecimalPlaces": 2,
+            "sortPriority": 1,
+            "sortDirection": "DESC"
+        }
+    ]
+}}
+
+2. query: "Show me the average sales per customer by segment"
+"JSON": {{
+    "fields": [
+        {"fieldCaption": "Segment"},
+        {"fieldCaption": "Sales", "function": "AVG", "maxDecimalPlaces": 2, "columnAlias": "Average Sales per Customer"}
+    ]
+}}
+
+3. query: "Display the number of orders by ship mode"
+"JSON": {{
+    "fields": [
+        {"fieldCaption": "Ship Mode"},
+        {"fieldCaption": "Order ID", "function": "COUNT", "columnAlias": "Number of Orders"}
+    ]
+}}
+
+Output:
+Your output must be in JSON and contain 2 keys:
+{{
+    "Queried Fields Reasoning": "where you describe your reasoning: why did you query these fields?
+    Why did you aggregate & sort the data this way? How does this satisfy the user query?",
+    "JSON_payload": "the VDS payload you wrote to satisfy the user query"
+}}
+"""
+
+filters_instructions = f"""
+Task:
+- Your job is to add filters to the main body of a request to Tableau’s VizQL Data Service (VDS) API
+to answer user questions with data and analytics
+
+
+Restrictions:
+- DO NOT HALLUCINATE FILTER VALUES.
+- Only apply filters based on what is listed in the `data_model` key
+
+The VDS query is a JSON object and to add filters you must follow these steps:
+
+1. Find the necessary filter fields to write the query check the `data_model` key containing
+additional metadata describing available fields on the data source
+
+2. Structure the overall payload or request body according to this spec:
+Query: \n{vds_schema.get('Query', None)}
+
+3. Declare fields to query that help answer the user question following this spec:
+FieldBase: \n{vds_schema.get('FieldBase', None)}
+FieldMetadata: \n{vds_schema.get('FieldMetadata', None)}
+Field: \n{vds_schema.get('Field', None)}
+
+4. Aggregate fields to match the granularity needed by the user per this spec:
+Function: \n{vds_schema.get('Function', None)}
+
+5. Sort fields to prioritize the display specified by the user using this spec:
+SortDirection: \n{vds_schema.get('SortDirection', None)}
+
+Few-shot Examples:
+1. query: "Average discount, total sales and profits by region sorted by profit"
+"JSON": {{
+    "fields": [
+        {
+            "fieldCaption": "Region"
+        },
+        {
+            "fieldCaption": "Discount",
+            "function": "AVG",
+            "maxDecimalPlaces": 2
+        },
+        {
+            "fieldCaption": "Sales",
+            "function": "SUM",
+            "maxDecimalPlaces": 2
+        },
+        {
+            "fieldCaption": "Profit",
+            "function": "SUM",
+            "maxDecimalPlaces": 2,
+            "sortPriority": 1,
+            "sortDirection": "DESC"
+        }
+    ]
+}}
+
+2. query: "Show me the average sales per customer by segment"
+"JSON": {{
+    "fields": [
+        {"fieldCaption": "Segment"},
+        {"fieldCaption": "Sales", "function": "AVG", "maxDecimalPlaces": 2, "columnAlias": "Average Sales per Customer"}
+    ]
+}}
+
+3. query: "Display the number of orders by ship mode"
+"JSON": {{
+    "fields": [
+        {"fieldCaption": "Ship Mode"},
+        {"fieldCaption": "Order ID", "function": "COUNT", "columnAlias": "Number of Orders"}
+    ]
+}}
+
+Output:
+Your output must be in JSON and contain 2 keys:
+{{
+    "Queried Fields Reasoning": "where you describe your reasoning: why did you query these fields?
+    Why did you aggregate & sort the data this way? How does this satisfy the user query?",
+    "JSON_payload": "the VDS payload you wrote to satisfy the user query"
+}}
+"""
+
+
+vds_prompts = {
+    "fields_prompt": {
+        "instructions": fields_instructions,
+        "data_model": None
+    },
+    "filters_prompt": {
+        "instructions": filters_instructions,
+        "data_model": None
+    },
+    "calculations_prompt": {
+        "instructions": None,
+        "data_model": None
+    },
+
 }

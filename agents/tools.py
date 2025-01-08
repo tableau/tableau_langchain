@@ -19,7 +19,6 @@ def tavily_tool():
     tavily = TavilySearchResults(tavily_api_key=tavily_api_key, max_results=2)
     return tavily
 
-
 @tool("tableau_metrics")
 def tableau_metrics(query: str):
     """
