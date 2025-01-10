@@ -1,6 +1,8 @@
 import requests, json, re, aiohttp
-from typing import Dict, Optional
+from typing import Dict, List, Any, Union, Optional
 from pydantic import BaseModel, Field
+
+from community.langchain_community.utilities.tableau.utils import http_post, http_get
 
 class AnalyzeDataInputs(BaseModel):
     """Describes model inputs for usage of the analyze_data tool"""
@@ -14,16 +16,23 @@ class AnalyzeDataInputs(BaseModel):
             }
         }
 
-# define the headless BI query template
-def query_vds(**kwargs):
+async def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Queries Tableau's VizQL Data Service with a parameterized query in the payload
-    Returns data sets to the end user as well as metadata used before querying
+    Queries Tableau's VizQL Data Service with a parameterized query in the payload.
+
+    Args:
+        api_key (str): The API key for authentication.
+        datasource_luid (str): The LUID of the data source to query.
+        url (str): The base URL for the Tableau server.
+        query (Dict[str, Any]): The query parameters for the data request.
+
+    Returns:
+        Dict[str, Any]: The queried data sets as a dictionary if successful.
+
+    Raises:
+        RuntimeError: If the request fails or returns an error status code.
     """
-    api_key = kwargs['api_key']
-    datasource_luid = kwargs['datasource_luid']
-    url = kwargs['url'] + '/api/v1/vizql-data-service/query-datasource'
-    query = kwargs['query']
+    full_url = f"{url}/api/v1/vizql-data-service/query-datasource"
 
     payload = json.dumps({
         "datasource": {
@@ -37,32 +46,35 @@ def query_vds(**kwargs):
         'Content-Type': 'application/json'
     }
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+    response = await http_post(endpoint=full_url, headers=headers, payload=payload)
 
     # Check if the request was successful (status code 200)
-    if response.status_code == 200:
-        data = response.json()['data']
-        return data
+    if response.status == 200:
+        data = await response.json()
+        return data.get('data', {})
     else:
-        print("Failed to query data source via Tableau VizQL Data Service. Status code:", response.status_code)
-        print(response.text)
+        error_message = (
+            f"Failed to query data source via Tableau VizQL Data Service. "
+            f"Status code: {response.status}. Response: {await response.text()}"
+        )
+        raise RuntimeError(error_message)
 
 # sends requests to Tableau's VizQL Data Service with payload written by Agent
-def get_headlessbi_data(**kwargs):
+async def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
     """
     Returns a dictionary containing a data consisting of formatted markdown and a query plan
     describing the reasoning and steps the model performed in order to generate the query payload
     """
-    agent_response = get_payload(kwargs['payload'])
+    agent_response = get_payload(payload)
     vds_payload = agent_response["payload"]
     query_plan = agent_response["query_plan"]
 
     # when data is available return it and the reasoning behind the query
     if vds_payload:
-        headlessbi_data = query_vds(
-            api_key = kwargs['api_key'],
-            datasource_luid = kwargs['datasource_luid'],
-            url = kwargs['url'],
+        headlessbi_data = await query_vds(
+            api_key = api_key,
+            datasource_luid = datasource_luid,
+            url = url,
             query = vds_payload
         )
 
@@ -138,13 +150,22 @@ def json_to_markdown(json_data):
     return markdown_table
 
 # request metadata of declared datasource
-def query_metadata(**kwargs):
+async def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Dict[str, Any]:
     """
-    Gets metadata from the VizQL Data Service endpoint for the specified data source
+    Gets metadata from the VizQL Data Service endpoint for the specified data source.
+
+    Args:
+        api_key (str): The API key for authentication.
+        datasource_luid (str): The LUID of the data source to query.
+        url (str): The base URL for the Tableau server.
+
+    Returns:
+        Dict[str, Any]: The metadata of the queried data source.
+
+    Raises:
+        RuntimeError: If the request fails or returns an error status code.
     """
-    api_key = kwargs['api_key']
-    datasource_luid = kwargs['datasource_luid']
-    url = kwargs['url'] + '/api/v1/vizql-data-service/read-metadata'
+    full_url = f"{url}/api/v1/vizql-data-service/read-metadata"
 
     payload = json.dumps({
         "datasource": {
@@ -156,15 +177,19 @@ def query_metadata(**kwargs):
         'X-Tableau-Auth': api_key,
         'Content-Type': 'application/json'
     }
-    response = requests.request("POST", url, headers=headers, data=payload)
+
+    response = await http_post(endpoint=full_url, headers=headers, payload=payload)
 
     # Check if the request was successful (status code 200)
-    if response.status_code == 200:
-        data = response.json()['data']
-        return data
+    if response.status == 200:
+        data = await response.json()
+        return data.get('data', {})
     else:
-        print("Failed to obtain data source metadata from VizQL Data Service. Status code:", response.status_code)
-        print(response.text)
+        error_message = (
+            f"Failed to obtain data source metadata from VizQL Data Service. "
+            f"Status code: {response.status}. Response: {await response.text()}"
+        )
+        raise RuntimeError(error_message)
 
 # extract column or field values
 def get_values(**kwargs):
@@ -184,27 +209,8 @@ def get_values(**kwargs):
     sample_values = [list(item.values())[0] for item in output][:4]
     return sample_values
 
-# queries the Tableau Metadata API for any given domain and payload
-async def query_metadata_api(query: str, token: str, domain: str):
-    url = f"{domain}/api/metadata/graphql"
-
-    payload = json.dumps({
-        "query": query,
-        "variables": {}
-    })
-
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'X-Tableau-Auth': token
-    }
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, headers=headers, data=payload) as response:
-            return await response.text()
-
 # obtains datasource metadata to augment the tool prompt
-def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, prompt: Dict[str, str]):
+async def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, prompt: Dict[str, str]):
     """
     Enhances the provided prompt (expecting a key called "data_model") with metadata
     describing a Tableau data source such that an Agent can correctly write queries to meet
@@ -212,7 +218,7 @@ def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, pr
     """
 
     # get metadata from VizQL Data Service endpoint
-    datasource_metadata = query_metadata(
+    datasource_metadata = await query_vds_metadata(
         api_key=api_key,
         url=url,
         datasource_luid=datasource_luid
@@ -222,11 +228,11 @@ def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, pr
         del field['fieldName']
         del field['logicalTableId']
         if field['dataType'] == 'STRING':
-            string_values=get_values(
-                api_key=api_key,
-                url=url,
-                datasource_luid=datasource_luid,
-                caption=field['fieldCaption']
+            string_values = await get_values(
+                api_key = api_key,
+                url = url,
+                datasource_luid = datasource_luid,
+                caption = field['fieldCaption']
             )
             field['sampleValues'] = string_values
 
