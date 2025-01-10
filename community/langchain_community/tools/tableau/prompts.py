@@ -494,7 +494,7 @@ vds_schema = {
             }
         ]
     }
-},
+}
 
 vds_few_shot = {
     "fields": {
@@ -747,252 +747,242 @@ vds_prompt = {
 fields_instructions = f"""
 Task:
 - Your job is to write the main body of a request to Tableau’s VizQL Data Service (VDS) API
-to answer user questions with data and analytics
-- Query all of the fields that seem useful or interesting including those that may only be
-contextually related to the topics mentioned by the user even if additional transformations
-or other actions are needed such as calculations on top of existing fields
-- Always perform aggregations according to the needs of the user to avoid returning too many rows of data
-- Include sorting as often as possible to highlight a field of interest to the query
+  to answer user questions with data and analytics.
+- Query all useful or interesting fields, including those contextually related to the topics mentioned
+  by the user, even if additional transformations or calculations are needed.
+- Always perform aggregations according to user needs to avoid returning too many rows of data.
+- Include sorting as often as possible to highlight a field of interest in the query.
 
 Restrictions:
 - DO NOT HALLUCINATE FIELD NAMES.
-- Only use fields based on what is listed in the `metadata_model` key
+- Only use fields based on what is listed in the `metadata_model` key.
 
 The VDS query is a JSON object and to write it you must follow these steps:
 
-1. Find the necessary `fieldCaptions` to write the query check the `metadata_model` key containing
-additional metadata describing available fields on the data source
+1. Find the necessary `fieldCaptions` to write the query by checking the `metadata_model` key
+   containing additional metadata describing available fields on the data source.
 
 2. Structure the overall payload or request body according to this spec:
-Query: \n{vds_schema.get('Query', None)}
+   Query: \n{vds_schema.get('Query', None)}
 
 3. Declare fields to query that help answer the user question following this spec:
-FieldBase: \n{vds_schema.get('FieldBase', None)}
-FieldMetadata: \n{vds_schema.get('FieldMetadata', None)}
-Field: \n{vds_schema.get('Field', None)}
+   FieldBase: \n{vds_schema.get('FieldBase', None)}
+   FieldMetadata: \n{vds_schema.get('FieldMetadata', None)}
+   Field: \n{vds_schema.get('Field', None)}
 
 4. Aggregate fields to match the granularity needed by the user per this spec:
-Function: \n{vds_schema.get('Function', None)}
+   Function: \n{vds_schema.get('Function', None)}
 
-5. Sort fields to prioritize the display specified by the user using this spec:
-SortDirection: \n{vds_schema.get('SortDirection', None)}
+5. Sort fields to prioritize display as specified by the user using this spec:
+   SortDirection: \n{vds_schema.get('SortDirection', None)}
 
 Few-shot Examples:
 1. "query": "Average discount, total sales and profits by region sorted by profit"
-"JSON": {{
-    "fields": [
-        {
-            "fieldCaption": "Region"
-        },
-        {
-            "fieldCaption": "Discount",
-            "function": "AVG",
-            "maxDecimalPlaces": 2
-        },
-        {
-            "fieldCaption": "Sales",
-            "function": "SUM",
-            "maxDecimalPlaces": 2
-        },
-        {
-            "fieldCaption": "Profit",
-            "function": "SUM",
-            "maxDecimalPlaces": 2,
-            "sortPriority": 1,
-            "sortDirection": "DESC"
-        }
-    ]
-}}
+   "JSON": {{
+       "fields": [
+           {{"fieldCaption": "Region"}},
+           {{"fieldCaption": "Discount", "function": "AVG", "maxDecimalPlaces": 2}},
+           {{"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}},
+           {{"fieldCaption": "Profit", "function": "SUM", "maxDecimalPlaces": 2,
+             "sortPriority": 1, "sortDirection": "DESC"}}
+       ]
+   }}
 
 2. "query": "Show me the average sales per customer by segment"
-"JSON": {{
-    "fields": [
-        {"fieldCaption": "Segment"},
-        {"fieldCaption": "Sales", "function": "AVG", "maxDecimalPlaces": 2, "columnAlias": "Average Sales per Customer"}
-    ]
-}}
+   "JSON": {{
+       "fields": [
+           {{"fieldCaption": "Segment"}},
+           {{"fieldCaption": "Sales", "function": "AVG",
+             "maxDecimalPlaces": 2, "columnAlias": "Average Sales per Customer"}}
+       ]
+   }}
 
 3. "query": "Display the number of orders by ship mode"
-"JSON": {{
-    "fields": [
-        {"fieldCaption": "Ship Mode"},
-        {"fieldCaption": "Order ID", "function": "COUNT", "columnAlias": "Number of Orders"}
-    ]
-}}
+   "JSON": {{
+       "fields": [
+           {{"fieldCaption": "Ship Mode"}},
+           {{"fieldCaption": "Order ID",
+             "function": "COUNT", "columnAlias": "Number of Orders"}}
+       ]
+   }}
 
 Output:
 Your output must be in JSON and contain 2 keys:
 {{
-    "queried_fields_reasoning": "in 3 short sentences, describe your reasoning: why did you query these fields? Why did you aggregate & sort the data this way? How does this satisfy the user query?",
-    "vds_payload": "the vds_payload with fields, aggregations and sorts you wrote to satisfy the user query"
+    "queried_fields_reasoning":
+        "In 3 short sentences, describe your reasoning: why did you query these fields?
+         Why did you aggregate & sort the data this way? How does this satisfy the user query?",
+    "vds_payload":
+        "The vds_payload with fields, aggregations, and sorts you wrote to satisfy the user query."
 }}
 """
+
 
 filters_instructions = f"""
 Task:
 - Your job is to add filters to the main body of a request to Tableau's VDS API provided as the
 input key `vds_payload` to answer user questions with data and analytics narrowed down to the
-user's explicit specifications
+user's explicit specifications.
 
-The VDS query is a JSON object and to add filters to it you must follow these steps:
+The VDS query is a JSON object, and to add filters to it you must follow these steps:
 
 1. Understand the structure of a `vds_payload` input as described by this spec:
-Query: {vds_schema.get('Query', None)}
+Query: {vds_schema.get('Query', 'No query provided')}
 
-2. Deduce the necessary filter fields by checking the `data_model` which only contains sample
-filter values, you will need to make an educated guess to write the particular filter fields
-needed by the user
+2. Deduce the necessary filter fields by checking the `data_model`, which only contains sample
+filter values. You will need to make an educated guess to write the particular filter fields
+needed by the user.
 
 3. Select the right kind of filters to add to `vds_payload` to satisfy the needs of the user query,
-consider the problem the user wants to solve:
-- MatchFilter: {vds_schema.get('MatchFilter', None)}
-- QuantitativeFilterBase: {vds_schema.get('QuantitativeFilterBase', None)}
-- QuantitativeNumericalFilter: {vds_schema.get('QuantitativeNumericalFilter', None)}
-- QuantitativeDateFilter: {vds_schema.get('QuantitativeDateFilter', None)}
-- SetFilter: {vds_schema.get('SetFilter', None)}
-- RelativeDateFilter: {vds_schema.get('RelativeDateFilter', None)}
-- TopNFilter: {vds_schema.get('TopNFilter', None)}
+considering the problem the user wants to solve:
+- MatchFilter: {vds_schema.get('MatchFilter', 'No MatchFilter provided')}
+- QuantitativeFilterBase: {vds_schema.get('QuantitativeFilterBase', 'No QuantitativeFilterBase provided')}
+- QuantitativeNumericalFilter: {vds_schema.get('QuantitativeNumericalFilter', 'No QuantitativeNumericalFilter provided')}
+- QuantitativeDateFilter: {vds_schema.get('QuantitativeDateFilter', 'No QuantitativeDateFilter provided')}
+- SetFilter: {vds_schema.get('SetFilter', 'No SetFilter provided')}
+- RelativeDateFilter: {vds_schema.get('RelativeDateFilter', 'No RelativeDateFilter provided')}
+- TopNFilter: {vds_schema.get('TopNFilter', 'No TopNFilter provided')}
 
 4. Add filter objects to `vds_payload` according to this spec:
-Field: {vds_schema.get('Filter', None)}
-FilterField: {vds_schema.get('FilterField', None)}
+Field: {vds_schema.get('Filter', 'No Filter provided')}
+FilterField: {vds_schema.get('FilterField', 'No FilterField provided')}
 
 Few-shot Examples:
-1. "query": "Top selling sub-categories with a minimum of $200,000"
-"JSON": {
+1. "query": "Top selling sub-categories with a minimum of $200,000",
+"JSON": {{
     "fields": [
-        {
+        {{
             "fieldCaption": "Sub-Category"
-        },
-        {
+        }},
+        {{
             "fieldCaption": "Sales",
             "function": "SUM",
             "sortPriority": 1,
             "sortDirection": "DESC"
-        }
+        }}
     ],
     "filters": [
-        {
-            "field":{
+        {{
+            "field": {{
                 "fieldCaption": "Sales"
-            },
+            }},
             "filterType": "QUANTITATIVE_NUMERICAL",
             "quantitativeFilterType": "MIN",
             "min": 200000
-            }
+        }}
     ]
-}
+}}
 2. "query": "What are the sales for furniture products in the last 6 months?",
-"JSON": {
+"JSON": {{
     "fields": [
-        {"fieldCaption": "Product Name"},
-        {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+        {{ "fieldCaption": "Product Name" }},
+        {{ "fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2 }}
     ],
     "filters": [
-        {
-            "field": {
-                "fieldCaption": "Category"
-        },
+        {{
+            "field": {{ "fieldCaption": "Category" }},
             "filterType": "SET",
             "values": ["Furniture"],
-            "exclude": False
-        },
-        {
-                "field": {
-                "fieldCaption": "Order Date"
-                },
+            "exclude": false
+        }},
+        {{
+            "field": {{ "fieldCaption": "Order Date" }},
             "filterType": "DATE",
             "periodtype": "MONTHS",
             "dateRangeType": "LASTN",
             "rangeN": 6
-        }
+        }}
     ]
-}
+}}
 3. "query": "What are the top 5 sub-categories by sales, excluding the Technology category?",
-"JSON": {
+"JSON": {{
     "fields": [
-        {"fieldCaption": "Sub-Category"},
-        {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+        {{ "fieldCaption": "Sub-Category" }},
+        {{ "fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2 }}
     ],
     "filters": [
-        {
-            "field":{
+        {{
+            "field": {{
                 "fieldCaption": "Category"
-            },
+            }},
             "filterType": "SET",
             "values": ["Technology"],
-            "exclude": True,
-        },
-        {
-            "field":{
+            "exclude": true
+        }},
+        {{
+            "field": {{
                 "fieldCaption": "Sales"
-            },
+            }},
             "filterType": "TOP",
             "direction": "TOP",
             "howMany": 5,
-            "fieldToMeasure": {"fieldCaption": "Sales", "function": "SUM"}
-        }
+            "fieldToMeasure": {{
+                "fieldCaption": "Sales",
+                "function": "SUM"
+            }}
+        }}
     ]
-}
+}}
 
 Output:
 Your output must be in JSON and contain 3 keys:
 {{
-    "queried_fields_reasoning": "the verbatim contents of `queried_fields_reasoning` provided as an input key",
-    "filtered_fields_reasoning": "in 3 short sentences, describe your reasoning: why did you filter these fields? why did you choose these types of filters?",
-    "vds_payload": "the `vds_payload` provided as an input enhanced with the filters you wrote to satisfy the user query"
+    \"queried_fields_reasoning\": \"the verbatim contents of `queried_fields_reasoning` provided as an input key\",
+    \"filtered_fields_reasoning\": \"in 3 short sentences, describe your reasoning: why did you filter these fields? why did you choose these types of filters?\",
+    \"vds_payload\": \"the `vds_payload` provided as an input enhanced with the filters you wrote to satisfy the user query\"
 }}
 """
+
 
 calculations_instructions = f"""
 Task:
 - Your job is to add calculations to the main body of a request to Tableau's VDS API provided as the
 input key `vds_payload` to answer user questions with data and analytics enhanced by analysis that does
-not exist in the current data model
+not exist in the current data model.
 
-The VDS query is a JSON object and to add calculations to it you must follow these steps:
+The VDS query is a JSON object, and to add calculations to it you must follow these steps:
 
 1. Understand the structure of a `vds_payload` input as described by this spec:
-Query: {vds_schema.get('Query', None)}
+Query: {vds_schema.get('Query', 'No query provided')}
 
-2. xxx
+2. [Insert specific instructions here]
 
 Few-shot Examples:
 1. "query": "Top selling sub-categories with a minimum of $200,000"
-"JSON": {
+"JSON": {{
     "fields": [
-        {
+        {{
             "fieldCaption": "Sub-Category"
-        },
-        {
+        }},
+        {{
             "fieldCaption": "Sales",
             "function": "SUM",
             "sortPriority": 1,
             "sortDirection": "DESC"
-        }
+        }}
     ],
     "filters": [
-        {
-            "field":{
+        {{
+            "field": {{
                 "fieldCaption": "Sales"
-            },
+            }},
             "filterType": "QUANTITATIVE_NUMERICAL",
             "quantitativeFilterType": "MIN",
             "min": 200000
-            }
+        }}
     ]
-}
-
+}}
 
 Output:
 Your output must be in JSON and contain 4 keys:
 {{
     "queried_fields_reasoning": "the verbatim contents of `queried_fields_reasoning` provided as an input key",
     "filtered_fields_reasoning": "the verbatim contents of `filtered_fields_reasoning` provided as an input key",
-    "calculated_fields_reasoning": "in 3 short sentences, describe your reasoning: why did you write these calculations? how do they help the user answer the question or understand the problem?",
+    "calculated_fields_reasoning": "In 3 short sentences, describe your reasoning: why did you write these calculations? How do they help the user answer the question or understand the problem?",
     "vds_payload": "the `vds_payload` provided as an input enhanced with the calculations you wrote to satisfy the user query"
 }}
 """
+
 
 vds_prompts = {
     "fields_prompt": fields_instructions,

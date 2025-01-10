@@ -29,7 +29,7 @@ def _visualize_graph(graph):
         print(f"Failed to generate PNG: {str(e)}")
 
 
-def stream_graph_updates(message: dict, graph):
+async def stream_graph_updates(message: dict, graph):
     """
     This function streams responses from Agents to clients, such as chat interfaces, by processing
     user inputs and dynamically updating the conversation.
@@ -70,7 +70,7 @@ def stream_graph_updates(message: dict, graph):
     # gets value DEBUG value or sets it to empty string, condition applies if string is empty or 0
     if os.environ.get("DEBUG", "") in ["0", ""]:
         # streams events from the agent graph started by the client input containing user queries
-        for event in graph.stream(input_stream):
+        async for event in graph.astream(input_stream):
             agent_output = event.get('agent')
             if event.get('agent'):
                 agent_message = agent_output["messages"][0].content
@@ -82,6 +82,6 @@ def stream_graph_updates(message: dict, graph):
         # display tableau credentials to prove access to the environment
         print('*** tableau_credentials ***', message['tableau_credentials'])
 
-        for event in graph.stream(input_stream):
+        async for event in graph.astream(input_stream):
             print(f"*** EVENT *** type: {type(event)}")
             print(event)

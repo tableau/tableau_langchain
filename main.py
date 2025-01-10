@@ -116,7 +116,7 @@ async def main():
                 "agent_inputs": sample_inputs
             }
 
-            stream_graph_updates(message, agent)
+            await stream_graph_updates(message, agent)
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -129,7 +129,7 @@ async def main():
                 "agent_inputs": sample_inputs
             }
 
-            stream_graph_updates(message, agent)
+            await stream_graph_updates(message, agent)
             break
 
 if __name__ == "__main__":

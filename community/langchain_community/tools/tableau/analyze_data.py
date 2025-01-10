@@ -13,7 +13,7 @@ from community.langchain_community.tools.tableau.prompts import vds_prompt
 from community.langchain_community.utilities.tableau.analyze_data import AnalyzeDataInputs, augment_datasource_metadata, get_headlessbi_data
 
 @tool("analyze_tableau_datasource")
-def analyze_data(
+async def analyze_data(
     query: str,
     tableau_credentials: Annotated[Dict, InjectedState("tableau_credentials")],
     datasource_state: Annotated[Dict, InjectedState("datasource")]
@@ -44,11 +44,11 @@ def analyze_data(
 
     # 1. Initialize Langchain chat template with an augmented prompt containing metadata for the datasource
     query_data_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content=augment_datasource_metadata(
-            api_key=tableau_auth,
-            url=tableau_url,
-            datasource_luid=tableau_datasource,
-            prompt=vds_prompt
+        SystemMessage(content = await augment_datasource_metadata(
+            api_key = tableau_auth,
+            url = tableau_url,
+            datasource_luid = tableau_datasource,
+            prompt = vds_prompt
         )),
         ("user", "{utterance}")
     ])
@@ -60,19 +60,19 @@ def analyze_data(
     )
 
     # 3. Query data from Tableau's VizQL Data Service using the dynamically written payload
-    def get_data(vds_query):
-        return get_headlessbi_data(
-            api_key=tableau_auth,
-            url=tableau_url,
-            datasource_luid=tableau_datasource,
-            payload=vds_query.content
+    async def get_data(vds_query):
+        return await get_headlessbi_data(
+            api_key = tableau_auth,
+            url = tableau_url,
+            datasource_luid = tableau_datasource,
+            payload = vds_query.content
         )
 
     # this chain defines the flow of data through the system
     chain = query_data_prompt | query_writer | get_data
 
     # invoke the chain to generate a query and obtain data
-    vizql_data = chain.invoke(query)
+    vizql_data = await chain.ainvoke(query)
 
     # Return the structured output
-    return vizql_data
+    return await vizql_data
