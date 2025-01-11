@@ -8,6 +8,7 @@ dependencies:
     - conda-forge::nb_conda_kernels
     - ipykernel
     - python-dotenv
+    - pyjwt
     - langchain
     - langsmith
     - pip=23.3.1
