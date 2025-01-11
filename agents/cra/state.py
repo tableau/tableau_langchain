@@ -36,5 +36,6 @@ class TableauDatasource(BaseModel):
 class TableauAgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], add_messages]
     is_last_step: IsLastStep # required to customize create_react_agent
+    remaining_steps: int # required to customize create_react_agent
     tableau_credentials: TableauCredentials
     datasource: Optional[TableauDatasource]
