@@ -24,7 +24,8 @@ async def analyze_data(
     search tool to find the right resource and retry with more information or ask the user to provide it.
 
     Prioritize this tool if the user asks you to analyze and explore data. This tool includes Agent summarization
-    and is not meant for direct data set exports.
+    and is not meant for direct data set exports. To be more efficient, query all the data you need in a single
+    request rather than selecting small slices of data in multiple requests
     """
 
     # credentials to access Tableau environment on behalf of the user
