@@ -76,4 +76,4 @@ async def analyze_data(
     vizql_data = await chain.ainvoke(query)
 
     # Return the structured output
-    return await vizql_data
+    return vizql_data

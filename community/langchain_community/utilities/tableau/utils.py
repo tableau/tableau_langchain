@@ -19,7 +19,7 @@ async def http_get(endpoint: str, headers: Optional[Dict[str, str]] = None) -> a
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(endpoint, headers=headers) as response:
-            response
+            return response
 
 
 async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, payload: Dict[str, Any] = None) -> aiohttp.ClientResponse:
@@ -34,9 +34,9 @@ async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, pay
     Returns:
         Dict[str, Any]: A dictionary containing the response headers and body
     """
-    formattedPayload = json.dumps(payload)
     async with aiohttp.ClientSession() as session:
-        async with session.post(endpoint, headers=headers, json=formattedPayload) as response:
+        async with session.post(endpoint, headers=headers, json=payload) as response:
+            response_data = await response.json()  # For JSON response
             return response
 
 

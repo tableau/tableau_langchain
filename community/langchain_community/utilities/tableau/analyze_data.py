@@ -2,7 +2,7 @@ import requests, json, re, aiohttp
 from typing import Dict, List, Any, Union, Optional
 from pydantic import BaseModel, Field
 
-from community.langchain_community.utilities.tableau.utils import http_post, http_get
+from community.langchain_community.utilities.tableau.utils import http_post
 
 class AnalyzeDataInputs(BaseModel):
     """Describes model inputs for usage of the analyze_data tool"""
@@ -34,12 +34,12 @@ async def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[st
     """
     full_url = f"{url}/api/v1/vizql-data-service/query-datasource"
 
-    payload = json.dumps({
+    payload = {
         "datasource": {
             "datasourceLuid": datasource_luid
         },
         "query": query
-    })
+    }
 
     headers = {
         'X-Tableau-Auth': api_key,
@@ -180,8 +180,6 @@ async def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Di
 
     response = await http_post(endpoint=full_url, headers=headers, payload=payload)
 
-    print('*** response ***', response)
-
     # Check if the request was successful (status code 200)
     if response.status == 200:
         data = await response.json()
@@ -194,17 +192,17 @@ async def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Di
         raise RuntimeError(error_message)
 
 # extract column or field values
-def get_values(**kwargs):
+async def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
     """
     Returns the available members or column values of a data source field
     """
 
-    column_values = {'fields': [{'fieldCaption': kwargs['caption']}]}
-    output = query_vds(
-        api_key = kwargs['api_key'],
-        datasource_luid = kwargs['datasource_luid'],
-        url = kwargs['url'],
-        query=column_values
+    column_values = {'fields': [{'fieldCaption': caption}]}
+    output = await query_vds(
+        api_key = api_key,
+        datasource_luid = datasource_luid,
+        url = url,
+        query = column_values
     )
     if output is None:
         return None
