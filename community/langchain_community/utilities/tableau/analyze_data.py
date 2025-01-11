@@ -167,11 +167,11 @@ async def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Di
     """
     full_url = f"{url}/api/v1/vizql-data-service/read-metadata"
 
-    payload = json.dumps({
+    payload = {
         "datasource": {
             "datasourceLuid": datasource_luid
-        },
-    })
+        }
+    }
 
     headers = {
         'X-Tableau-Auth': api_key,
@@ -179,6 +179,8 @@ async def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Di
     }
 
     response = await http_post(endpoint=full_url, headers=headers, payload=payload)
+
+    print('*** response ***', response)
 
     # Check if the request was successful (status code 200)
     if response.status == 200:

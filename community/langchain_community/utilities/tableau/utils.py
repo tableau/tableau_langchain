@@ -19,14 +19,7 @@ async def http_get(endpoint: str, headers: Optional[Dict[str, str]] = None) -> a
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(endpoint, headers=headers) as response:
-            responseHeaders = dict(response.headers)
-            responseBody = await response.json()
-
-            responseObject = {
-                "headers": responseHeaders,
-                "body": responseBody
-            }
-            return responseObject
+            response
 
 
 async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, payload: Dict[str, Any] = None) -> aiohttp.ClientResponse:
@@ -43,15 +36,8 @@ async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, pay
     """
     formattedPayload = json.dumps(payload)
     async with aiohttp.ClientSession() as session:
-        async with session.post(endpoint, headers=headers, data=formattedPayload) as response:
-            responseHeaders = dict(response.headers)
-            responseBody = await response.json()
-
-            responseObject = {
-                "headers": responseHeaders,
-                "body": responseBody
-            }
-            return responseObject
+        async with session.post(endpoint, headers=headers, json=formattedPayload) as response:
+            return response
 
 
 async def authenticate_tableau_user(
