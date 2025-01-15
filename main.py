@@ -4,8 +4,9 @@ from dotenv import load_dotenv
 
 from agents.cra.agent import cra_agent
 from agents.utils.agent_utils import stream_graph_updates, _visualize_graph
-from agents.utils.tableau import authenticate_tableau_user
 from agents.utils.other import _set_env
+
+from community.langchain_community.utilities.tableau.utils import authenticate_tableau_user
 
 
 async def main():

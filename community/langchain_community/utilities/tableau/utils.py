@@ -22,22 +22,42 @@ async def http_get(endpoint: str, headers: Optional[Dict[str, str]] = None) -> a
             return response
 
 
-async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, payload: Dict[str, Any] = None) -> aiohttp.ClientResponse:
+# async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, payload: Dict[str, Any] = None) -> aiohttp.ClientResponse:
+#     """
+#     reusable asynchronous HTTP POST requests
+
+#     Args:
+#         endpoint (str): The URL to send the POST request to
+#         headers (Optional[Dict[str, str]]): Optional headers to include in the request
+#         payload (Optional[Dict[str, Any]]): The data to send in the body of the request
+
+#     Returns:
+#         Dict[str, Any]: A dictionary containing the response headers and body
+#     """
+#     async with aiohttp.ClientSession() as session:
+#         async with session.post(endpoint, headers=headers, json=payload) as response:
+#             # response_data = await response.json()  # For JSON response
+#             return response
+
+async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, payload: Dict[str, Any] = None) -> Dict[str, Any]:
     """
-    reusable asynchronous HTTP POST requests
+    Reusable asynchronous HTTP POST requests.
 
     Args:
-        endpoint (str): The URL to send the POST request to
-        headers (Optional[Dict[str, str]]): Optional headers to include in the request
-        payload (Optional[Dict[str, Any]]): The data to send in the body of the request
+        endpoint (str): The URL to send the POST request to.
+        headers (Optional[Dict[str, str]]): Optional headers to include in the request.
+        payload (Optional[Dict[str, Any]]): The data to send in the body of the request.
 
     Returns:
-        Dict[str, Any]: A dictionary containing the response headers and body
+        Dict[str, Any]: A dictionary containing the status code and either the JSON response or response text.
     """
     async with aiohttp.ClientSession() as session:
         async with session.post(endpoint, headers=headers, json=payload) as response:
-            response_data = await response.json()  # For JSON response
-            return response
+            response_data = await response.json() if response.status == 200 else await response.text()
+            return {
+                'status': response.status,
+                'data': response_data
+            }
 
 
 async def authenticate_tableau_user(
@@ -107,4 +127,12 @@ async def authenticate_tableau_user(
     }
 
     response = await http_post(endpoint=endpoint, headers=headers, payload=payload)
-    return response['body']
+     # Check if the request was successful (status code 200)
+    if response['status'] == 200:
+        return response['data']
+    else:
+        error_message = (
+            f"Failed to authenticate to the Tableau site. "
+            f"Status code: {response['status']}. Response: {response['data']}"
+        )
+        raise RuntimeError(error_message)

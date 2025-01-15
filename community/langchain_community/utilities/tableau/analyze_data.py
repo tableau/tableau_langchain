@@ -1,5 +1,6 @@
-import requests, json, re, aiohttp
-from typing import Dict, List, Any, Union, Optional
+import json
+import re
+from typing import Dict, Any
 from pydantic import BaseModel, Field
 
 from community.langchain_community.utilities.tableau.utils import http_post
@@ -49,13 +50,12 @@ async def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[st
     response = await http_post(endpoint=full_url, headers=headers, payload=payload)
 
     # Check if the request was successful (status code 200)
-    if response.status == 200:
-        data = await response.json()
-        return data.get('data', {})
+    if response['status'] == 200:
+        return response['data']
     else:
         error_message = (
             f"Failed to query data source via Tableau VizQL Data Service. "
-            f"Status code: {response.status}. Response: {await response.text()}"
+            f"Status code: {response['status']}. Response: {response['data']}"
         )
         raise RuntimeError(error_message)
 
@@ -79,7 +79,7 @@ async def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_l
         )
 
         # Convert to JSON string
-        markdown_table = json_to_markdown(headlessbi_data)
+        markdown_table = json_to_markdown(headlessbi_data['data'])
 
         # response includes markdown table with data + query plan
         return {
@@ -181,13 +181,12 @@ async def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Di
     response = await http_post(endpoint=full_url, headers=headers, payload=payload)
 
     # Check if the request was successful (status code 200)
-    if response.status == 200:
-        data = await response.json()
-        return data.get('data', {})
+    if response['status'] == 200:
+        return response['data']
     else:
         error_message = (
             f"Failed to obtain data source metadata from VizQL Data Service. "
-            f"Status code: {response.status}. Response: {await response.text()}"
+            f"Status code: {response['status']}. Response: {response['data']}"
         )
         raise RuntimeError(error_message)
 
@@ -206,7 +205,7 @@ async def get_values(api_key: str, url: str, datasource_luid: str, caption: str)
     )
     if output is None:
         return None
-    sample_values = [list(item.values())[0] for item in output][:4]
+    sample_values = [list(item.values())[0] for item in output['data']][:4]
     return sample_values
 
 # obtains datasource metadata to augment the tool prompt
@@ -224,7 +223,7 @@ async def augment_datasource_metadata(api_key: str, url: str, datasource_luid: s
         datasource_luid=datasource_luid
     )
 
-    for field in datasource_metadata:
+    for field in datasource_metadata['data']:
         del field['fieldName']
         del field['logicalTableId']
         if field['dataType'] == 'STRING':
