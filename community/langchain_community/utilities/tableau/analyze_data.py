@@ -1,3 +1,4 @@
+import asyncio
 import json
 import re
 from typing import Dict, Any
@@ -223,17 +224,29 @@ async def augment_datasource_metadata(api_key: str, url: str, datasource_luid: s
         datasource_luid=datasource_luid
     )
 
+    # Prepare a list of coroutines for fields that are of type 'STRING'
+    string_fields_coroutines = []
     for field in datasource_metadata['data']:
+        # Delete the specified keys
         del field['fieldName']
         del field['logicalTableId']
+
+        # If the field is of type 'STRING', prepare the coroutine for getting values
         if field['dataType'] == 'STRING':
-            string_values = await get_values(
-                api_key = api_key,
-                url = url,
-                datasource_luid = datasource_luid,
-                caption = field['fieldCaption']
+            coroutine = get_values(
+                api_key=api_key,
+                url=url,
+                datasource_luid=datasource_luid,
+                caption=field['fieldCaption']
             )
-            field['sampleValues'] = string_values
+            string_fields_coroutines.append(coroutine)
+
+    # Run all coroutines concurrently and wait for all to finish
+    string_values_results = await asyncio.gather(*string_fields_coroutines)
+
+    # Update the fields with the sample values
+    for field, string_values in zip([field for field in datasource_metadata['data'] if field['dataType'] == 'STRING'], string_values_results):
+        field['sampleValues'] = string_values
 
     # add the datasource metadata of the connected datasource to the system prompt
     prompt['data_model'] = datasource_metadata

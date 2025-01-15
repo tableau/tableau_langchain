@@ -1,5 +1,4 @@
 from typing import Dict, List, Any, Optional
-import json
 import aiohttp
 import jwt
 from datetime import datetime, timedelta, timezone
