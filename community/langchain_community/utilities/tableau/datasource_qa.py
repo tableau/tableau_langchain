@@ -142,14 +142,14 @@ def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, pr
         del field['fieldName']
         del field['logicalTableId']
 
-        if field['dataType'] == 'STRING':
-            string_values = get_values(
-                api_key=api_key,
-                url=url,
-                datasource_luid=datasource_luid,
-                caption=field['fieldCaption']
-            )
-            field['sampleValues'] = string_values
+        # if field['dataType'] == 'STRING':
+        #     string_values = get_values(
+        #         api_key=api_key,
+        #         url=url,
+        #         datasource_luid=datasource_luid,
+        #         caption=field['fieldCaption']
+        #     )
+        #     field['sampleValues'] = string_values
 
     prompt['data_model'] = datasource_metadata
 
