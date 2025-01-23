@@ -7,11 +7,10 @@ from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import vds_prompt
-from community.langchain_community.utilities.tableau.analyze_data import augment_datasource_metadata, get_headlessbi_data
-from community.langchain_community.utilities.tableau.utils import authenticate_tableau_user
+from community.langchain_community.utilities.tableau.datasource_qa import augment_datasource_metadata, get_headlessbi_data, authenticate_tableau_user
 
 @tool("datasource_qa")
-async def datasource_qa(
+def datasource_qa(
     query: str,
 ) -> dict:
     """
@@ -33,7 +32,7 @@ async def datasource_qa(
         "tableau:viz_data_service:read" # for querying VizQL Data Service
     ]
 
-    tableau_session = await authenticate_tableau_user(
+    tableau_session = authenticate_tableau_user(
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
         jwt_secret=os.environ['TABLEAU_JWT_SECRET'],
@@ -60,7 +59,7 @@ async def datasource_qa(
 
     # 1. Initialize Langchain chat template with an augmented prompt containing metadata for the datasource
     query_data_prompt = ChatPromptTemplate.from_messages([
-        SystemMessage(content = await augment_datasource_metadata(
+        SystemMessage(content = augment_datasource_metadata(
             api_key = tableau_auth,
             url = domain,
             datasource_luid = tableau_datasource,
@@ -76,8 +75,8 @@ async def datasource_qa(
     )
 
     # 3. Query data from Tableau's VizQL Data Service using the dynamically written payload
-    async def get_data(vds_query):
-        return await get_headlessbi_data(
+    def get_data(vds_query):
+        return get_headlessbi_data(
             api_key = tableau_auth,
             url = domain,
             datasource_luid = tableau_datasource,
@@ -88,7 +87,7 @@ async def datasource_qa(
     chain = query_data_prompt | query_writer | get_data
 
     # invoke the chain to generate a query and obtain data
-    vizql_data = await chain.ainvoke(query)
+    vizql_data = chain.invoke(query)
 
     # Return the structured output
     return vizql_data
