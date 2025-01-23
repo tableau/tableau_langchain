@@ -1,51 +1,3 @@
-vds_instructions = """
-Task:
-Your job is to write requests to Tableau’s VizQL Data Service (VDS) API
-to answer user questions that relate to data and analytics. The VDS API
-accepts HTTP requests with a JSON payload describing how it must aggregate,
-sort and filter the data as well as being able to write calculations on demand.
-
-The VDS query is a JSON object that contains 2 fundamental components (See `Query` for more details).
-    1. fields [required] - an array of fields that define the desired output of the query
-        - See `FieldBase` for more information on supported properties
-        - Aggregate fields according to the specifications found in `Function`
-        - Refer to `SortDirection` for instructions on sorting
-        - Find the necessary `fieldCaptions` to write the query by checking the `data_model` key
-        containing additional metadata describing the data source
-    2. filters [optional] - an array of filters to apply to the query. They can include fields
-    that are not in the fields array. Supported filter types include:
-        - [ Filter, MatchFilter, QuantitativeFilterBase, QuantitativeNumericalFilter, QuantitativeDateFilter, SetFilter, RelativeDateFilter, TopNFilter ]
-
-Guidelines:
-- Your task is to write the payload to retrieve data relevant to the user's question.
-- Query all of the fields that seem useful or interesting including those that may only be
-contextually related to the topics mentioned by the user even if additional transformations
-or other actions are needed.
-- Always aggregate data to avoid returning too granular of a result.
-- Return query results verbatim
-
-Output:
-Your output must contain two sections
-    1. "Query Plan": where you describe your reasoning: why you queried these fields,
-    why you aggregated the data and why filters were applied to it. How does this satisfy the user query?
-    2. "JSON_payload": the VDS payload you wrote to satisfy the user query according to the query plan and
-    the instructions provided in the prompt
-
-This is the template you must use:
-
-Query Plan:
-{insert query plan here}
-
-JSON_payload:
-{insert VDS payload here}
-"""
-
-vds_restrictions = """
-Restrictions:
-DO NOT HALLUCINATE FIELD NAMES.
-Only use fields based on what is listed in the data_model
-"""
-
 vds_schema = {
     "FieldBase": {
         "type": "object",
@@ -496,497 +448,148 @@ vds_schema = {
     }
 }
 
-vds_few_shot = {
-    "fields": {
-        1: {
-            "query": "Show me sales by segment",
-            "JSON": {
-                "fields": [
-                {"fieldCaption": "Segment"},
-                {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
+vds_fewshot = [
+    {
+        "user_input": "Average discount, total sales, number of orders and profits by region sorted by profit",
+        "best_practices": "",
+        "JSON": {
+            "fields": [
+                {"fieldCaption": "Region"},
+                {"fieldCaption": "Discount", "function": "AVG", "maxDecimalPlaces": 2},
+                {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2},
+                {"fieldCaption": "Order ID", "function": "COUNT", "columnAlias": "Number of Orders"},
+                {"fieldCaption": "Profit", "function": "SUM", "maxDecimalPlaces": 2, "sortPriority": 1, "sortDirection": "DESC"}
             ]
-            },
-        },
-        2: {
-            "query": "What are the total sales and profit for each product category?",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "Category"},
-                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2},
-                    {"fieldCaption": "Profit", "function": "SUM", "maxDecimalPlaces": 2}
-                ]
-            },
-        },
-        3: {
-            "query": "Display the number of orders by ship mode",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "Ship Mode"},
-                    {"fieldCaption": "Order ID", "function": "COUNT", "columnAlias": "Number of Orders"}
-                ]
-            },
-        },
-        4: {
-            "query": "Show me the average sales per customer by segment",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "Segment"},
-                    {"fieldCaption": "Sales", "function": "AVG", "maxDecimalPlaces": 2, "columnAlias": "Average Sales per Customer"}
-                ]
-            },
-        },
-        5: {
-            "query": "What are the total sales for each state or province?",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "State/Province"},
-                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                ]
-            },
-        },
-        6: {
-            "query": "Average discount, total sales and profits by region sorted by profit",
-            "JSON": {
-                "fields": [
-                    {
-                        "fieldCaption": "Region"
-                    },
-                    {
-                        "fieldCaption": "Discount",
-                        "function": "AVG",
-                        "maxDecimalPlaces": 2
-                    },
-                    {
-                        "fieldCaption": "Sales",
-                        "function": "SUM",
-                        "maxDecimalPlaces": 2
-                    },
-                    {
-                        "fieldCaption": "Profit",
-                        "function": "SUM",
-                        "maxDecimalPlaces": 2,
-                        "sortPriority": 1,
-                        "sortDirection": "DESC"
-                    }
-                ]
-            }
         }
     },
-    "filters": {
-        1: {
-            "query": "Show me sales for the top 10 cities",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "City"},
-                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                ],
-                "filters": [
-                    {
-                        "field": {
-                            "fieldCaption": "Sales"
-                        },
-                        "filterType": "TOP",
-                        "direction": "TOP",
-                        "howMany": 10,
-                        "fieldToMeasure": {"fieldCaption": "Sales", "function": "SUM"}
-                    }
-                ]
-            }
-        },
-        2: {
-            "query": "What are the sales for furniture products in the last 6 months?",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "Product Name"},
-                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                ],
-                "filters": [
-                    {
-                        "field": {
-                            "fieldCaption": "Category"
+    {
+        "user_input": "What are the top 5 sub-categories by sales with a minimum of $200,000 in the last 6 months, excluding Technology?",
+        "best_practices": "",
+        "JSON": {
+            "fields": [
+                { "fieldCaption": "Category" },
+                { "fieldCaption": "Sub-Category" },
+                { "fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2, "sortPriority": 1, "sortDirection": "DESC" }
+            ],
+            "filters": [
+                {
+                    "field": {
+                        "fieldCaption": "Category"
                     },
-                        "filterType": "SET",
-                        "values": ["Furniture"],
-                        "exclude": False
+                    "filterType": "SET",
+                    "values": ["Technology"],
+                    "exclude": "true",
+                    "context": "true"
+                },
+                {
+                    "field": {
+                        "fieldCaption": "Category"
                     },
-                    {
-                            "field": {
-                            "fieldCaption": "Order Date"
-                            },
-                        "filterType": "DATE",
-                        "periodtype": "MONTHS",
-                        "dateRangeType": "LASTN",
-                        "rangeN": 6
-                    }
-                ]
-            }
-        },
-        3: {
-            "query": "List customers who have made purchases over $1000 in the Consumer segment",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "Customer Name"},
-                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                ],
-                "filters": [
-                    {
-                        "field": {
-                            "fieldCaption": "Sales",
-                        },
-                        "filterType": "QUANTITATIVE_NUMERICAL",
-                        "quantitativeFilterType": "MIN",
-                        "min": 1000
-                    },
-                    {
-                        "field": {
-                            "fieldCaption": "Segment"
-                        },
-                        "filterType": "SET",
-                        "values": ["Consumer"],
-                        "exclude": False
-                    }
-                ]
-            }
-        },
-        4: {
-            "query": "Show me the orders that were returned in the West region",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "Order ID"},
-                    {"fieldCaption": "Product Name"},
-                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                ],
-                "filters": [
-                    {
-                        "field":
-                        {
-                            "fieldCaption": "Returned"
-                        },
-                        "filterType": "SET",
-                        "values": [True],
-                        "exclude": False
-                    },
-                    {
-                        "field":
-                        {
-                            "fieldCaption": "Region"
-                        },
-                        "filterType": "SET",
-                        "values": ["West"],
-                        "exclude": False
-                    }
-                ]
-            }
-        },
-        5: {
-            "query": "What are the top 5 sub-categories by sales, excluding the Technology category?",
-            "JSON": {
-                "fields": [
-                    {"fieldCaption": "Sub-Category"},
-                    {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}
-                ],
-                "filters": [
-                    {
-                        "field":{
-                            "fieldCaption": "Category"
-                        },
-                        "filterType": "SET",
-                        "values": ["Technology"],
-                        "exclude": True,
-                    },
-                    {
-                        "field":{
-                            "fieldCaption": "Sales"
-                        },
-                        "filterType": "TOP",
-                        "direction": "TOP",
-                        "howMany": 5,
-                        "fieldToMeasure": {"fieldCaption": "Sales", "function": "SUM"}
-                    }
-                ]
-            }
-        },
-        6: {
-            "query": "Top selling sub-categories with a minimum of $200,000",
-            "JSON": {
-                "fields": [
-                    {
-                        "fieldCaption": "Sub-Category"
-                    },
-                    {
+                    "filterType": "TOP",
+                    "direction": "TOP",
+                    "howMany": 5,
+                    "fieldToMeasure": {
                         "fieldCaption": "Sales",
-                        "function": "SUM",
-                        "sortPriority": 1,
-                        "sortDirection": "DESC"
+                        "function": "SUM"
                     }
-                ],
-                "filters": [
-                    {
-                        "field":{
-                            "fieldCaption": "Sales"
-                        },
-                        "filterType": "QUANTITATIVE_NUMERICAL",
-                        "quantitativeFilterType": "MIN",
-                        "min": 200000
-                        }
-                ]
-            }
+                },
+                {
+                    "field": { "fieldCaption": "Order Date" },
+                    "filterType": "DATE",
+                    "periodtype": "MONTHS",
+                    "dateRangeType": "LASTN",
+                    "rangeN": 6
+                },
+                {
+                    "field": {
+                        "fieldCaption": "Sales"
+                    },
+                    "filterType": "QUANTITATIVE_NUMERICAL",
+                    "quantitativeFilterType": "MIN",
+                    "min": 200000
+                }
+            ]
         }
-    },
-    "calculations": {}
-}
+    }
+]
 
-vds_prompt = {
-    "instructions": vds_instructions,
-    "restrictions": vds_restrictions,
-    "vds_schema": vds_schema,
-    "few_shot_examples": vds_few_shot,
-    "data_model": {}
-}
+vds_instructions = f"""
+Task: Your job is to write the main body of a request to Tableau’s VizQL Data Service (VDS) API
+to obtain data to answer user questions
 
-fields_instructions = f"""
-Task:
-- Your job is to write the main body of a request to Tableau’s VizQL Data Service (VDS) API
-  to answer user questions with data and analytics.
-- Query all useful or interesting fields, including those contextually related to the topics mentioned
-  by the user, even if additional transformations or calculations are needed.
-- Always perform aggregations according to user needs to avoid returning too many rows of data.
-- Include sorting as often as possible to highlight a field of interest in the query.
+Actions:
+- Query all useful or interesting fields, including those somewhat related to the topics mentioned
+  by the user, even if additional transformations or calculations are needed
+- Always perform aggregations (or functions) according to explicit or implied user needs to avoid returning too many rows of data
+- Sort fields as often as possible to highlight data of interest in the query even if not explicitly stated by the user
+- Add filters to narrow down the data set according to user specifications and to avoid unnecessary large volumes of data
+- Write Tableau calculations to answer user questions with original analysis that does not exist in the target data source, use this
+to create fields that do not exist that will be useful to answer the question
 
 Restrictions:
-- DO NOT HALLUCINATE FIELD NAMES.
-- Only use fields based on what is listed in the `metadata_model` key.
+- DO NOT HALLUCINATE FIELD NAMES OR FILTER VALUES
+- Only use fields listed in the `data_model` key
+- For categorical or STR filters use the values listed in the `data_model` key
+- Do not write redundant calculations if the field already exists and can be aggregated via a function
 
 The VDS query is a JSON object and to write it you must follow these steps:
 
-1. Find the necessary `fieldCaptions` to write the query by checking the `metadata_model` key
-   containing additional metadata describing available fields on the data source.
+1. Find the necessary `fieldCaptions` to write the query by checking the `data_model` key
 
 2. Structure the overall payload or request body according to this spec:
-   Query: \n{vds_schema.get('Query', None)}
+    Query: \n {vds_schema.get('Query', 'No Query schema provided')}
 
-3. Declare fields to query that help answer the user question following this spec:
-   FieldBase: \n{vds_schema.get('FieldBase', None)}
-   FieldMetadata: \n{vds_schema.get('FieldMetadata', None)}
-   Field: \n{vds_schema.get('Field', None)}
+3. Add fields to `Query` that help answer the user question
+    This spec describes 3 different fields, one with row level data, one with functions (aggregating data) and one with calculations
+    Field: \n{vds_schema.get('Field', 'No Field schema provided')}
 
-4. Aggregate fields to match the granularity needed by the user per this spec:
-   Function: \n{vds_schema.get('Function', None)}
+    Each field has a base set of properties.
+    FieldBase: \n{vds_schema.get('FieldBase', 'No FieldBase schema provided')}
 
-5. Sort fields to prioritize display as specified by the user using this spec:
-   SortDirection: \n{vds_schema.get('SortDirection', None)}
+4. Add functions or aggregations to fields to match the granularity needed by the user per this spec:
+    Function: \n{vds_schema.get('Function', 'No Function schema provided')}
 
-Few-shot Examples:
-1. "query": "Average discount, total sales and profits by region sorted by profit"
-   "JSON": {{
-       "fields": [
-           {{"fieldCaption": "Region"}},
-           {{"fieldCaption": "Discount", "function": "AVG", "maxDecimalPlaces": 2}},
-           {{"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2}},
-           {{"fieldCaption": "Profit", "function": "SUM", "maxDecimalPlaces": 2,
-             "sortPriority": 1, "sortDirection": "DESC"}}
-       ]
-   }}
+    Aggregations should be added to `Field`s as a best practice unless row-level data is requested
+    Field: \n{vds_schema.get('Field', 'No Field schema provided')}
 
-2. "query": "Show me the average sales per customer by segment"
-   "JSON": {{
-       "fields": [
-           {{"fieldCaption": "Segment"}},
-           {{"fieldCaption": "Sales", "function": "AVG",
-             "maxDecimalPlaces": 2, "columnAlias": "Average Sales per Customer"}}
-       ]
-   }}
+5. Add sorting instructions to fields:
+    SortDirection: \n{vds_schema.get('SortDirection', 'No SortDirection schema provided')}
 
-3. "query": "Display the number of orders by ship mode"
-   "JSON": {{
-       "fields": [
-           {{"fieldCaption": "Ship Mode"}},
-           {{"fieldCaption": "Order ID",
-             "function": "COUNT", "columnAlias": "Number of Orders"}}
-       ]
-   }}
+    This should be added to the proper `Field` not the `Query` as a separate object
+    Field: \n{vds_schema.get('Field', 'No Field schema provided')}
 
-Output:
-Your output must be in JSON and contain 2 keys:
-{{
-    "queried_fields_reasoning":
-        "In 3 short sentences, describe your reasoning: why did you query these fields?
-         Why did you aggregate & sort the data this way? How does this satisfy the user query?",
-    "vds_payload":
-        "The vds_payload with fields, aggregations, and sorts you wrote to satisfy the user query."
-}}
-"""
+6. Identify potential filtering fields by checking the `data_model` key
 
-
-filters_instructions = f"""
-Task:
-- Your job is to add filters to the main body of a request to Tableau's VDS API provided as the
-input key `vds_payload` to answer user questions with data and analytics narrowed down to the
-user's explicit specifications.
-
-The VDS query is a JSON object, and to add filters to it you must follow these steps:
-
-1. Understand the structure of a `vds_payload` input as described by this spec:
-Query: {vds_schema.get('Query', 'No query provided')}
-
-2. Deduce the necessary filter fields by checking the `data_model`, which only contains sample
-filter values. You will need to make an educated guess to write the particular filter fields
-needed by the user.
-
-3. Select the right kind of filters to add to `vds_payload` to satisfy the needs of the user query,
+7. Select the right kind of filters to add to `vds_payload` to satisfy the needs of the user query
 considering the problem the user wants to solve:
-- MatchFilter: {vds_schema.get('MatchFilter', 'No MatchFilter provided')}
-- QuantitativeFilterBase: {vds_schema.get('QuantitativeFilterBase', 'No QuantitativeFilterBase provided')}
-- QuantitativeNumericalFilter: {vds_schema.get('QuantitativeNumericalFilter', 'No QuantitativeNumericalFilter provided')}
-- QuantitativeDateFilter: {vds_schema.get('QuantitativeDateFilter', 'No QuantitativeDateFilter provided')}
-- SetFilter: {vds_schema.get('SetFilter', 'No SetFilter provided')}
-- RelativeDateFilter: {vds_schema.get('RelativeDateFilter', 'No RelativeDateFilter provided')}
-- TopNFilter: {vds_schema.get('TopNFilter', 'No TopNFilter provided')}
+- MatchFilter: {vds_schema.get('MatchFilter', 'No MatchFilter schema provided')}
+- QuantitativeFilterBase: {vds_schema.get('QuantitativeFilterBase', 'No QuantitativeFilterBase schema provided')}
+- QuantitativeNumericalFilter: {vds_schema.get('QuantitativeNumericalFilter', 'No QuantitativeNumericalFilter schema provided')}
+- QuantitativeDateFilter: {vds_schema.get('QuantitativeDateFilter', 'No QuantitativeDateFilter schema provided')}
+- SetFilter: {vds_schema.get('SetFilter', 'No SetFilter schema provided')}
+- RelativeDateFilter: {vds_schema.get('RelativeDateFilter', 'No RelativeDateFilter schema provided')}
+- TopNFilter: {vds_schema.get('TopNFilter', 'No TopNFilter schema provided')}
 
-4. Add filter objects to `vds_payload` according to this spec:
-Field: {vds_schema.get('Filter', 'No Filter provided')}
-FilterField: {vds_schema.get('FilterField', 'No FilterField provided')}
+8. Write filters according to this spec:
+    FilterField: {vds_schema.get('FilterField', 'No FilterField schema provided')}
 
-Few-shot Examples:
-1. "query": "Top selling sub-categories with a minimum of $200,000",
-"JSON": {{
-    "fields": [
-        {{
-            "fieldCaption": "Sub-Category"
-        }},
-        {{
-            "fieldCaption": "Sales",
-            "function": "SUM",
-            "sortPriority": 1,
-            "sortDirection": "DESC"
-        }}
-    ],
-    "filters": [
-        {{
-            "field": {{
-                "fieldCaption": "Sales"
-            }},
-            "filterType": "QUANTITATIVE_NUMERICAL",
-            "quantitativeFilterType": "MIN",
-            "min": 200000
-        }}
-    ]
-}}
-2. "query": "What are the sales for furniture products in the last 6 months?",
-"JSON": {{
-    "fields": [
-        {{ "fieldCaption": "Product Name" }},
-        {{ "fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2 }}
-    ],
-    "filters": [
-        {{
-            "field": {{ "fieldCaption": "Category" }},
-            "filterType": "SET",
-            "values": ["Furniture"],
-            "exclude": false
-        }},
-        {{
-            "field": {{ "fieldCaption": "Order Date" }},
-            "filterType": "DATE",
-            "periodtype": "MONTHS",
-            "dateRangeType": "LASTN",
-            "rangeN": 6
-        }}
-    ]
-}}
-3. "query": "What are the top 5 sub-categories by sales, excluding the Technology category?",
-"JSON": {{
-    "fields": [
-        {{ "fieldCaption": "Sub-Category" }},
-        {{ "fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2 }}
-    ],
-    "filters": [
-        {{
-            "field": {{
-                "fieldCaption": "Category"
-            }},
-            "filterType": "SET",
-            "values": ["Technology"],
-            "exclude": true
-        }},
-        {{
-            "field": {{
-                "fieldCaption": "Sales"
-            }},
-            "filterType": "TOP",
-            "direction": "TOP",
-            "howMany": 5,
-            "fieldToMeasure": {{
-                "fieldCaption": "Sales",
-                "function": "SUM"
-            }}
-        }}
-    ]
-}}
+    Filters should be added to `Query` as a best practice to avoid unnecessarily large volumes of data
+    Query: \n {vds_schema.get('Query', 'No Query schema provided')}
 
 Output:
-Your output must be in JSON and contain 3 keys:
-{{
-    \"queried_fields_reasoning\": \"the verbatim contents of `queried_fields_reasoning` provided as an input key\",
-    \"filtered_fields_reasoning\": \"in 3 short sentences, describe your reasoning: why did you filter these fields? why did you choose these types of filters?\",
-    \"vds_payload\": \"the `vds_payload` provided as an input enhanced with the filters you wrote to satisfy the user query\"
-}}
+Your output must contain two sections, this is the template you must use:
+
+Query Plan:
+Where you describe your reasoning: why you queried these fields, why you aggregated the data and why filters were applied to it.
+How does this satisfy the user query?
+
+JSON_payload:
+Where you include VDS payload you wrote to satisfy the user query according to the query plan and the instructions provided in the prompt
 """
 
 
-calculations_instructions = f"""
-Task:
-- Your job is to add calculations to the main body of a request to Tableau's VDS API provided as the
-input key `vds_payload` to answer user questions with data and analytics enhanced by analysis that does
-not exist in the current data model.
-
-The VDS query is a JSON object, and to add calculations to it you must follow these steps:
-
-1. Understand the structure of a `vds_payload` input as described by this spec:
-Query: {vds_schema.get('Query', 'No query provided')}
-
-2. [Insert specific instructions here]
-
-Few-shot Examples:
-1. "query": "Top selling sub-categories with a minimum of $200,000"
-"JSON": {{
-    "fields": [
-        {{
-            "fieldCaption": "Sub-Category"
-        }},
-        {{
-            "fieldCaption": "Sales",
-            "function": "SUM",
-            "sortPriority": 1,
-            "sortDirection": "DESC"
-        }}
-    ],
-    "filters": [
-        {{
-            "field": {{
-                "fieldCaption": "Sales"
-            }},
-            "filterType": "QUANTITATIVE_NUMERICAL",
-            "quantitativeFilterType": "MIN",
-            "min": 200000
-        }}
-    ]
-}}
-
-Output:
-Your output must be in JSON and contain 4 keys:
-{{
-    "queried_fields_reasoning": "the verbatim contents of `queried_fields_reasoning` provided as an input key",
-    "filtered_fields_reasoning": "the verbatim contents of `filtered_fields_reasoning` provided as an input key",
-    "calculated_fields_reasoning": "In 3 short sentences, describe your reasoning: why did you write these calculations? How do they help the user answer the question or understand the problem?",
-    "vds_payload": "the `vds_payload` provided as an input enhanced with the calculations you wrote to satisfy the user query"
-}}
-"""
-
-
-vds_prompts = {
-    "fields_prompt": fields_instructions,
-    "filters_prompt": filters_instructions,
-    "calculations_prompt": calculations_instructions,
-    "metadata_model": None
+vds_prompt = {
+    "instructions": vds_instructions,
+    "vds_schema": vds_schema,
+    "data_model": {}
 }
