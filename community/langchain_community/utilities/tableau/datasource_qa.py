@@ -1,8 +1,10 @@
+import os
 import json
 import re
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 import requests
 import jwt
+import logging
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
@@ -32,48 +34,54 @@ def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any
         )
         raise RuntimeError(error_message)
 
-def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
-    agent_response = get_payload(payload)
-    vds_payload = agent_response["payload"]
-    query_plan = agent_response["query_plan"]
 
-    if vds_payload:
+def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
+    json_payload = json.loads(payload)
+
+    try:
         headlessbi_data = query_vds(
             api_key=api_key,
             datasource_luid=datasource_luid,
             url=url,
-            query=vds_payload
+            query=json_payload
         )
 
-        markdown_table = json_to_markdown(headlessbi_data['data'])
+        if not headlessbi_data or 'data' not in headlessbi_data:
+            raise ValueError("Invalid or empty response from query_vds")
 
-        return {
-            "query_plan": query_plan,
-            "data": markdown_table
-        }
-    else:
-        return {
-            "query_plan": query_plan,
-            "data": None
-        }
+        markdown_table = json_to_markdown(headlessbi_data['data'])
+        return markdown_table
+
+    except ValueError as ve:
+        logging.error(f"Value error in get_headlessbi_data: {str(ve)}")
+        raise
+
+    except json.JSONDecodeError as je:
+        logging.error(f"JSON decoding error in get_headlessbi_data: {str(je)}")
+        raise ValueError("Invalid JSON format in the payload")
+
+    except Exception as e:
+        logging.error(f"Unexpected error in get_headlessbi_data: {str(e)}")
+        raise RuntimeError(f"An unexpected error occurred: {str(e)}")
+
 
 def get_payload(output):
-    query_plan = output.split('JSON_payload')[0]
-    parsed_output = output.split('JSON_payload')[1]
+    try:
+        parsed_output = output.split('JSON_payload')[1]
+    except IndexError:
+        raise ValueError("'JSON_payload' not found in the output")
 
     match = re.search(r'{.*}', parsed_output, re.DOTALL)
     if match:
         json_string = match.group(0)
-        payload = json.loads(json_string)
-
-        return {
-            "query_plan": query_plan,
-            "payload": payload
-        }
+        try:
+            payload = json.loads(json_string)
+            return payload
+        except json.JSONDecodeError:
+            raise ValueError("Invalid JSON format in the payload")
     else:
-        return {
-            "query_plan": query_plan
-        }
+        raise ValueError("No JSON payload found in the parsed output")
+
 
 def json_to_markdown(json_data):
     if isinstance(json_data, str):
@@ -131,7 +139,7 @@ def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
     sample_values = [list(item.values())[0] for item in output['data']][:4]
     return sample_values
 
-def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, prompt: Dict[str, str]):
+def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, previous_errors: Optional[str], prompt: Dict[str, str]):
     datasource_metadata = query_vds_metadata(
         api_key=api_key,
         url=url,
@@ -152,6 +160,9 @@ def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, pr
         #     field['sampleValues'] = string_values
 
     prompt['data_model'] = datasource_metadata
+
+    if previous_errors:
+        prompt['previous_call_error'] = previous_errors
 
     return json.dumps(prompt)
 
@@ -232,3 +243,21 @@ def authenticate_tableau_user(
             f"Status code: {response.status_code}. Response: {response.text}"
         )
         raise RuntimeError(error_message)
+
+def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
+    """
+    Prepare inputs for the prompt template with explicit, safe mapping.
+
+    Args:
+        data (dict): Raw data from VizQL query
+        user_input (str): Original user query
+
+    Returns:
+        dict: Mapped inputs for PromptTemplate
+    """
+    return {
+        "vds_query": data.get('query', ''),
+        "data_source": data.get('data_source', ''),
+        "data_table": data.get('data_table', ''),
+        "user_input": user_string
+    }
