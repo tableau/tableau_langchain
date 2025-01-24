@@ -48,7 +48,7 @@ async def main():
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
         jwt_secret=os.environ['TABLEAU_JWT_SECRET'],
-        tableau_api=os.environ['TABLEAU_API'],
+        tableau_api=os.environ['TABLEAU_API_VERSION'],
         tableau_user=os.environ['TABLEAU_USER'],
         tableau_domain=domain,
         tableau_site=site,
