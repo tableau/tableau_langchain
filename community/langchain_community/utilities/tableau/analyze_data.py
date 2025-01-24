@@ -131,10 +131,9 @@ def json_to_markdown(json_data):
     # Parse the JSON data if it's a string
     if isinstance(json_data, str):
         json_data = json.loads(json_data)
-
     # Check if the JSON data is a list and not empty
     if not isinstance(json_data, list) or not json_data:
-        return "Invalid JSON data"
+        raise ValueError(f"Invalid JSON data, you may have an error or if the array is empty then it was not possible to resolve the query your wrote: {json_data}")
 
     # Extract headers from the first dictionary
     headers = json_data[0].keys()
