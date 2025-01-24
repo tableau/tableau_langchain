@@ -518,78 +518,55 @@ Task: Your job is to write the main body of a request to Tableau’s VizQL Data 
 to obtain data to answer user questions
 
 Actions:
-- Query all useful or interesting fields, including those somewhat related to the topics mentioned
-  by the user, even if additional transformations or calculations are needed
+- Query all useful or interesting fields, including those somewhat related to the topics mentioned by the user, even if additional transformations or calculations are needed
 - Always perform aggregations (or functions) according to explicit or implied user needs to avoid returning too many rows of data
 - Sort fields as often as possible to highlight data of interest in the query even if not explicitly stated by the user
 - Add filters to narrow down the data set according to user specifications and to avoid unnecessary large volumes of data
 - Write Tableau calculations to answer user questions with original analysis that does not exist in the target data source, use this
 to create fields that do not exist that will be useful to answer the question
+- Pay attention to the `previous_call_error` key, the previous attempt had an error and you have to make sure you avoid it by
+checking instructions
 
 Restrictions:
 - DO NOT HALLUCINATE FIELD NAMES OR FILTER VALUES
 - Only use fields listed in the `data_model` key
-- For categorical or STR filters use the values listed in the `data_model` key
 - Do not write redundant calculations if the field already exists and can be aggregated via a function
 
-The VDS query is a JSON object and to write it you must follow these steps:
-
-1. Find the necessary `fieldCaptions` to write the query by checking the `data_model` key
-
-2. Structure the overall payload or request body according to this spec:
-    Query: \n {vds_schema.get('Query', 'No Query schema provided')}
-
-3. Add fields to `Query` that help answer the user question
-    This spec describes 3 different fields, one with row level data, one with functions (aggregating data) and one with calculations
-    Field: \n{vds_schema.get('Field', 'No Field schema provided')}
-
-    Each field has a base set of properties.
-    FieldBase: \n{vds_schema.get('FieldBase', 'No FieldBase schema provided')}
-
-4. Add functions or aggregations to fields to match the granularity needed by the user per this spec:
-    Function: \n{vds_schema.get('Function', 'No Function schema provided')}
-
-    Aggregations should be added to `Field`s as a best practice unless row-level data is requested
-    Field: \n{vds_schema.get('Field', 'No Field schema provided')}
-
-5. Add sorting instructions to fields:
-    SortDirection: \n{vds_schema.get('SortDirection', 'No SortDirection schema provided')}
-
-    This should be added to the proper `Field` not the `Query` as a separate object
-    Field: \n{vds_schema.get('Field', 'No Field schema provided')}
-
-6. Identify potential filtering fields by checking the `data_model` key
-
-7. Select the right kind of filters to add to `vds_payload` to satisfy the needs of the user query
-considering the problem the user wants to solve:
-- MatchFilter: {vds_schema.get('MatchFilter', 'No MatchFilter schema provided')}
-- QuantitativeFilterBase: {vds_schema.get('QuantitativeFilterBase', 'No QuantitativeFilterBase schema provided')}
-- QuantitativeNumericalFilter: {vds_schema.get('QuantitativeNumericalFilter', 'No QuantitativeNumericalFilter schema provided')}
-- QuantitativeDateFilter: {vds_schema.get('QuantitativeDateFilter', 'No QuantitativeDateFilter schema provided')}
-- SetFilter: {vds_schema.get('SetFilter', 'No SetFilter schema provided')}
-- RelativeDateFilter: {vds_schema.get('RelativeDateFilter', 'No RelativeDateFilter schema provided')}
-- TopNFilter: {vds_schema.get('TopNFilter', 'No TopNFilter schema provided')}
-
-8. Write filters according to this spec:
-    FilterField: {vds_schema.get('FilterField', 'No FilterField schema provided')}
-
-    Filters should be added to `Query` as a best practice to avoid unnecessarily large volumes of data
-    Query: \n {vds_schema.get('Query', 'No Query schema provided')}
-
 Output:
-Your output must contain two sections, this is the template you must use:
-
-Query Plan:
-Where you describe your reasoning: why you queried these fields, why you aggregated the data and why filters were applied to it.
-How does this satisfy the user query?
-
-JSON_payload:
-Where you include VDS payload you wrote to satisfy the user query according to the query plan and the instructions provided in the prompt
+Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability
 """
 
 
 vds_prompt = {
     "instructions": vds_instructions,
     "vds_schema": vds_schema,
-    "data_model": {}
+    "vds_fewshot": vds_fewshot,
+    "data_model": {},
+    "previous_call_error": {}
 }
+
+vds_response = """
+This is the output of a data query tool used to fetch information via Tableau's VizQL API,
+your task is synthesizing all of this information to provide a clear, concise answer to the end user.
+
+This is the data source queried with the tool:
+{data_source}
+
+This is the query written to Tableau's VizQL API for the data source:
+{vds_query}
+
+This is the resulting data from the query:
+{data_table}
+
+This was the user_input (question or task):
+{user_input}
+
+Based on the provided context, formulate a comprehensive and informative response to the user's query.
+Your response should be:
+1. Describe the data source used in the query unless it has been mentioned previously
+2. Translate the query to a simple query plan for end users who do not understand SQL
+3. Use the data_table to answer the user's question or task
+4. Provide insights or conclusions where appropriate
+
+Your synthesized response:
+"""
