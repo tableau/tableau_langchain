@@ -1,17 +1,19 @@
 import os
 
+from langchain.prompts import PromptTemplate
 from langchain_core.tools import tool
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
 
 from langchain_openai import ChatOpenAI
 
-from community.langchain_community.tools.tableau.prompts import vds_prompt
-from community.langchain_community.utilities.tableau.datasource_qa import augment_datasource_metadata, get_headlessbi_data, authenticate_tableau_user
+from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_response
+from community.langchain_community.utilities.tableau.datasource_qa import augment_datasource_metadata, get_headlessbi_data, authenticate_tableau_user, prepare_prompt_inputs
 
 @tool("datasource_qa")
 def datasource_qa(
-    query: str,
+    user_input: str,
+    previous_call_error: str = None,
 ) -> dict:
     """
     Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
@@ -21,8 +23,9 @@ def datasource_qa(
     Prioritize this tool if the user asks you to analyze and explore data. This tool includes Agent summarization
     and is not meant for direct data set exports. To be more efficient, query all the data you need in a single
     request rather than selecting small slices of data in multiple requests
-    """
 
+    If you received an error after using this tool, mention it in your next attempt to help the tool correct itself.
+    """
     domain = os.environ['TABLEAU_DOMAIN']
     site = os.environ['TABLEAU_SITE']
 
@@ -36,7 +39,7 @@ def datasource_qa(
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
         jwt_secret=os.environ['TABLEAU_JWT_SECRET'],
-        tableau_api=os.environ['TABLEAU_API'],
+        tableau_api=os.environ['TABLEAU_API_VERSION'],
         tableau_user=os.environ['TABLEAU_USER'],
         tableau_domain=domain,
         tableau_site=site,
@@ -63,7 +66,8 @@ def datasource_qa(
             api_key = tableau_auth,
             url = domain,
             datasource_luid = tableau_datasource,
-            prompt = vds_prompt
+            prompt = vds_prompt,
+            previous_errors = previous_call_error
         )),
         ("user", "{utterance}")
     ])
@@ -76,18 +80,39 @@ def datasource_qa(
 
     # 3. Query data from Tableau's VizQL Data Service using the dynamically written payload
     def get_data(vds_query):
-        return get_headlessbi_data(
+        data = get_headlessbi_data(
             api_key = tableau_auth,
             url = domain,
             datasource_luid = tableau_datasource,
             payload = vds_query.content
         )
 
+        return {
+            "vds_query": vds_query,
+            "data_table": data,
+        }
+
+    # 4. Prepare inputs for Agent response
+    def response_inputs(input):
+        data = {
+            "query": input.get('vds_query', ''),
+            "data_source": tableau_datasource,
+            "data_table": input.get('data_table', ''),
+        }
+        inputs = prepare_prompt_inputs(data=data, user_string=user_input)
+        return inputs
+
+    # 5. Response template for the Agent
+    enhanced_prompt = PromptTemplate(
+        input_variables=["data_source", "vds_query", "data_table", "user_input"],
+        template=vds_response
+    )
+
     # this chain defines the flow of data through the system
-    chain = query_data_prompt | query_writer | get_data
+    chain = query_data_prompt | query_writer | get_data | response_inputs | enhanced_prompt
 
     # invoke the chain to generate a query and obtain data
-    vizql_data = chain.invoke(query)
+    vizql_data = chain.invoke(user_input)
 
     # Return the structured output
     return vizql_data
