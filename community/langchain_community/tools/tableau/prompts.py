@@ -566,7 +566,10 @@ Your response should be:
 1. Describe the data source used in the query unless it has been mentioned previously
 2. Translate the query to a simple query plan for end users who do not understand SQL
 3. Use the data_table to answer the user's question or task
-4. Provide insights or conclusions where appropriate
+4. Provide insights or conclusions only when relevant to the user, don't generate additional insights
+that are unasked for unless the request asked for a detailed analysis
+5. Short and concise, if the data table is too long only return the relevant rows or a small sample
+6. Avoid generating too much redundant information unless specified by the user or they asked for detailed analysis
 
 Your synthesized response:
 """
