@@ -86,9 +86,9 @@ def get_payload(output):
 def json_to_markdown(json_data):
     if isinstance(json_data, str):
         json_data = json.loads(json_data)
-
+    # Check if the JSON data is a list and not empty
     if not isinstance(json_data, list) or not json_data:
-        return "Invalid JSON data"
+        raise ValueError(f"Invalid JSON data, you may have an error or if the array is empty then it was not possible to resolve the query your wrote: {json_data}")
 
     headers = json_data[0].keys()
 
@@ -139,7 +139,13 @@ def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
     sample_values = [list(item.values())[0] for item in output['data']][:4]
     return sample_values
 
-def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, previous_errors: Optional[str], prompt: Dict[str, str]):
+def augment_datasource_metadata(
+    api_key: str,
+    url: str,
+    datasource_luid: str,
+    prompt: Dict[str, str],
+    previous_errors: Optional[str] = None,
+):
     datasource_metadata = query_vds_metadata(
         api_key=api_key,
         url=url,
@@ -149,15 +155,6 @@ def augment_datasource_metadata(api_key: str, url: str, datasource_luid: str, pr
     for field in datasource_metadata['data']:
         del field['fieldName']
         del field['logicalTableId']
-
-        # if field['dataType'] == 'STRING':
-        #     string_values = get_values(
-        #         api_key=api_key,
-        #         url=url,
-        #         datasource_luid=datasource_luid,
-        #         caption=field['fieldCaption']
-        #     )
-        #     field['sampleValues'] = string_values
 
     prompt['data_model'] = datasource_metadata
 
