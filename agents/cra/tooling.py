@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from agents.tools import tableau_metrics, tavily_tool
 
 from community.langchain_community.tools.tableau.analyze_data import analyze_data
-from community.langchain_community.tools.tableau.datasource_qa import datasource_qa, initialize_datasource_qa
+from community.langchain_community.tools.tableau.simple_datasource_qa import initialize_simple_datasource_qa
 
 # Load environment variables before accessing them
 load_dotenv()
@@ -22,7 +22,7 @@ tooling_llm_model = os.environ['TOOLING_MODEL']
 metrics = tableau_metrics
 
 # Tableau VizQL Data Service Query Tool
-analyze_datasource = initialize_datasource_qa(
+analyze_datasource = initialize_simple_datasource_qa(
     domain=tableau_domain,
     site=tableau_site,
     jwt_client_id=tableau_jwt_client_id,

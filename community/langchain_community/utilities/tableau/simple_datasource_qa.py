@@ -267,7 +267,7 @@ def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
     }
 
 
-def env_vars_datasource_qa(
+def env_vars_simple_datasource_qa(
     domain=None,
     site=None,
     jwt_client_id=None,
