@@ -8,6 +8,7 @@ import logging
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
+
 def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any]) -> Dict[str, Any]:
     full_url = f"{url}/api/v1/vizql-data-service/query-datasource"
 
@@ -101,6 +102,7 @@ def json_to_markdown(json_data):
 
     return markdown_table
 
+
 def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Dict[str, Any]:
     full_url = f"{url}/api/v1/vizql-data-service/read-metadata"
 
@@ -126,6 +128,7 @@ def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Dict[str
         )
         raise RuntimeError(error_message)
 
+
 def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
     column_values = {'fields': [{'fieldCaption': caption}]}
     output = query_vds(
@@ -138,6 +141,7 @@ def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
         return None
     sample_values = [list(item.values())[0] for item in output['data']][:4]
     return sample_values
+
 
 def augment_datasource_metadata(
     api_key: str,
@@ -162,6 +166,7 @@ def augment_datasource_metadata(
         prompt['previous_call_error'] = previous_errors
 
     return json.dumps(prompt)
+
 
 def authenticate_tableau_user(
         tableau_domain: str,
@@ -240,6 +245,7 @@ def authenticate_tableau_user(
             f"Status code: {response.status_code}. Response: {response.text}"
         )
         raise RuntimeError(error_message)
+
 
 def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
     """
