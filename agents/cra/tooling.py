@@ -8,8 +8,6 @@ from community.langchain_community.tools.tableau.datasource_qa import datasource
 
 # Load environment variables before accessing them
 load_dotenv()
-
-tavily_key = os.environ['TAVILY_API_KEY']
 tableau_domain = os.environ['TABLEAU_DOMAIN']
 tableau_site = os.environ['TABLEAU_SITE']
 tableau_jwt_client_id = os.environ['TABLEAU_JWT_CLIENT_ID']
@@ -19,7 +17,6 @@ tableau_api_version = os.environ['TABLEAU_API_VERSION']
 tableau_user = os.environ['TABLEAU_USER']
 datasource_luid = os.environ['DATASOURCE_LUID']
 tooling_llm_model = os.environ['TOOLING_MODEL']
-
 
 # Metrics RAG tool
 metrics = tableau_metrics
