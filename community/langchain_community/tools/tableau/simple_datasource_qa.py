@@ -1,14 +1,14 @@
 from typing import Optional
 
 from langchain.prompts import PromptTemplate
-from langchain_core.tools import tool
+from langchain_core.tools import tool, ToolException
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
 
 from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_response
-from community.langchain_community.utilities.tableau.simple_datasource_qa import augment_datasource_metadata, get_headlessbi_data, prepare_prompt_inputs
+from community.langchain_community.utilities.tableau.simple_datasource_qa import SimpleDataSourceQAInputs, augment_datasource_metadata, get_headlessbi_data, prepare_prompt_inputs
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
 from community.langchain_community.utilities.tableau.utils import env_vars_simple_datasource_qa
 
@@ -101,16 +101,17 @@ def initialize_simple_datasource_qa(
         # credentials to access Tableau environment on behalf of the user
         tableau_auth =  tableau_session['credentials']['token']
         if not tableau_auth or not domain:
+            auth_error_string = f"""
+            CRITICAL ERROR: Tableau credentials were not provided by the client application.
+            This tool is unusable as a result.
+            INSTRUCTION: Do not ask the user to provide credentials directly or in chat since they should
+            originate from a secure Tableau Connected App for the site.
+            """
             # lets the Agent know this error cannot be resolved by the end user
-            raise KeyError("Critical Error: Tableau credentials were not provided by the client application. INSTRUCTION: Do not ask the user to provide credentials directly or in chat since they should come from a secure application.")
+            raise ToolException(auth_error_string)
 
         # Data source for VDS querying
         tableau_datasource = env_vars["datasource_luid"]
-
-        # Check if we have a valid datasource
-        if not tableau_datasource:
-            # Lets the Agent know that the LUID is missing and it needs to use an alternative tool
-            raise KeyError("The Datasource LUID is missing. Use a data source search tool to find an appropriate query target that matches the user query.")
 
         # 1. Initialize Langchain chat template with an augmented prompt containing metadata for the datasource
         query_data_prompt = ChatPromptTemplate.from_messages([
@@ -132,17 +133,34 @@ def initialize_simple_datasource_qa(
 
         # 3. Query data from Tableau's VizQL Data Service using the AI written payload
         def get_data(vds_query):
-            data = get_headlessbi_data(
-                api_key = tableau_auth,
-                url = domain,
-                datasource_luid = tableau_datasource,
-                payload = vds_query.content
-            )
+            try:
+                data = get_headlessbi_data(
+                    api_key = tableau_auth,
+                    url = domain,
+                    datasource_luid = tableau_datasource,
+                    payload = vds_query.content
+                )
 
-            return {
-                "vds_query": vds_query,
-                "data_table": data,
-            }
+                return {
+                    "vds_query": vds_query,
+                    "data_table": data,
+                }
+            except Exception as e:
+                query_error_message = f"""
+                Tableau's VizQL Data Service return an error for the generated query:
+                {str(vds_query)}
+
+                The user_input used to write this query was:
+                {str(user_input)}
+
+                This was the error:
+                {str(e)}
+
+                Consider retrying this tool with the same `user_input` key but include the query and
+                the error in the `previous_call_error` key for the tool to debug the query.
+                """
+
+                raise ToolException(query_error_message)
 
         # 4. Prepare inputs for a structured response to the calling Agent
         def response_inputs(input):
