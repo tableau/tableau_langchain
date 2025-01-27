@@ -8,8 +8,9 @@ from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_response
-from community.langchain_community.utilities.tableau.simple_datasource_qa import augment_datasource_metadata, get_headlessbi_data, authenticate_tableau_user, prepare_prompt_inputs, env_vars_simple_datasource_qa
-
+from community.langchain_community.utilities.tableau.simple_datasource_qa import augment_datasource_metadata, get_headlessbi_data, prepare_prompt_inputs
+from community.langchain_community.utilities.tableau.auth import jwt_connected_app
+from community.langchain_community.utilities.tableau.utils import env_vars_simple_datasource_qa
 
 def initialize_simple_datasource_qa(
     domain: Optional[str] = None,
@@ -23,7 +24,7 @@ def initialize_simple_datasource_qa(
     tooling_llm_model: Optional[str] = None
 ):
     """
-    Initializes the Langgraph tool called 'simple_datasource_qa' for analyical
+    Initializes the Langgraph tool called 'simple_datasource_qa' for analytical
     questions and answers on a Tableau Data Source
 
     Args:
@@ -86,7 +87,7 @@ def initialize_simple_datasource_qa(
             "tableau:viz_data_service:read" # for querying VizQL Data Service
         ]
 
-        tableau_session = authenticate_tableau_user(
+        tableau_session = jwt_connected_app(
             tableau_domain=env_vars["domain"],
             tableau_site=env_vars["site"],
             jwt_client_id=env_vars["jwt_client_id"],
