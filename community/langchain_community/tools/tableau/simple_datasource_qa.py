@@ -1,4 +1,5 @@
 from typing import Optional
+from pydantic import BaseModel, Field
 
 from langchain.prompts import PromptTemplate
 from langchain_core.tools import tool, ToolException
@@ -8,9 +9,31 @@ from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_response
-from community.langchain_community.utilities.tableau.simple_datasource_qa import SimpleDataSourceQAInputs, augment_datasource_metadata, get_headlessbi_data, prepare_prompt_inputs
+from community.langchain_community.utilities.tableau.simple_datasource_qa import augment_datasource_metadata, get_headlessbi_data, prepare_prompt_inputs
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
 from community.langchain_community.utilities.tableau.utils import env_vars_simple_datasource_qa
+
+
+class SimpleDataSourceQAInputs(BaseModel):
+    """Describes inputs for usage of the simple_datasource_qa tool"""
+
+    user_input: str = Field(
+        ...,
+        description="Take the user query and represent it as a simple SQL query",
+        examples=[
+            "SELECT Region, AVG(Discount) AS Average_Discount, SUM(Sales) AS Total_Sales, SUM(Profit) AS Total_Profit FROM SalesData GROUP BY Region ORDER BY Total_Profit DESC",
+            ""
+        ]
+    )
+    previous_call_error: Optional[str] = Field(
+        None,
+        description="If the previous interaction resulted in a VizQL Data Service error suggesting a malformed query, include it and the query otherwise use None.",
+        examples=[
+            None, # no errors example
+            "Error: Quantitative Filters must have a QuantitativeFilterType, Query: {\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",\"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],\"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",\"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",\"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",\"exclude\":true,\"contains\":\"Technology\"}]}"
+        ],
+    )
+
 
 def initialize_simple_datasource_qa(
     domain: Optional[str] = None,
@@ -64,7 +87,7 @@ def initialize_simple_datasource_qa(
         tooling_llm_model=tooling_llm_model
     )
 
-    @tool("simple_datasource_qa")
+    @tool("simple_datasource_qa", args_schema=SimpleDataSourceQAInputs)
     def simple_datasource_qa(
         user_input: str,
         previous_call_error: Optional[str] = None
