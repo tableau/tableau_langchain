@@ -7,7 +7,7 @@ from agents.cra.agent import cra_agent
 from agents.utils.agent_utils import stream_graph_updates, _visualize_graph
 from agents.utils.other import _set_env
 
-from community.langchain_community.utilities.tableau.utils import authenticate_tableau_user
+from community.langchain_community.utilities.tableau.auth import jwt_connected_app
 
 
 async def main():
@@ -44,7 +44,7 @@ async def main():
         "tableau:viz_data_service:read" # for querying VizQL Data Service
     ]
 
-    tableau_auth = await authenticate_tableau_user(
+    tableau_auth = jwt_connected_app(
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
         jwt_secret=os.environ['TABLEAU_JWT_SECRET'],
