@@ -1,42 +1,29 @@
-from typing import Dict, List, Any, Optional
+import os
+from typing import Dict, Any, Optional
 import aiohttp
-import jwt
-from datetime import datetime, timedelta, timezone
-from uuid import uuid4
+import json
+from dotenv import load_dotenv
 
 
-async def http_get(endpoint: str, headers: Optional[Dict[str, str]] = None) -> aiohttp.ClientResponse:
+async def http_get(endpoint: str, headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
     """
-    reusable asynchronous HTTP GET requests
+    Reusable asynchronous HTTP GET requests.
 
     Args:
-        endpoint (str): The URL to send the GET request to
-        headers (Optional[Dict[str, str]]): Optional headers to include in the request
+        endpoint (str): The URL to send the GET request to.
+        headers (Optional[Dict[str, str]]): Optional headers to include in the request.
 
     Returns:
-        Dict[str, Any]: A dictionary containing the response headers and body
+        Dict[str, Any]: A dictionary containing the status code and either the JSON response or response text.
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(endpoint, headers=headers) as response:
-            return response
+            response_data = await response.json() if response.status == 200 else await response.text()
+            return {
+                'status': response.status,
+                'data': response_data
+            }
 
-
-# async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, payload: Dict[str, Any] = None) -> aiohttp.ClientResponse:
-#     """
-#     reusable asynchronous HTTP POST requests
-
-#     Args:
-#         endpoint (str): The URL to send the POST request to
-#         headers (Optional[Dict[str, str]]): Optional headers to include in the request
-#         payload (Optional[Dict[str, Any]]): The data to send in the body of the request
-
-#     Returns:
-#         Dict[str, Any]: A dictionary containing the response headers and body
-#     """
-#     async with aiohttp.ClientSession() as session:
-#         async with session.post(endpoint, headers=headers, json=payload) as response:
-#             # response_data = await response.json()  # For JSON response
-#             return response
 
 async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, payload: Dict[str, Any] = None) -> Dict[str, Any]:
     """
@@ -59,79 +46,66 @@ async def http_post(endpoint: str, headers: Optional[Dict[str, str]] = None, pay
             }
 
 
-async def authenticate_tableau_user(
-        tableau_domain: str,
-        tableau_site: str,
-        tableau_api: str,
-        tableau_user: str,
-        jwt_client_id: str,
-        jwt_secret_id: str,
-        jwt_secret: str,
-        scopes: List[str],
-) -> Dict[str, Any]:
+def env_vars_simple_datasource_qa(
+    domain=None,
+    site=None,
+    jwt_client_id=None,
+    jwt_secret_id=None,
+    jwt_secret=None,
+    tableau_api_version=None,
+    tableau_user=None,
+    datasource_luid=None,
+    tooling_llm_model=None
+):
     """
-    Authenticates a user to Tableau using JSON Web Token (JWT) authentication.
-
-    This function generates a JWT based on the provided credentials and uses it to authenticate
-    a user with the Tableau Server or Tableau Online. The JWT is created with a specified expiration
-    time and scopes, allowing for secure access to Tableau resources.
+    Retrieves Tableau configuration from environment variables if not provided as arguments.
 
     Args:
-        tableau_domain (str): The domain of the Tableau Server or Tableau Online instance.
-        tableau_site (str): The content URL of the specific Tableau site to authenticate against.
-        tableau_api (str): The version of the Tableau API to use for authentication.
-        tableau_user (str): The username of the Tableau user to authenticate.
-        jwt_client_id (str): The client ID used for generating the JWT.
-        jwt_secret_id (str): The key ID associated with the JWT secret.
-        jwt_secret (str): The secret key used to sign the JWT.
-        scopes (List[str]): A list of scopes that define the permissions granted by the JWT.
+        domain (str, optional): Tableau domain
+        site (str, optional): Tableau site
+        jwt_client_id (str, optional): JWT client ID
+        jwt_secret_id (str, optional): JWT secret ID
+        jwt_secret (str, optional): JWT secret
+        tableau_api_version (str, optional): Tableau API version
+        tableau_user (str, optional): Tableau user
+        datasource_luid (str, optional): Datasource LUID
+        tooling_llm_model (str, optional): Tooling LLM model
 
     Returns:
-        Dict[str, Any]: A dictionary containing the response from the Tableau authentication endpoint,
-        typically including an API key or session that is valid for 2 hours and user information.
+        dict: A dictionary containing all the configuration values
     """
-    # Encode the payload and secret key to generate the JWT
-    token = jwt.encode(
-        {
-        "iss": jwt_client_id,
-        "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
-        "jti": str(uuid4()),
-        "aud": "tableau",
-        "sub": tableau_user,
-        "scp": scopes
-        },
-        jwt_secret,
-        algorithm = "HS256",
-        headers = {
-        'kid': jwt_secret_id,
-        'iss': jwt_client_id
-        }
-    )
+    # Load environment variables before accessing them
+    load_dotenv()
 
-    # authentication endpoint + request headers & payload
-    endpoint = f"{tableau_domain}/api/{tableau_api}/auth/signin"
-
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
+    config = {
+        'domain': domain or os.environ.get('TABLEAU_DOMAIN'),
+        'site': site or os.environ.get('TABLEAU_SITE'),
+        'jwt_client_id': jwt_client_id or os.environ.get('TABLEAU_JWT_CLIENT_ID'),
+        'jwt_secret_id': jwt_secret_id or os.environ.get('TABLEAU_JWT_SECRET_ID'),
+        'jwt_secret': jwt_secret or os.environ.get('TABLEAU_JWT_SECRET'),
+        'tableau_api_version': tableau_api_version or os.environ.get('TABLEAU_API_VERSION'),
+        'tableau_user': tableau_user or os.environ.get('TABLEAU_USER'),
+        'datasource_luid': datasource_luid or os.environ.get('DATASOURCE_LUID'),
+        'tooling_llm_model': tooling_llm_model or os.environ.get('TOOLING_MODEL')
     }
 
-    payload = {
-        "credentials": {
-        "jwt": token,
-        "site": {
-            "contentUrl": tableau_site,
-        }
-        }
-    }
+    return config
 
-    response = await http_post(endpoint=endpoint, headers=headers, payload=payload)
-     # Check if the request was successful (status code 200)
-    if response['status'] == 200:
-        return response['data']
-    else:
-        error_message = (
-            f"Failed to authenticate to the Tableau site. "
-            f"Status code: {response['status']}. Response: {response['data']}"
-        )
-        raise RuntimeError(error_message)
+
+def json_to_markdown_table(json_data):
+    if isinstance(json_data, str):
+        json_data = json.loads(json_data)
+    # Check if the JSON data is a list and not empty
+    if not isinstance(json_data, list) or not json_data:
+        raise ValueError(f"Invalid JSON data, you may have an error or if the array is empty then it was not possible to resolve the query your wrote: {json_data}")
+
+    headers = json_data[0].keys()
+
+    markdown_table = "| " + " | ".join(headers) + " |\n"
+    markdown_table += "| " + " | ".join(['---'] * len(headers)) + " |\n"
+
+    for entry in json_data:
+        row = "| " + " | ".join(str(entry[header]) for header in headers) + " |"
+        markdown_table += row + "\n"
+
+    return markdown_table
