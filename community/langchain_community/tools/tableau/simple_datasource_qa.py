@@ -65,7 +65,7 @@ def initialize_simple_datasource_qa(
         function: A decorated function that can be used as a langgraph tool for data source QA.
 
     The returned function (datasource_qa) takes the following parameters:
-        user_input (str): The user's query or command.
+        user_input (str): The user's query or command represented in simple SQL.
         previous_call_error (Optional[str]): Any error from a previous call, for error handling.
 
     It returns a dictionary containing the results of the QA operation.
@@ -99,7 +99,7 @@ def initialize_simple_datasource_qa(
 
         Prioritize this tool if the user asks you to analyze and explore data. This tool includes Agent summarization
         and is not meant for direct data set exports. To be more efficient, query all the data you need in a single
-        request rather than selecting small slices of data in multiple requests
+        request rather than selecting small slices of data in multiple requests.
 
         If you received an error after using this tool, mention it in your next attempt to help the tool correct itself.
         """
