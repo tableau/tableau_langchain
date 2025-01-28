@@ -9,9 +9,8 @@ from langchain_core.messages import SystemMessage
 from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_response
-from community.langchain_community.utilities.tableau.simple_datasource_qa import augment_datasource_metadata, get_headlessbi_data, prepare_prompt_inputs
+from community.langchain_community.utilities.tableau.simple_datasource_qa import env_vars_simple_datasource_qa, augment_datasource_metadata, get_headlessbi_data, prepare_prompt_inputs
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
-from community.langchain_community.utilities.tableau.utils import env_vars_simple_datasource_qa
 
 
 class SimpleDataSourceQAInputs(BaseModel):
@@ -21,8 +20,7 @@ class SimpleDataSourceQAInputs(BaseModel):
         ...,
         description="Take the user query and represent it as a simple SQL query",
         examples=[
-            "SELECT Region, AVG(Discount) AS Average_Discount, SUM(Sales) AS Total_Sales, SUM(Profit) AS Total_Profit FROM SalesData GROUP BY Region ORDER BY Total_Profit DESC",
-            ""
+            "SELECT Region, AVG(Discount) AS Average_Discount, SUM(Sales) AS Total_Sales, SUM(Profit) AS Total_Profit FROM SalesData GROUP BY Region ORDER BY Total_Profit DESC"
         ]
     )
     previous_call_error: Optional[str] = Field(
