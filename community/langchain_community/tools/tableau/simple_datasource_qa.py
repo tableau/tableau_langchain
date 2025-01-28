@@ -125,8 +125,9 @@ def initialize_simple_datasource_qa(
             Error from remote server: {e}
 
             INSTRUCTION: Do not ask the user to provide credentials directly or in chat since they should
-            originate from a secure Tableau Connected App for the site. You can inform the user that you
-            are not able to access their Tableau environment at this time.
+            originate from a secure Connected App or similar authentication mechanism. You may inform the
+            user that you are not able to access their Tableau environment at this time. You can also describe
+            the nature of the error to help them understand why you can't service their request.
             """
             raise ToolException(auth_error_string)
 
