@@ -107,29 +107,31 @@ def initialize_simple_datasource_qa(
             "tableau:content:read", # for quering Tableau Metadata API
             "tableau:viz_data_service:read" # for querying VizQL Data Service
         ]
+        try:
+            tableau_session = jwt_connected_app(
+                tableau_domain=env_vars["domain"],
+                tableau_site=env_vars["site"],
+                jwt_client_id=env_vars["jwt_client_id"],
+                jwt_secret_id=env_vars["jwt_secret_id"],
+                jwt_secret=env_vars["jwt_secret"],
+                tableau_api=env_vars["tableau_api_version"],
+                tableau_user=env_vars["tableau_user"],
+                scopes=access_scopes
+            )
+        except Exception as e:
+            auth_error_string = f"""
+            CRITICAL ERROR: Could not authenticate to the Tableau site successfully.
+            This tool is unusable as a result.
+            Error from remote server: {e}
 
-        tableau_session = jwt_connected_app(
-            tableau_domain=env_vars["domain"],
-            tableau_site=env_vars["site"],
-            jwt_client_id=env_vars["jwt_client_id"],
-            jwt_secret_id=env_vars["jwt_secret_id"],
-            jwt_secret=env_vars["jwt_secret"],
-            tableau_api=env_vars["tableau_api_version"],
-            tableau_user=env_vars["tableau_user"],
-            scopes=access_scopes
-        )
+            INSTRUCTION: Do not ask the user to provide credentials directly or in chat since they should
+            originate from a secure Tableau Connected App for the site. You can inform the user that you
+            are not able to access their Tableau environment at this time.
+            """
+            raise ToolException(auth_error_string)
 
         # credentials to access Tableau environment on behalf of the user
         tableau_auth =  tableau_session['credentials']['token']
-        if not tableau_auth or not domain:
-            auth_error_string = f"""
-            CRITICAL ERROR: Tableau credentials were not provided by the client application.
-            This tool is unusable as a result.
-            INSTRUCTION: Do not ask the user to provide credentials directly or in chat since they should
-            originate from a secure Tableau Connected App for the site.
-            """
-            # lets the Agent know this error cannot be resolved by the end user
-            raise ToolException(auth_error_string)
 
         # Data source for VDS querying
         tableau_datasource = env_vars["datasource_luid"]

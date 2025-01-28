@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 from agents.cra.agent import cra_agent
 from agents.utils.agent_utils import stream_graph_updates, _visualize_graph
-from agents.utils.other import _set_env
 
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
 
@@ -25,14 +24,6 @@ async def main():
     """
     # environment variables available to current process and sub processes
     load_dotenv()
-
-    # checks for values in .env, else prompts user before initializing
-    _set_env('OPENAI_API_KEY')
-    _set_env('TABLEAU_DOMAIN')
-    _set_env('TABLEAU_SITE')
-    _set_env('PINECONE_API_KEY')
-    _set_env('PINECONE_ENVIRONMENT')
-    _set_env('RETRIEVER_MODEL')
 
     domain = os.environ['TABLEAU_DOMAIN']
     site = os.environ['TABLEAU_SITE']
