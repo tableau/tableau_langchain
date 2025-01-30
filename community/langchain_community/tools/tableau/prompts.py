@@ -529,8 +529,10 @@ checking instructions
 
 Restrictions:
 - DO NOT HALLUCINATE FIELD NAMES OR FILTER VALUES
-- Only use fields listed in the `data_model` key
-- Do not write redundant calculations if the field already exists and can be aggregated via a function
+- Refer to the `data_model` for factual information about the data source
+- Do not write redundant calculations if the field already exists
+- For INTEGER or REAL fields, you must always aggregate it with one of these: SUM, AVG, MEDIAN, COUNT, COUNTD, MIN or MAX
+- For DATETIME or DATE fields, you must always aggregate it with one of these: YEAR, QUARTER, MONTH, WEEK, DAY, TRUNC_YEAR, TRUNC_QUARTER, TRUNC_MONTH, TRUNC_WEEK or TRUNC_DAY
 
 Output:
 Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability
