@@ -30,10 +30,18 @@ class SimpleDataSourceQAInputs(BaseModel):
     )
     previous_call_error: Optional[str] = Field(
         None,
-        description="If the previous interaction resulted in a VizQL Data Service error suggesting a malformed query, include it and the query otherwise use None.",
+        description="If the previous interaction resulted in a VizQL Data Service error suggesting a malformed query, include the error otherwise use None.",
         examples=[
             None, # no errors example
-            "Error: Quantitative Filters must have a QuantitativeFilterType, Query: {\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",\"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],\"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",\"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",\"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",\"exclude\":true,\"contains\":\"Technology\"}]}"
+            "Error: Quantitative Filters must have a QuantitativeFilterType"
+        ],
+    )
+    previous_call_query: Optional[str] = Field(
+        None,
+        description="If the previous interaction resulted in a VizQL Data Service error suggesting a malformed query, include the faulty query otherwise use None.",
+        examples=[
+            None, # no errors example
+            "{\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",\"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],\"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",\"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",\"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",\"exclude\":true,\"contains\":\"Technology\"}]}"
         ],
     )
 
@@ -93,7 +101,8 @@ def initialize_simple_datasource_qa(
     @tool("simple_datasource_qa", args_schema=SimpleDataSourceQAInputs)
     def simple_datasource_qa(
         user_input: str,
-        previous_call_error: Optional[str] = None
+        previous_call_error: Optional[str] = None,
+        previous_call_query: Optional[str] = None
     ) -> dict:
         """
         Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
@@ -149,7 +158,8 @@ def initialize_simple_datasource_qa(
                 url = domain,
                 datasource_luid = tableau_datasource,
                 prompt = vds_prompt,
-                previous_errors = previous_call_error
+                previous_errors = previous_call_error,
+                previous_error_query = previous_call_query
             )),
             ("user", "{utterance}")
         ])

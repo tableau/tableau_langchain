@@ -77,6 +77,7 @@ def augment_datasource_metadata(
     datasource_luid: str,
     prompt: Dict[str, str],
     previous_errors: Optional[str] = None,
+    previous_error_query: Optional[str] = None
 ):
     datasource_metadata = query_vds_metadata(
         api_key=api_key,
@@ -92,6 +93,8 @@ def augment_datasource_metadata(
 
     if previous_errors:
         prompt['previous_call_error'] = previous_errors
+    if previous_error_query:
+        prompt['previous_error_query'] = previous_error_query
 
     return json.dumps(prompt)
 
