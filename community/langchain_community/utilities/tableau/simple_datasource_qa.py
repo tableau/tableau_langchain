@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 
 from community.langchain_community.utilities.tableau.vizql_data_service import query_vds, query_vds_metadata
 from community.langchain_community.utilities.tableau.utils import json_to_markdown_table
+from community.langchain_community.utilities.tableau.metadata import get_data_dictionary
 
 
 def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
@@ -79,6 +80,38 @@ def augment_datasource_metadata(
     previous_errors: Optional[str] = None,
     previous_error_query: Optional[str] = None
 ):
+    """
+    Augment datasource metadata with additional information and format as JSON.
+
+    This function retrieves the data dictionary and sample field values for a given
+    datasource, adds them to the provided prompt dictionary, and includes any previous
+    errors or queries for debugging purposes.
+
+    Args:
+        api_key (str): The API key for authentication.
+        url (str): The base URL for the API endpoints.
+        datasource_luid (str): The unique identifier of the datasource.
+        prompt (Dict[str, str]): Initial prompt dictionary to be augmented.
+        previous_errors (Optional[str]): Any errors from previous function calls. Defaults to None.
+        previous_error_query (Optional[str]): The query that caused errors in previous calls. Defaults to None.
+
+    Returns:
+        str: A JSON string containing the augmented prompt dictionary with datasource metadata.
+
+    Note:
+        This function relies on external functions `get_data_dictionary` and `query_vds_metadata`
+        to retrieve the necessary datasource information.
+    """
+    # get dictionary for the data source from the Metadata API
+    data_dictionary = get_data_dictionary(
+        api_key=api_key,
+        domain=url,
+        datasource_luid=datasource_luid
+    )
+
+    prompt['data_dictionary'] = data_dictionary['publishedDatasources'][0]
+
+    #  get sample values for fields from VDS metadata endpoint
     datasource_metadata = query_vds_metadata(
         api_key=api_key,
         url=url,
@@ -89,8 +122,9 @@ def augment_datasource_metadata(
         del field['fieldName']
         del field['logicalTableId']
 
-    prompt['data_model'] = datasource_metadata
+    prompt['data_model'] = datasource_metadata['data']
 
+    # include previous error and query to debug in current run
     if previous_errors:
         prompt['previous_call_error'] = previous_errors
     if previous_error_query:
