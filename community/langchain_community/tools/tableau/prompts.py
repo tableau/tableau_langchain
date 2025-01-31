@@ -965,8 +965,8 @@ references to generate the right queries for questions from regular users who ar
 more precise analytical terms.
 
 Errors:
-Pay attention to the `previous_call_error` and `previous_call_query` keys, the previous attempt had an error and you have to
-make sure you avoid it by checking instructions again to fix the mistake
+Pay attention to the `previous_call_error` and `previous_call_query` keys, if they contain information then the previous
+attempt had an error and you have to avoid it by checking instructions again to fix any mistakes
 
 Output:
 Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability
