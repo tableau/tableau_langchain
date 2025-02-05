@@ -2,7 +2,9 @@ import os
 import time
 
 from langchain_core.tools import tool
+from langchain_core.prompts import PromptTemplate
 from langchain_community.tools.tavily_search import TavilySearchResults
+
 
 from llama_index.core import VectorStoreIndex
 from llama_index.core.retrievers import VectorIndexRetriever
@@ -64,13 +66,40 @@ def tableau_metrics(query: str):
     retriever = VectorIndexRetriever(index=vector_index, similarity_top_k=5)
 
     # Query vector DB
-    answer = retriever.retrieve(query)
+    docs = retriever.retrieve(query)
 
-    # Inspect results
-    if (os.environ["DEBUG"] == 1):
-        print([i.get_content() for i in answer])
+    # Extract content from retrieved documents
+    metrics_content = "\n".join([doc.get_content() for doc in docs])
 
-    return answer
+    metrics_response = """
+    This is the output of a tool that retrieves updated information about the user's metrics and KPIs from a remote
+    vector database. Your job is to answer the user's questions with this context.
+
+    This is the relevant data about the user's metrics:
+    {metrics}
+
+    This is the user's question, task or command:
+    {user_input}
+
+    Based on the provided context, formulate a comprehensive and informative response to the user_input.
+    Your response should be:
+    1. Unless the user_input explicitly asks for detailed, thorough and comprehensive analysis you should prioritize
+    generating brief, simple and concise answers to provide a quick response.
+    2. Provide additional insights or conclusions only when relevant to the user, don't generate additional insights
+    that are unasked for
+
+    Your synthesized response:
+    """
+
+    response_prompt = PromptTemplate(
+        input_variables=["metrics", "user_input"],
+        template=metrics_response
+    )
+
+    # Format the prompt with the retrieved metrics and the original query
+    formatted_prompt = response_prompt.format(metrics=metrics_content, user_input=query)
+
+    return formatted_prompt
 
 
 @tool("tableau_datasources_catalog")
