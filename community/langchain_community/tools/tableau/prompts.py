@@ -943,7 +943,8 @@ following list of filter types to make this determination:
 - QuantitativeDateFilter (defined at `vds_schema.QuantitativeDateFilter`):
 - SetFilter (defined at `vds_schema.SetFilter`):
 - RelativeDateFilter (defined at `vds_schema.RelativeDateFilter`):
-- TopNFilter (defined at `vds_schema.TopNFilter`):
+- TopNFilter (defined at `vds_schema.TopNFilter`): Use this filter when the user asked a Top 10 or Top N question so that
+you filter the data response to analyze
 
 You may not have all filter members for fields of type "STRING" in the `data_model`, only sample values. Therefore, you must
 generate educated guesses for actual filter values and refer to any previous errors in case you used an incorrect filter value

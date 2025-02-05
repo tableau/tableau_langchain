@@ -50,8 +50,6 @@ else:
 # define the agent graph
 cra_agent = create_react_agent(
     model=llm,
-    state_schema=TableauAgentState,
     tools=tools,
-    store=memory,
     debug=debugging
 )
