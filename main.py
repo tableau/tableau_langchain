@@ -1,11 +1,12 @@
-import os, asyncio
+import os
+import asyncio
 
 from dotenv import load_dotenv
 
 from agents.cra.agent import cra_agent
 from agents.utils.agent_utils import stream_graph_updates, _visualize_graph
-from agents.utils.tableau import authenticate_tableau_user
-from agents.utils.other import _set_env
+
+from community.langchain_community.utilities.tableau.auth import jwt_connected_app
 
 
 async def main():
@@ -24,14 +25,6 @@ async def main():
     # environment variables available to current process and sub processes
     load_dotenv()
 
-    # checks for values in .env, else prompts user before initializing
-    _set_env('OPENAI_API_KEY')
-    _set_env('TABLEAU_DOMAIN')
-    _set_env('TABLEAU_SITE')
-    _set_env('PINECONE_API_KEY')
-    _set_env('PINECONE_ENVIRONMENT')
-    _set_env('RETRIEVER_MODEL')
-
     domain = os.environ['TABLEAU_DOMAIN']
     site = os.environ['TABLEAU_SITE']
     datasource_luid = '0965e61b-a072-43cf-994c-8c6cf526940d'
@@ -42,11 +35,11 @@ async def main():
         "tableau:viz_data_service:read" # for querying VizQL Data Service
     ]
 
-    tableau_auth = await authenticate_tableau_user(
+    tableau_auth = jwt_connected_app(
         jwt_client_id=os.environ['TABLEAU_JWT_CLIENT_ID'],
         jwt_secret_id=os.environ['TABLEAU_JWT_SECRET_ID'],
         jwt_secret=os.environ['TABLEAU_JWT_SECRET'],
-        tableau_api=os.environ['TABLEAU_API'],
+        tableau_api=os.environ['TABLEAU_API_VERSION'],
         tableau_user=os.environ['TABLEAU_USER'],
         tableau_domain=domain,
         tableau_site=site,
@@ -116,7 +109,7 @@ async def main():
                 "agent_inputs": sample_inputs
             }
 
-            stream_graph_updates(message, agent)
+            await stream_graph_updates(message, agent)
 
         except Exception as e:
             print(f"An error occurred: {e}")
@@ -129,7 +122,7 @@ async def main():
                 "agent_inputs": sample_inputs
             }
 
-            stream_graph_updates(message, agent)
+            await stream_graph_updates(message, agent)
             break
 
 if __name__ == "__main__":
