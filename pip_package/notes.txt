@@ -1,0 +1,19 @@
+# build the package
+python setup.py sdist bdist_wheel
+
+# clear build dist folders
+rm -rf build dist *.egg-info
+
+# install locally built module to test
+pip install dist/langchain_tableau-0.2-py3-none-any.whl --force-reinstall
+
+# Twine to check .whl file is valid
+twine check dist/*
+
+# Twine to upload to test.pypi.org
+export TWINE_USERNAME="__token__"
+export TWINE_PASSWORD="YOUR_TESTPYPI_API_KEY"
+twine upload --repository testpypi dist/*
+
+# pip install from test test.pypi.org
+pip install -i https://test.pypi.org/simple/ langchain-tableau
