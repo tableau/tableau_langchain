@@ -80,7 +80,7 @@ async def stream_graph_updates(message: dict, graph):
 
     elif (os.environ["DEBUG"] == "1"):
         # display tableau credentials to prove access to the environment
-        print('*** tableau_credentials ***', message['tableau_credentials'])
+        print('*** tableau_credentials ***', message.get('tableau_credentials'))
 
         async for event in graph.astream(input_stream):
             print(f"*** EVENT *** type: {type(event)}")
