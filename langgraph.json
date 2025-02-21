@@ -4,7 +4,7 @@
         "pyproject.toml"
     ],
     "graphs": {
-        "agent": "./agents/cra/agent.py:cra_agent"
+        "agent": "./agents/cra/agent.py:analytics_agent"
     },
     "env": ".env"
 }

@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 
-from agents.tools import tableau_metrics, tavily_tool
+from agents.tools import tavily_tool
+from agents.retrievers import tableau_metrics
 
 from community.langchain_community.tools.tableau.datasource_qa import initialize_simple_datasource_qa
 
@@ -16,9 +17,6 @@ tableau_api_version = os.environ['TABLEAU_API_VERSION']
 tableau_user = os.environ['TABLEAU_USER']
 datasource_luid = os.environ['DATASOURCE_LUID']
 tooling_llm_model = os.environ['TOOLING_MODEL']
-
-# Metrics RAG tool
-metrics = tableau_metrics
 
 # Tableau VizQL Data Service Query Tool
 analyze_datasource = initialize_simple_datasource_qa(
@@ -37,4 +35,4 @@ analyze_datasource = initialize_simple_datasource_qa(
 # web_search = tavily_tool()
 
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ metrics, analyze_datasource ]
+tools = [ tableau_metrics, analyze_datasource ]
