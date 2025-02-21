@@ -9,6 +9,7 @@ from langgraph.store.memory import InMemoryStore
 
 from agents.cra.state import TableauAgentState
 from agents.cra.tooling import tools
+from agents.cra.prompt import AGENT_SYSTEM_PROMPT
 
 
 """
@@ -19,7 +20,6 @@ This Agent uses the Langgraph prebuilt `create_react_agent` to can handle conver
     - Workbooks (contains analytics such as dashboards and charts that server as canonical interfaces for data exploration)
     - Data Sources (describes sources of data available for querying and exploration)
     - VizQL Data Service (can query a data source for on-demand data sets including aggregations, filters and calculations)
-    - Web Search (can incorporate external knowledge from the web)
 
 Intended the most straightforward implementation of Tableau tooling for Langgraph.
 """
@@ -49,7 +49,9 @@ else:
 
 # define the agent graph
 cra_agent = create_react_agent(
+    name='Analytics Agent',
     model=llm,
     tools=tools,
-    debug=debugging
+    debug=debugging,
+    prompt=AGENT_SYSTEM_PROMPT
 )
