@@ -2,11 +2,10 @@ import os
 
 from dotenv import load_dotenv
 
-from langchain_openai import ChatOpenAI
-
 from langgraph.prebuilt import create_react_agent
 from langgraph.store.memory import InMemoryStore
 
+from agents.models import select_model
 from agents.cra.state import TableauAgentState
 from agents.cra.tooling import tools
 from agents.cra.prompt import AGENT_SYSTEM_PROMPT
@@ -27,15 +26,10 @@ Intended the most straightforward implementation of Tableau tooling for Langgrap
 load_dotenv()
 
 # configure running model for the agent
-llm = ChatOpenAI(
-    model=os.environ["AGENT_MODEL"],
-    api_key=os.environ["OPENAI_API_KEY"],
-    temperature=0,
-    verbose=True,
-    max_tokens=None,
-    timeout=None,
-    max_retries=2,
-    # allow_dangerous_code=True,
+llm = select_model(
+    provider=os.environ["MODEL_PROVIDER"],
+    model_name=os.environ["AGENT_MODEL"],
+    temperature=0.2
 )
 
 # initialize a memory store
@@ -48,8 +42,7 @@ else:
     debugging = False
 
 # define the agent graph
-cra_agent = create_react_agent(
-    name='Analytics Agent',
+analytics_agent = create_react_agent(
     model=llm,
     tools=tools,
     debug=debugging,

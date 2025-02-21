@@ -34,7 +34,7 @@ def tableau_metrics(query: str):
     to write thorough summaries, reports or analysis requiring multiple complex queries.
     """
     pinecone_api_key = os.environ["PINECONE_API_KEY"]
-    index_name = os.environ["PINECONE_METRICS_INDEX"]
+    index_name = os.environ["METRICS_INDEX"]
     index_region = os.environ["PINECONE_ENVIRONMENT"]
 
     # Initialize connection to Pinecone
@@ -120,7 +120,7 @@ def tableau_datasources(query: str):
         dict: A data set relevant to the user's query
     """
     pinecone_api_key = os.environ["PINECONE_API_KEY"]
-    index_name = os.environ["PINECONE_DATASOURCES_INDEX"]
+    index_name = os.environ["DATASOURCES_INDEX"]
     index_region = os.environ["PINECONE_ENVIRONMENT"]
 
     # Initialize connection to Pinecone
@@ -179,7 +179,7 @@ def tableau_workbooks(query: str):
         dict: A data set relevant to the user's query
     """
     pinecone_api_key = os.environ["PINECONE_API_KEY"]
-    index_name = os.environ["PINECONE_WORKBOOKS_INDEX"]
+    index_name = os.environ["WORKBOOKS_INDEX"]
     index_region = os.environ["PINECONE_ENVIRONMENT"]
 
     # Initialize connection to Pinecone
