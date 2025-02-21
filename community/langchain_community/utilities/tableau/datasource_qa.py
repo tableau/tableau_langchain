@@ -152,7 +152,7 @@ def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
     }
 
 
-def env_vars_simple_datasource_qa(
+def env_vars_datasource_qa(
     domain=None,
     site=None,
     jwt_client_id=None,
@@ -161,6 +161,7 @@ def env_vars_simple_datasource_qa(
     tableau_api_version=None,
     tableau_user=None,
     datasource_luid=None,
+    model_provider=None,
     tooling_llm_model=None
 ):
     """
@@ -192,6 +193,7 @@ def env_vars_simple_datasource_qa(
         'tableau_api_version': tableau_api_version or os.environ['TABLEAU_API_VERSION'],
         'tableau_user': tableau_user or os.environ['TABLEAU_USER'],
         'datasource_luid': datasource_luid or os.environ['DATASOURCE_LUID'],
+        'model_provider': model_provider or os.environ['MODEL_PROVIDER'],
         'tooling_llm_model': tooling_llm_model or os.environ['TOOLING_MODEL']
     }
 

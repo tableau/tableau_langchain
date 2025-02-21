@@ -10,8 +10,9 @@ from langchain_openai import ChatOpenAI
 
 from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_response
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
-from community.langchain_community.utilities.tableau.simple_datasource_qa import (
-    env_vars_simple_datasource_qa,
+from community.langchain_community.utilities.tableau.models import select_model
+from community.langchain_community.utilities.tableau.datasource_qa import (
+    env_vars_datasource_qa,
     augment_datasource_metadata,
     get_headlessbi_data,
     prepare_prompt_inputs
@@ -55,6 +56,7 @@ def initialize_simple_datasource_qa(
     tableau_api_version: Optional[str] = None,
     tableau_user: Optional[str] = None,
     datasource_luid: Optional[str] = None,
+    model_provider: Optional[str] = None,
     tooling_llm_model: Optional[str] = None
 ):
     """
@@ -86,7 +88,7 @@ def initialize_simple_datasource_qa(
         environment variables, typically stored in a .env file.
     """
     # if arguments are not provided, the tool obtains environment variables directly from .env
-    env_vars = env_vars_simple_datasource_qa(
+    env_vars = env_vars_datasource_qa(
         domain=domain,
         site=site,
         jwt_client_id=jwt_client_id,
@@ -95,11 +97,12 @@ def initialize_simple_datasource_qa(
         tableau_api_version=tableau_api_version,
         tableau_user=tableau_user,
         datasource_luid=datasource_luid,
+        model_provider=model_provider,
         tooling_llm_model=tooling_llm_model
     )
 
-    @tool("simple_datasource_qa", args_schema=SimpleDataSourceQAInputs)
-    def simple_datasource_qa(
+    @tool("datasource_qa", args_schema=SimpleDataSourceQAInputs)
+    def datasource_qa(
         user_input: str,
         previous_call_error: Optional[str] = None,
         previous_call_query: Optional[str] = None
@@ -165,8 +168,9 @@ def initialize_simple_datasource_qa(
         ])
 
         # 2. Instantiate language model to execute the prompt to write a VizQL Data Service query
-        query_writer = ChatOpenAI(
-            model=env_vars["tooling_llm_model"],
+        query_writer = select_model(
+            provider=env_vars["model_provider"],
+            model_name=env_vars["tooling_llm_model"],
             temperature=0
         )
 
@@ -226,4 +230,4 @@ def initialize_simple_datasource_qa(
         # Return the structured output
         return vizql_data
 
-    return simple_datasource_qa
+    return datasource_qa
