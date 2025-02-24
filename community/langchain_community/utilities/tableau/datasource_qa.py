@@ -73,6 +73,7 @@ def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
 
 
 def augment_datasource_metadata(
+    task: str,
     api_key: str,
     url: str,
     datasource_luid: str,
@@ -102,6 +103,9 @@ def augment_datasource_metadata(
         This function relies on external functions `get_data_dictionary` and `query_vds_metadata`
         to retrieve the necessary datasource information.
     """
+    # insert the user input as a task
+    prompt['task'] = task
+
     # get dictionary for the data source from the Metadata API
     data_dictionary = get_data_dictionary(
         api_key=api_key,
@@ -109,6 +113,7 @@ def augment_datasource_metadata(
         datasource_luid=datasource_luid
     )
 
+    # insert data dictionary from Tableau's Data Catalog
     prompt['data_dictionary'] = data_dictionary['publishedDatasources'][0]
 
     #  get sample values for fields from VDS metadata endpoint
@@ -122,6 +127,7 @@ def augment_datasource_metadata(
         del field['fieldName']
         del field['logicalTableId']
 
+    # insert the data model with sample values from Tableau's VDS metadata API
     prompt['data_model'] = datasource_metadata['data']
 
     # include previous error and query to debug in current run
@@ -130,7 +136,7 @@ def augment_datasource_metadata(
     if previous_vds_payload:
         prompt['previous_vds_payload'] = previous_vds_payload
 
-    return json.dumps(prompt)
+    return prompt
 
 
 def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
