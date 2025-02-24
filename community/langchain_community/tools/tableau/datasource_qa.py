@@ -209,16 +209,21 @@ def initialize_datasource_qa(
             except Exception as e:
                 query_error_message = f"""
                 Tableau's VizQL Data Service return an error for the generated query:
-                {str(vds_query)}
+
+                {str(vds_query.content)}
 
                 The user_input used to write this query was:
+
                 {str(user_input)}
 
                 This was the error:
+
                 {str(e)}
 
-                Consider retrying this tool with the same `user_input` key but include the query and
-                the error in the `previous_call_error` key for the tool to debug the query.
+                Consider retrying this tool with the same inputs but include the previous query
+                causing the error and the error itself for the tool to correct itself on a retry.
+                If the error was an empty array, this usually indicates an incorrect filter value
+                was applied, thus returning no data
                 """
 
                 raise ToolException(query_error_message)
