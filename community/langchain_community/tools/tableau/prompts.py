@@ -928,8 +928,6 @@ error_queries = [
 ]
 
 
-
-
 vds_instructions = f"""
 Task:
 Your job is to write the main body of a request to the Tableau VizQL Data Service (VDS) API to
@@ -1017,14 +1015,129 @@ Your output must be minimal, containing only the VDS query in JSON format withou
 
 vds_prompt = {
     "instructions": vds_instructions,
+    "data_dictionary": {},
+    "data_model": {},
     "vds_schema": vds_schema,
     "sample_queries": sample_queries,
     "error_queries": error_queries,
+    "previous_call_error": {},
+    "previous_vds_payload": {}
+}
+
+vds_prompt_data = {
+    "task": {},
     "data_dictionary": {},
     "data_model": {},
+    "vds_schema": vds_schema,
+    "sample_queries": sample_queries,
+    "error_queries": error_queries,
     "previous_call_error": {},
-    "previous_call_query": {}
+    "previous_vds_payload": {}
 }
+
+
+vds_query = vds_instructions = """
+Task:
+Your job is to write the main body of a request to the Tableau VizQL Data Service (VDS) API to
+obtain data that answers the task given to you by the user:
+
+User Task: {task}
+
+Data Dictionary:
+Use this to map the user's natural language questions to the fields of data available in the data source and
+to be aware of any additional operations that may be needed to conceptualize the data correctly according to business
+semantics or other logic such as applying filters, aggregations, dates, etc.
+
+{data_dictionary}
+
+Data Model:
+Provides sample values for fields in the data source. This is useful in particular when aggregating or inferring
+filter values
+
+{data_model}
+
+VDS Schema:
+OpenAPI schema describing JSON payloads to the VDS API, use this to generate queries with correct syntax
+
+{vds_schema}
+
+Query:
+The query must be written according to the `vds_schema.Query` key. Which describes two properties: fields (required)
+and filters (optional)
+
+Fields:
+To satisfy the required "fields" property of `vds_schema.Query`, add fields according to the `vds_schema.Field` key,
+which references `vds_schema.FieldBase`. Use the `data_dictionary` and `data_model` keys to query all useful or related
+fields, including those not directly related to the topics mentioned by the user. Even if additional transformations or
+calculations are needed, the additional fields may be useful. DO NOT HALLUCINATE FIELD NAMES
+
+Aggregations:
+ALWAYS AGGREGATE THE DATA to avoid row-level results that are too granular and not insightful. The only reason to avoid
+aggregations would be if the user expicitly asked for unaggregated or row-level results. Aggregations are a property of
+`vds_schema.Field` called "functions" and are described in `vds_schema.Functions`. For INTEGER or REAL fields, you must
+always aggregate it with one of these: SUM, AVG, MEDIAN, COUNT, COUNTD, MIN or MAX. For DATETIME or DATE fields, you must
+always aggregate it with one of these: YEAR, QUARTER, MONTH, WEEK, DAY, TRUNC_YEAR, TRUNC_QUARTER, TRUNC_MONTH, TRUNC_WEEK
+or TRUNC_DAY
+
+Sorting:
+Sort fields as often as possible to highlight data of interest in the query even if not explicitly stated by the user. That
+means that if they asked about a field in particular, find a way to sort it that makes sense. Sorting is composed of two
+properties applied to `vds_schema.Field`: "sortDirection" described by `vds_schema.SortDirection` and "SortPriority" which
+is sets the sort order for fields in the query. "SortPriority" is only needed for fields you wish to sort. DO NOT apply
+sorting to the entire query or payload, this applies only to fields
+
+Filtering:
+Add filters to narrow down the data set according to user specifications and to avoid unnecessary large volumes of data.
+Filters are the second and optional property of `vds_schema.Query` and should be written according to `vds_schema.Filter`.
+The `vds_schema.Filter` spec references `vds_schema.FilterField`. When asked about values for a specific date, use
+QuantitativeDateFilter with RANGE and always include both minDate and maxDate properties. When asked about last week,
+previous month, current year, this quarter, previous 10 years, last 2 quarters use `RelativeDateFilter`
+
+There are many types of filters. To choose the right kind of filters you must first use the `data_model` key to map the
+target field to the kind of filters it supports. Use the "dataType" for each field (ex. "dataType": "STRING") and the
+following list of filter types to make this determination:
+
+- MatchFilter (defined at `vds_schema.MatchFilter`):
+- QuantitativeFilterBase (defined at `vds_schema.QuantitativeFilterBase`):
+- QuantitativeNumericalFilter (defined at `vds_schema.QuantitativeNumericalFilter`):
+- QuantitativeDateFilter (defined at `vds_schema.QuantitativeDateFilter`): Always include minDate and maxDate properties for
+specific dates
+- SetFilter (defined at `vds_schema.SetFilter`):
+- RelativeDateFilter (defined at `vds_schema.RelativeDateFilter`): Ideal for relative dates such as last week, previous month,
+current year, this quarter, previous 10 years, last 2 quarters
+- TopNFilter (defined at `vds_schema.TopNFilter`): Use this filter when the user asked a Top 10 or Top N question so that
+you filter the data response to analyze
+
+You may not have all filter members for fields of type "STRING" in the Data Model, only sample values. Therefore, you must
+generate educated guesses for actual filter values and use any previous empty array errors to retry with better values
+
+Sample Queries:
+Reference these examples as best practices to execute tasks. These examples show distinct ways to interact with the VDS API
+in order to obtain data in different shapes.
+
+{sample_queries}
+
+Error Queries:
+These examples demonstrate common errors you have generated in the past, avoid these scenarios by using correct syntax instead
+
+{error_queries}
+
+Previous Tool Call Errors:
+If this section has data, then the previous attempt resulted in an error described here:
+
+{previous_call_error}
+
+If the array was empty without syntax errors this indicates that a filter was applied with an incorrect value
+
+The query you generated that caused the error is this:
+
+{previous_vds_payload}
+
+Output:
+Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability.
+If the data source does not contain fields of data that can answer the user_input, return a message so the agent knows to
+use a different tool
+"""
 
 
 vds_response = """

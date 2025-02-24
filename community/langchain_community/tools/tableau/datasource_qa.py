@@ -6,7 +6,7 @@ from langchain_core.tools import tool, ToolException
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
 
-from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_instructions, vds_response
+from community.langchain_community.tools.tableau.prompts import vds_query, vds_prompt_data, vds_prompt, vds_response
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
 from community.langchain_community.utilities.tableau.models import select_model
 from community.langchain_community.utilities.tableau.datasource_qa import (
@@ -17,19 +17,22 @@ from community.langchain_community.utilities.tableau.datasource_qa import (
 )
 
 
-class SimpleDataSourceQAInputs(BaseModel):
+class DataSourceQAInputs(BaseModel):
     """Describes inputs for usage of the simple_datasource_qa tool"""
 
     user_input: str = Field(
         ...,
-        description="Describe the user query thoroughly in natural language: the user wants to see connects & disconnects for january 15 2025",
+        description="""Describe the user query thoroughly in natural language such as: 'the user wants to see connects & disconnects
+        for january 15 2025'. You can ask for relative dates such as last week, 3 days ago, current year, previous 3 quarters or
+        specific dates like March 12 1980""",
         examples=[
             "value connects for january 15 2025"
         ]
     )
     previous_call_error: Optional[str] = Field(
         None,
-        description="If the previous interaction resulted in a VizQL Data Service error, include the error otherwise use None: Error: Quantitative Filters must have a QuantitativeFilterType",
+        description="""If the previous interaction resulted in a VizQL Data Service error, include the error otherwise use None:
+        Error: Quantitative Filters must have a QuantitativeFilterType""",
         examples=[
             None, # no errors example
             "Error: Quantitative Filters must have a QuantitativeFilterType"
@@ -37,7 +40,13 @@ class SimpleDataSourceQAInputs(BaseModel):
     )
     previous_vds_payload: Optional[str] = Field(
         None,
-        description="If the previous interaction resulted in a VizQL Data Service error, include the faulty VDS JSON payload otherwise use None: {\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",\"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],\"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",\"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",\"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",\"exclude\":true,\"contains\":\"Technology\"}]}",
+        description="""If the previous interaction resulted in a VizQL Data Service error, include the faulty VDS JSON payload
+        otherwise use None: {\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",
+        \"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],
+        \"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",
+        \"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",
+        \"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",
+        \"exclude\":true,\"contains\":\"Technology\"}]}""",
         examples=[
             None, # no errors example
             "{\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",\"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],\"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",\"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",\"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",\"exclude\":true,\"contains\":\"Technology\"}]}"
@@ -99,7 +108,7 @@ def initialize_datasource_qa(
         tooling_llm_model=tooling_llm_model
     )
 
-    @tool("datasource_qa", args_schema=SimpleDataSourceQAInputs)
+    @tool("datasource_qa", args_schema=DataSourceQAInputs)
     def datasource_qa(
         user_input: str,
         previous_call_error: Optional[str] = None,
@@ -108,8 +117,8 @@ def initialize_datasource_qa(
         """
         Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
         To be more efficient, describe your entire query in a single request rather than selecting small slices of
-        data in multiple requests. DO NOT perform multiple queries if they can fetched at once with the same filters
-        and other conditions
+        data in multiple requests. DO NOT perform multiple queries if all the data can be fetched at once with the
+        same filters or conditions
 
         If you received an error after using this tool, mention it in your next attempt to help the tool correct itself.
         """
@@ -149,30 +158,32 @@ def initialize_datasource_qa(
         # Data source for VDS querying
         tableau_datasource = env_vars["datasource_luid"]
 
-        # 0. Enhance the prompt with metadata about the data source
-        # query_instructions = augment_datasource_metadata(
-        #     api_key = tableau_auth,
-        #     url = domain,
-        #     datasource_luid = tableau_datasource,
-        #     prompt = vds_prompt,
-        #     previous_errors = previous_call_error,
-        #     previous_error_query = previous_vds_payload
-        # )
+        # 0. Obtain metadata about the data source to enhance the query writing prompt
+        query_writing_data = augment_datasource_metadata(
+            task = user_input,
+            api_key = tableau_auth,
+            url = domain,
+            datasource_luid = tableau_datasource,
+            prompt = vds_prompt,
+            previous_errors = previous_call_error,
+            previous_vds_payload = previous_vds_payload
+        )
 
-        # query_prompt = ChatPromptTemplate.from_template(vds_instructions)
-
-        # 1. Initialize Langchain chat template with an augmented prompt containing metadata for the datasource
-        query_data_prompt = ChatPromptTemplate.from_messages([
-            SystemMessage(content = augment_datasource_metadata(
-                api_key = tableau_auth,
-                url = domain,
-                datasource_luid = tableau_datasource,
-                prompt = vds_prompt,
-                previous_errors = previous_call_error,
-                previous_vds_payload = previous_vds_payload
-            )),
-            ("user", "{utterance}")
-        ])
+        # 1. Insert instruction data into the template
+        query_writing_prompt = PromptTemplate(
+            input_variables=[
+                "task"
+                "instructions",
+                "vds_schema",
+                "sample_queries",
+                "error_queries",
+                "data_dictionary",
+                "data_model",
+                "previous_call_error",
+                "previous_vds_payload"
+            ],
+            template=vds_query
+        )
 
         # 2. Instantiate language model to execute the prompt to write a VizQL Data Service query
         query_writer = select_model(
@@ -223,16 +234,17 @@ def initialize_datasource_qa(
             return inputs
 
         # 5. Response template for the Agent with further instructions
-        enhanced_prompt = PromptTemplate(
+        response_prompt = PromptTemplate(
             input_variables=["data_source", "vds_query", "data_table", "user_input"],
             template=vds_response
         )
 
         # this chain defines the flow of data through the system
-        chain = query_data_prompt | query_writer | get_data | response_inputs | enhanced_prompt
+        chain = query_writing_prompt | query_writer | get_data | response_inputs | response_prompt
+
 
         # invoke the chain to generate a query and obtain data
-        vizql_data = chain.invoke(user_input)
+        vizql_data = chain.invoke(query_writing_data)
 
         # Return the structured output
         return vizql_data
