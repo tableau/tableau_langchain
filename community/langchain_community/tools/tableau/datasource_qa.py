@@ -3,10 +3,8 @@ from pydantic import BaseModel, Field
 
 from langchain.prompts import PromptTemplate
 from langchain_core.tools import tool, ToolException
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage
 
-from community.langchain_community.tools.tableau.prompts import vds_query, vds_prompt_data, vds_prompt, vds_response
+from community.langchain_community.tools.tableau.prompts import vds_query, vds_prompt_data, vds_response
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
 from community.langchain_community.utilities.tableau.models import select_model
 from community.langchain_community.utilities.tableau.datasource_qa import (
@@ -164,7 +162,7 @@ def initialize_datasource_qa(
             api_key = tableau_auth,
             url = domain,
             datasource_luid = tableau_datasource,
-            prompt = vds_prompt,
+            prompt = vds_prompt_data,
             previous_errors = previous_call_error,
             previous_vds_payload = previous_vds_payload
         )
