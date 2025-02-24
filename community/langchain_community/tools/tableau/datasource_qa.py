@@ -20,11 +20,11 @@ class DataSourceQAInputs(BaseModel):
 
     user_input: str = Field(
         ...,
-        description="""Describe the user query thoroughly in natural language such as: 'the user wants to see connects & disconnects
-        for january 15 2025'. You can ask for relative dates such as last week, 3 days ago, current year, previous 3 quarters or
-        specific dates like March 12 1980""",
+        description="""Describe the user query thoroughly in natural language such as: 'the user wants to see orders and sales
+        for April 20 2025'. You can ask for relative dates such as last week, 3 days ago, current year, previous 3 quarters or
+        specific dates""",
         examples=[
-            "value connects for january 15 2025"
+            "sales and orders for April 20 2025"
         ]
     )
     previous_call_error: Optional[str] = Field(
