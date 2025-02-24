@@ -6,9 +6,7 @@ from langchain_core.tools import tool, ToolException
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.messages import SystemMessage
 
-from langchain_openai import ChatOpenAI
-
-from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_response
+from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_instructions, vds_response
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
 from community.langchain_community.utilities.tableau.models import select_model
 from community.langchain_community.utilities.tableau.datasource_qa import (
@@ -24,22 +22,22 @@ class SimpleDataSourceQAInputs(BaseModel):
 
     user_input: str = Field(
         ...,
-        description="Take the user query and represent it as a simple SQL query",
+        description="Describe the user query thoroughly in natural language: the user wants to see connects & disconnects for january 15 2025",
         examples=[
-            "SELECT Region, AVG(Discount) AS Average_Discount, SUM(Sales) AS Total_Sales, SUM(Profit) AS Total_Profit FROM SalesData GROUP BY Region ORDER BY Total_Profit DESC"
+            "value connects for january 15 2025"
         ]
     )
     previous_call_error: Optional[str] = Field(
         None,
-        description="If the previous interaction resulted in a VizQL Data Service error suggesting a malformed query, include the error otherwise use None.",
+        description="If the previous interaction resulted in a VizQL Data Service error, include the error otherwise use None: Error: Quantitative Filters must have a QuantitativeFilterType",
         examples=[
             None, # no errors example
             "Error: Quantitative Filters must have a QuantitativeFilterType"
         ],
     )
-    previous_call_query: Optional[str] = Field(
+    previous_vds_payload: Optional[str] = Field(
         None,
-        description="If the previous interaction resulted in a VizQL Data Service error suggesting a malformed query, include the faulty query otherwise use None.",
+        description="If the previous interaction resulted in a VizQL Data Service error, include the faulty VDS JSON payload otherwise use None: {\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",\"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],\"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",\"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",\"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",\"exclude\":true,\"contains\":\"Technology\"}]}",
         examples=[
             None, # no errors example
             "{\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",\"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],\"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",\"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",\"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",\"exclude\":true,\"contains\":\"Technology\"}]}"
@@ -47,7 +45,7 @@ class SimpleDataSourceQAInputs(BaseModel):
     )
 
 
-def initialize_simple_datasource_qa(
+def initialize_datasource_qa(
     domain: Optional[str] = None,
     site: Optional[str] = None,
     jwt_client_id: Optional[str] = None,
@@ -105,16 +103,13 @@ def initialize_simple_datasource_qa(
     def datasource_qa(
         user_input: str,
         previous_call_error: Optional[str] = None,
-        previous_call_query: Optional[str] = None
+        previous_vds_payload: Optional[str] = None
     ) -> dict:
         """
         Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
-        You need a data source to target to use this tool. If a target data source is unknown, use a data source
-        search tool to find the right resource and retry with more information or ask the user to provide it.
-
-        Prioritize this tool if the user asks you to analyze and explore data. This tool includes Agent summarization
-        and is not meant for direct data set exports. To be more efficient, query all the data you need in a single
-        request rather than selecting small slices of data in multiple requests.
+        To be more efficient, describe your entire query in a single request rather than selecting small slices of
+        data in multiple requests. DO NOT perform multiple queries if they can fetched at once with the same filters
+        and other conditions
 
         If you received an error after using this tool, mention it in your next attempt to help the tool correct itself.
         """
@@ -154,6 +149,18 @@ def initialize_simple_datasource_qa(
         # Data source for VDS querying
         tableau_datasource = env_vars["datasource_luid"]
 
+        # 0. Enhance the prompt with metadata about the data source
+        # query_instructions = augment_datasource_metadata(
+        #     api_key = tableau_auth,
+        #     url = domain,
+        #     datasource_luid = tableau_datasource,
+        #     prompt = vds_prompt,
+        #     previous_errors = previous_call_error,
+        #     previous_error_query = previous_vds_payload
+        # )
+
+        # query_prompt = ChatPromptTemplate.from_template(vds_instructions)
+
         # 1. Initialize Langchain chat template with an augmented prompt containing metadata for the datasource
         query_data_prompt = ChatPromptTemplate.from_messages([
             SystemMessage(content = augment_datasource_metadata(
@@ -162,7 +169,7 @@ def initialize_simple_datasource_qa(
                 datasource_luid = tableau_datasource,
                 prompt = vds_prompt,
                 previous_errors = previous_call_error,
-                previous_error_query = previous_call_query
+                previous_vds_payload = previous_vds_payload
             )),
             ("user", "{utterance}")
         ])

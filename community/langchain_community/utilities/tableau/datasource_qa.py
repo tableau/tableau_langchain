@@ -78,7 +78,7 @@ def augment_datasource_metadata(
     datasource_luid: str,
     prompt: Dict[str, str],
     previous_errors: Optional[str] = None,
-    previous_error_query: Optional[str] = None
+    previous_vds_payload: Optional[str] = None
 ):
     """
     Augment datasource metadata with additional information and format as JSON.
@@ -93,7 +93,7 @@ def augment_datasource_metadata(
         datasource_luid (str): The unique identifier of the datasource.
         prompt (Dict[str, str]): Initial prompt dictionary to be augmented.
         previous_errors (Optional[str]): Any errors from previous function calls. Defaults to None.
-        previous_error_query (Optional[str]): The query that caused errors in previous calls. Defaults to None.
+        previous_vds_payload (Optional[str]): The query that caused errors in previous calls. Defaults to None.
 
     Returns:
         str: A JSON string containing the augmented prompt dictionary with datasource metadata.
@@ -127,8 +127,8 @@ def augment_datasource_metadata(
     # include previous error and query to debug in current run
     if previous_errors:
         prompt['previous_call_error'] = previous_errors
-    if previous_error_query:
-        prompt['previous_error_query'] = previous_error_query
+    if previous_vds_payload:
+        prompt['previous_vds_payload'] = previous_vds_payload
 
     return json.dumps(prompt)
 
