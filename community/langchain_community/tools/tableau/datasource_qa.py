@@ -20,9 +20,9 @@ class DataSourceQAInputs(BaseModel):
 
     user_input: str = Field(
         ...,
-        description="""Describe the user query thoroughly in natural language such as: 'the user wants to see orders and sales
-        for April 20 2025'. You can ask for relative dates such as last week, 3 days ago, current year, previous 3 quarters or
-        specific dates""",
+        description="""Describe the user query thoroughly in natural language such as: 'orders and sales for April 20 2025'.
+        You can ask for relative dates such as last week, 3 days ago, current year, previous 3 quarters or
+        specific dates: profits and average discounts for last week""",
         examples=[
             "sales and orders for April 20 2025"
         ]
@@ -116,7 +116,10 @@ def initialize_datasource_qa(
         Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
         To be more efficient, describe your entire query in a single request rather than selecting small slices of
         data in multiple requests. DO NOT perform multiple queries if all the data can be fetched at once with the
-        same filters or conditions
+        same filters or conditions:
+
+        Good query: "Profits & average discounts by region for last week"
+        Bad queries: "profits per region last week" & "average discounts per region last week"
 
         If you received an error after using this tool, mention it in your next attempt to help the tool correct itself.
         """
