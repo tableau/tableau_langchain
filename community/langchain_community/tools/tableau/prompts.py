@@ -970,11 +970,11 @@ error_queries = [
         "error_query": {
             "fields": [
                 {
-                    "fieldCaption":"Effective Date",
+                    "fieldCaption":"Order Date",
                     "function":"YEAR"
                 },
                 {
-                    "fieldCaption":"XM Connects",
+                    "fieldCaption":"Orders",
                     "function":"SUM"
                 }
             ],
@@ -985,13 +985,13 @@ error_queries = [
         "correction": {
             "fields": [
                 {
-                    "fieldCaption":"Effective Date",
+                    "fieldCaption":"Order Date",
                     "function":"YEAR",
                     "sortDirection":"ASC",
                     "sortPriority":1
                 },
                 {
-                    "fieldCaption":"XM Connects",
+                    "fieldCaption":"Orders",
                     "function":"SUM"
                 }
             ],
