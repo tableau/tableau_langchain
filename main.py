@@ -27,8 +27,7 @@ async def main():
 
     domain = os.environ['TABLEAU_DOMAIN']
     site = os.environ['TABLEAU_SITE']
-    datasource_luid = '0965e61b-a072-43cf-994c-8c6cf526940d'
-
+    datasource_luid = os.environ["DATASOURCE_LUID"]
     # define required authorizations to Tableau resources to support Agent operations
     access_scopes = [
         "tableau:content:read", # for quering Tableau Metadata API

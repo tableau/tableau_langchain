@@ -38,4 +38,4 @@ analyze_datasource = initialize_simple_datasource_qa(
 # web_search = tavily_tool()
 
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ metrics, analyze_datasource ]
+tools = [ analyze_datasource ]
