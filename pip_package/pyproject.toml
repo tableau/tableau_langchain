@@ -12,14 +12,11 @@ license = "MIT"
 readme = "README.md"
 
 dependencies = [
+    "python-dotenv",
     "langchain",
+    "langchain-core",
     "langgraph",
-    "langsmith",
     "langchain-openai",
-    "langserve[all]",
-    # "langchain-community",
-    # "langchain-experimental",
-    # "semantic-router",
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",
