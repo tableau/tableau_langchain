@@ -1,19 +1,22 @@
+# make sure python build modules are installed  (setuptools was the old build system)
+pip install build twine hatchling
+
+# remove previous build files (from the current directory 'pip_package')
+rm -rf build dist/
+
 # build the package
-python setup.py sdist bdist_wheel
+python -m build
 
-# clear build dist folders
-rm -rf build dist *.egg-info
-
-# install locally built module to test
-pip install dist/langchain_tableau-0.2-py3-none-any.whl --force-reinstall
-
-# Twine to check .whl file is valid
+# check .whl file is valid after build
 twine check dist/*
 
-# Twine to upload to test.pypi.org
+# upload (to test.pypi.org, or remove --repository)
 export TWINE_USERNAME="__token__"
-export TWINE_PASSWORD="YOUR_TESTPYPI_API_KEY"
+export TWINE_PASSWORD=""
 twine upload --repository testpypi dist/*
 
-# pip install from test test.pypi.org
+# install locally built module to test
+pip install dist/langchain_tableau-0.4-py3-none-any.whl --force-reinstall
+
+# pip install (from test test.pypi.org, or remove -i)
 pip install -i https://test.pypi.org/simple/ langchain-tableau
