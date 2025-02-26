@@ -1,6 +1,6 @@
 [project]
 name = "langchain_tableau"
-version = "0.4.13"
+version = "0.4.15"
 description = "Tableau tools for Agentic use cases with Langchain"
 authors = [
     { name = "Stephen Price" },
@@ -17,6 +17,10 @@ dependencies = [
     "langchain-core",
     "langgraph",
     "langchain-openai",
+    "requests",
+    "pydantic",
+    "pyjwt",
+    "aiohttp",
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",
