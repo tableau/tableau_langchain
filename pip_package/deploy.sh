@@ -41,7 +41,7 @@ rm -f pyproject.toml.bak
 
 
 # remove previous build files (from the current directory 'pip_package')
-rm -rf build dist/
+rm -rf dist/
 
 # build the package
 python -m build

@@ -1,6 +1,6 @@
 [project]
 name = "langchain_tableau"
-version = "0.4.8"
+version = "0.4.13"
 description = "Tableau tools for Agentic use cases with Langchain"
 authors = [
     { name = "Stephen Price" },
@@ -8,7 +8,7 @@ authors = [
     { name = "Joseph Fluckiger" }
 ]
 requires-python = ">=3.12.2"
-license = "MIT"
+license = {text = "MIT"}
 readme = "README.md"
 
 dependencies = [
