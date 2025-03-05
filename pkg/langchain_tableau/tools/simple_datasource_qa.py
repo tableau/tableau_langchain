@@ -8,9 +8,9 @@ from langchain_core.messages import SystemMessage
 
 from langchain_openai import ChatOpenAI
 
-from community.langchain_community.tools.tableau.prompts import vds_prompt, vds_response
-from community.langchain_community.utilities.tableau.auth import jwt_connected_app
-from community.langchain_community.utilities.tableau.simple_datasource_qa import (
+from langchain_tableau.tools.prompts import vds_prompt, vds_response
+from langchain_tableau.utilities.auth import jwt_connected_app
+from langchain_tableau.utilities.simple_datasource_qa import (
     env_vars_simple_datasource_qa,
     augment_datasource_metadata,
     get_headlessbi_data,
@@ -106,8 +106,8 @@ def initialize_simple_datasource_qa(
     ) -> dict:
         """
         Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
-        You need a data source to target to use this tool. Always use the datasource ID that is passed in the datasource_luid parameter
-        of the tool.
+        You need a data source to target to use this tool. If a target data source is unknown, use a data source
+        search tool to find the right resource and retry with more information or ask the user to provide it.
 
         Prioritize this tool if the user asks you to analyze and explore data. This tool includes Agent summarization
         and is not meant for direct data set exports. To be more efficient, query all the data you need in a single
