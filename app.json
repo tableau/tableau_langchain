@@ -1,64 +1,80 @@
 {
     "name": "Tableau Langchain",
-    "description": "Tableau tools for Agentic use cases with Langchain",
+    "description": "Tableau tools for Agentic use cases with Langgraph",
     "repository": "https://github.com/Tab-SE/tableau_langchain",
-    "keywords": ["python", "tableau", "langchain", "agents", "tools", "ai"],
+    "keywords": ["python", "tableau", "langchain", "langgraph", "agents", "tools", "ai"],
     "env": {
+        "DEBUG": {
+            "description": "Controls how much logging occurs during Agent operations can be 1 or 0",
+            "value": "0"
+        },
         "OPENAI_API_KEY": {
-            "description": "OpenAI API Key",
+            "description": "OpenAI API Key required for using ChatGPT",
+            "value": ""
+        },
+        "AGENT_MODEL": {
+            "description": "LLM model used by the Agent such as (gpt-4o-mini)",
+            "value": "gpt-4o-mini"
+        },
+        "RETRIEVER_MODEL": {
+            "description": "Embedding model used by Retriever Tools such as (text-embedding-3-small)",
+            "value": "text-embedding-3-small"
+        },
+        "LANGCHAIN_TRACING_V2": {
+            "description": "Boolean either true or false for agent tracing on Langsmith",
+            "value": "true"
+        },
+        "LANGCHAIN_ENDPOINT": {
+            "description": "Service for hosting agent traces for analysis (Langsmith)",
+            "value": "https://api.smith.langchain.com"
+        },
+        "LANGCHAIN_API_KEY": {
+            "description": "Langchain API Key for using Langsmith",
+            "value": ""
+        },
+        "LANGCHAIN_PROJECT": {
+            "description": "Project containing agent traces on Langsmith",
+            "value": ""
+        },
+        "TAVILY_API_KEY": {
+            "description": "API Key for Web Search via the Tavily service",
+            "value": ""
+        },
+        "PINECONE_API_KEY": {
+            "description": "API Key for managing serverless vector databases on Pinecone",
+            "value": ""
+        },
+        "PINECONE_ENVIRONMENT": {
+            "description": "The cloud environment hosting the Pinecone serverless vector databases",
             "value": ""
         },
         "TABLEAU_DOMAIN": {
             "description": "Hostname for your Tableau Cloud environment",
             "value": ""
         },
-        "SITE_NAME": {
-            "description": "Tableau Site Name (contentUrl)",
+        "TABLEAU_SITE": {
+            "description": "Tableau Site Name (or contentUrl)",
             "value": ""
         },
-        "DATA_SOURCE": {
-            "description": "Tableau Data Source Repository name",
+        "TABLEAU_API": {
+            "description": "Version of the Tableau REST API used for some Agent operations",
+            "value": "3.21"
+        },
+        "TABLEAU_JWT_CLIENT_ID": {
+            "description": "Client ID from an enabled Tableau Connected App used for JWT authentication",
             "value": ""
         },
-        "PAT_NAME": {
-            "description": "Tableau Personal Access Token name",
+        "TABLEAU_JWT_SECRET_ID": {
+            "description": "Secret ID from an enabled Tableau Connected App used for JWT authentication",
             "value": ""
         },
-        "PAT_SECRET": {
-            "description": "Tableau Personal Access Token secret",
+        "TABLEAU_JWT_SECRET": {
+            "description": "Secret from an enabled Tableau Connected App used for JWT authentication",
             "value": ""
         },
-        "READ_METADATA": {
-            "description": "Salesforce Metadata URL",
+        "TABLEAU_USER": {
+            "description": "A valid Tableau user for access to the analytics environment",
             "value": ""
-        },
-        "VDS_URL": {
-            "description": "Salesforce VizQL Data Service URL",
-            "value": ""
-        },
-        "VDS_AGENT_MODEL": {
-            "description": "",
-            "value": "gpt-4o-mini"
-        },
-        "PANDAS_AGENT_MODEL": {
-            "description": "",
-            "value": "gpt-4o-mini"
-        },
-        "LANGCHAIN_TRACING_V2": {
-            "description": "",
-            "value": "true"
-        },
-        "LANGCHAIN_ENDPOINT": {
-            "description": "",
-            "value": "https://api.smith.langchain.com"
-        },
-        "LANGCHAIN_API_KEY": {
-            "description": "",
-            "value": ""
-        },
-        "LANGCHAIN_PROJECT": {
-            "description": "",
-            "value": "tableau_langchain"
         }
     }
 }

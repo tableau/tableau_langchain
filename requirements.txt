@@ -1,6 +1,3 @@
-# python>=3.12.2
-# pip>=23.3.1
-
 notebook
 ipykernel
 python-dotenv
@@ -8,6 +5,17 @@ pyjwt
 fastapi
 tabulate
 langchain
+langgraph
+langsmith
+langgraph-cli
+langchain_anthropic
 langchain_openai
-langchain_experimental
+langchain-pinecone
 langserve[all]
+langchain_community
+langchain_experimental
+llama-index
+llama-index-vector-stores-pinecone
+pinecone-client[grpc]
+semantic-router
+tavily-python

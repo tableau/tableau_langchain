@@ -1,6 +1,8 @@
 {
     "recommendations": [
       "vscode-icons-team.vscode-icons",
-      "editorconfig.editorconfig"
+      "editorconfig.editorconfig",
+      "ms-python.python",
+      "ms-toolsai.jupyter"
     ]
 }

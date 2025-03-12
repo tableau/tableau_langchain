@@ -1,0 +1,10 @@
+{
+    "dependencies": [
+        ".",
+        "pyproject.toml"
+    ],
+    "graphs": {
+        "agent": "./agents/cra/agent.py:cra_agent"
+    },
+    "env": ".env"
+}
