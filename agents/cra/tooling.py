@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-from agents.tools import tableau_metrics
+#from agents.tools import tableau_metrics
 
 from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
@@ -17,8 +17,8 @@ tableau_user = os.environ['TABLEAU_USER']
 datasource_luid = os.environ['DATASOURCE_LUID']
 tooling_llm_model = os.environ['TOOLING_MODEL']
 
-# Metrics RAG tool
-metrics = tableau_metrics
+# # Metrics RAG tool
+# metrics = tableau_metrics
 
 # Tableau VizQL Data Service Query Tool
 analyze_datasource = initialize_simple_datasource_qa(
