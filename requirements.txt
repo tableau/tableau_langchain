@@ -19,3 +19,5 @@ llama-index-vector-stores-pinecone
 pinecone-client[grpc]
 semantic-router
 tavily-python
+tokenizers
+langchain_tableau
