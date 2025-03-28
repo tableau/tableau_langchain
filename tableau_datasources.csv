@@ -1,0 +1,104 @@
+name,luid,description,is_certified,project_name,owner_username,owner_name,owner_email,last_refresh_time,last_incremental_update_time,last_update_time,has_active_warning,fields
+TestPDS,f83d1afb-fb58-496e-a457-5feb5d80e28e,,False,Joe,jchirilov@salesforce.com,Joe Chirilov,jchirilov@salesforce.com,2025-03-27T16:04:34Z,,2025-03-27T16:04:34Z,False,"Product Name: None
+Sales per Customer: None
+State/Province: None
+City: None
+Discount: None
+Country/Region: None
+Order Profitable?: A level of detail expression that calculates profitability for each Order
+Sales: None
+Product: None
+Ship Status: Was shipment early, ontime or late based on ship mode
+Order Date: None
+Order ID (Returns): None
+Profit per Order: None
+Sub-Category: None
+Order ID: None
+Segment: None
+Days to Ship Actual: None
+Customer ID: None
+Returns: None
+Quantity: None
+Product ID: None
+Postal Code: None
+:Measure Names: None
+Sales above Target?: Used with ""Sales Target"" data source
+Row ID: This is a test comment / field description
+People: None
+Category: None
+Profit: None
+Days to Ship Scheduled: None
+Regional Manager: None
+Orders: None
+Region: None
+Ship Mode: None
+Sales Forecast: None
+Ship Date: None
+Returned: None
+Profit Ratio: None
+Region (People): None
+Customer Name: None
+Location: None
+Units estimate: None"
+Superstore Sales,3dc475f2-8b3f-46ff-9448-a90f62519b2c,,False,Will,will.sutton@theinformationlab.co.uk,Will Sutton,will.sutton@theinformationlab.co.uk,2025-03-27T11:11:24Z,,2025-03-27T11:11:24Z,False,"Quantity: None
+Postal Code: None
+Sales: None
+Ship Mode: None
+Customer ID: None
+Order ID: None
+Customer Name: None
+State/Province: None
+Discount: None
+Product Name: None
+Returned: None
+Region (People): None
+Sub-Category: None
+Segment: None
+Regional Manager: None
+Product ID: None
+Profit: None
+Region: None
+Category: None
+Order ID (Returns): None
+Ship Date: None
+Order Date: None
+Returns: None
+City: None
+Row ID: None
+People: None
+Orders: None
+Country/Region: None"
+Superstore Datasource,5df29aa2-4c42-4518-a90d-f461ed1b04f9,,False,Samples,jchirilov@salesforce.com,Joe Chirilov,jchirilov@salesforce.com,,,,False,"Customer ID: None
+Profit (bin): None
+Returned: None
+Category: None
+Manufacturer: None
+City: None
+Sub-Category: None
+Ship Date: None
+Discount: None
+People: None
+Order ID (Returns): None
+Product ID: None
+Returns: None
+State/Province: None
+Order Date: None
+Top Customers by Profit: None
+Profit Ratio: None
+Region: None
+Order ID: None
+Row ID: None
+Customer Name: None
+Product Name: None
+Location: None
+Region (People): None
+Quantity: None
+Postal Code: None
+Profit: None
+Country/Region: None
+Product: None
+Orders: None
+Ship Mode: None
+Person: None
+Segment: None
+Sales: None"

@@ -166,6 +166,7 @@ cython_debug/
 .langgraph_api
 
 data/
+vector_db/
 chains/query_data_chain/static/dashboard_images/
 
 #Mac
