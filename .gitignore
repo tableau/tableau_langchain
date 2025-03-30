@@ -166,5 +166,5 @@ cython_debug/
 
 data/
 
-# Don't know why this isn't standard by now
+# Mac
 .DS_Store
