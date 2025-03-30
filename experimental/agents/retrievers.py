@@ -3,7 +3,7 @@ from langchain_pinecone import PineconeVectorStore
 from langchain.tools import Tool
 from pinecone import Pinecone
 
-from agents.models import select_embeddings
+from experimental.agents.models import select_embeddings
 
 # Initialize Pinecone client
 pinecone = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
