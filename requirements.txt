@@ -11,6 +11,7 @@ langgraph-cli
 langchain_anthropic
 langchain_openai
 langchain-pinecone
+langchain-tableau
 langserve[all]
 langchain_community
 langchain_experimental
