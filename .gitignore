@@ -168,3 +168,6 @@ data/
 
 # Mac
 .DS_Store
+
+# temporary graph visualization is updated with changes to agent run via main.py
+graph_visualization.png
