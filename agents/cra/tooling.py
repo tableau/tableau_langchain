@@ -1,10 +1,11 @@
 import os
 from dotenv import load_dotenv
 
-from agents.tools import tavily_tool
-from agents.retrievers import tableau_metrics
+from agents.tools import tableau_metrics, tavily_tool
 
 from community.langchain_community.tools.tableau.datasource_qa import initialize_datasource_qa
+
+from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
 # Load environment variables before accessing them
 load_dotenv()
@@ -19,7 +20,7 @@ datasource_luid = os.environ['DATASOURCE_LUID']
 tooling_llm_model = os.environ['TOOLING_MODEL']
 
 # Tableau VizQL Data Service Query Tool
-analyze_datasource = initialize_datasource_qa(
+analyze_datasource = initialize_simple_datasource_qa(
     domain=tableau_domain,
     site=tableau_site,
     jwt_client_id=tableau_jwt_client_id,
