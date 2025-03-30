@@ -4,7 +4,7 @@
         "pyproject.toml"
     ],
     "graphs": {
-        "agent": "./agents/cra/agent.py:analytics_agent"
+        "agent": "./experimental/agents/create_react_agent/agent.py:analytics_agent"
     },
     "env": ".env"
 }

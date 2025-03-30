@@ -2,7 +2,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from uuid import uuid4
 
-from agents.utils.other import http_post
+from experimental.agents.utils.other import http_post
 
 
 # authenticates user to Tableau
