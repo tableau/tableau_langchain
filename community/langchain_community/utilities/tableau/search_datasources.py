@@ -131,12 +131,14 @@ def create_datasources_vector_db(
             persist_directory="vector_db"
         )
     )
-    
+
     # Delete existing collection if it exists
-    if collection_name in [col.name for col in chroma_client.list_collections()]:
+    collection_names = chroma_client.list_collections()
+    if collection_name in collection_names:
         chroma_client.delete_collection(name=collection_name)
         if debug:
             print(f"Deleted existing collection: {collection_name}")
+
     
     # Create new collection
     collection = chroma_client.create_collection(

@@ -1,5 +1,9 @@
 import os
 from dotenv import load_dotenv
+import jwt
+from datetime import datetime, timedelta, timezone
+from uuid import uuid4
+import requests
 
 # Import helper functions from existing modules
 from community.langchain_community.utilities.tableau.auth import jwt_connected_app
@@ -22,12 +26,79 @@ tableau_site     = os.getenv('SITE_NAME')
 tableau_user     = os.getenv('TABLEAU_USER')     
 
 # Credentials for generating auth token via connnected app
-tableau_client_id    = os.getenv('TABLEAU_JWT_CLIENT_ID')
-tableau_secret_id    = os.getenv('TABLEAU_JWT_SECRET_ID')
-tableau_secret_value = os.getenv('TABLEAU_JWT_SECRET')
+tableau_jwt_client_id    = os.getenv('TABLEAU_JWT_CLIENT_ID')
+tableau_jwt_secret_id    = os.getenv('TABLEAU_JWT_SECRET_ID')
+tableau_jwt_secret = os.getenv('TABLEAU_JWT_SECRET')
 tableau_api_version  = os.getenv('TABLEAU_API_VERSION') 
 
 DEFAULT_COLLECTION_NAME = f"{tableau_site}_vector_store"
+
+def generate_tableau_auth_token(
+    jwt_client_id, 
+    jwt_secret_id, 
+    jwt_secret, 
+    tableau_server, 
+    tableau_site, 
+    tableau_user,
+    tableau_api_version='3.20'
+):
+    """
+    Generate a Tableau authentication token
+    
+    :return: Authentication token (X-Tableau-Auth)
+    """
+    # Generate JWT for initial authentication
+    access_scopes = [
+        "tableau:content:read",
+        "tableau:viz_data_service:read"
+    ]
+    
+    jwt_token = jwt.encode(
+        {
+            "iss": jwt_client_id,
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
+            "jti": str(uuid4()),
+            "aud": "tableau",
+            "sub": tableau_user,
+            "scp": access_scopes
+        },
+        jwt_secret,
+        algorithm="HS256",
+        headers={
+            'kid': jwt_secret_id,
+            'iss': jwt_client_id
+        }
+    )
+    
+    # Authenticate and get X-Tableau-Auth token
+    endpoint = f"{tableau_server}/api/{tableau_api_version}/auth/signin"
+    
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    }
+    
+    payload = {
+        "credentials": {
+            "jwt": jwt_token,
+            "site": {
+                "contentUrl": tableau_site,
+            }
+        }
+    }
+    
+    try:
+        response = requests.post(endpoint, headers=headers, json=payload)
+        response.raise_for_status()
+        
+        # Extract the authentication token
+        return response.json()['credentials']['token']
+    
+    except requests.RequestException as e:
+        print(f"Authentication error: {e}")
+        print(f"Response content: {response.text}")
+        raise
+
 
 def build_tableau_vector_db(debug: bool = False) -> None:
     """
@@ -42,16 +113,26 @@ def build_tableau_vector_db(debug: bool = False) -> None:
 
 
     # Generate Tableau API auth token using the provided credentials
-    auth_token = jwt_connected_app(
-        jwt_client_id   = tableau_client_id,
-        jwt_secret_id   = tableau_secret_id,
-        jwt_secret      = tableau_secret_value,
-        tableau_domain  = tableau_server,
-        tableau_site    = tableau_site,
-        tableau_user    = tableau_user,
-        tableau_api     = tableau_api_version,
-        scopes          = access_scopes
-    )
+    # auth_token = jwt_connected_app(
+    #     jwt_client_id   = tableau_jwt_client_id,
+    #     jwt_secret_id   = tableau_jwt_secret_id,
+    #     jwt_secret      = tableau_jwt_secret,
+    #     tableau_domain  = tableau_server,
+    #     tableau_site    = tableau_site,
+    #     tableau_user    = tableau_user,
+    #     tableau_api     = tableau_api_version,
+    #     scopes          = access_scopes
+    # )
+
+    auth_token = generate_tableau_auth_token(
+            jwt_client_id=tableau_jwt_client_id,
+            jwt_secret_id=tableau_jwt_secret_id,
+            jwt_secret=tableau_jwt_secret,
+            tableau_server=tableau_server,
+            tableau_site=tableau_site,
+            tableau_user=tableau_user,
+            tableau_api_version=tableau_api_version
+        )
 
     # Retrieve all published datasource metadata via Tableau Metadata API
     datasources_metadata = get_datasources_metadata(domain=tableau_server, api_key=auth_token)
