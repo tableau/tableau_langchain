@@ -9,6 +9,8 @@ We welcome you to explore how Agentic tools can drive alignment between your org
 To see live demos of Agents using Tableau visit:
 - [EmbedTableau.com](https://www.embedtableau.com/) | [Github Repository](https://github.com/Tab-SE/embedding_playbook) | [@stephenlprice](https://github.com/stephenlprice)
 
+</br>
+
 # Getting Started
 
 The easiest way to get started with `tableau_langchain` is to try the Jupyter Notebooks found in the `experimental/notebooks/` folder. These examples will guide you through different use cases and scenarios with increasing complexity.
@@ -69,14 +71,14 @@ To use the sandbox, do the following:
 
 2. Create a Python environment to isolate project dependencies (optional)
 
-   Note: This is an example using Conda (environment.yml provided). If you use Conda skip to step #4 since dependencies will already be installed
+   Note: This is an example using `conda` (environment.yml provided). If you use `conda` skip to step #4 since dependencies will already be installed. Other environment management systems should also work (`poetry`,  `venv`, `mamba` etc.)
 
    ```bash
    conda env create -f environment.yml
    conda activate tableau_langchain
    ```
 
-3. Install project dependencies (use this with or without using Python environments)
+3. Install project dependencies (use this to install anytime with or without using Python environments)
 
    ```bash
    pip install
@@ -89,7 +91,7 @@ To use the sandbox, do the following:
     cp .env.template .env
     ```
 
-    Replace the values in the `.env` file with your own
+    Replace the values in the `.env` file with your own. These values are secure and never published to Github
 
 5. Run an Agent in the terminal
 
@@ -97,13 +99,13 @@ To use the sandbox, do the following:
     python main.py
     ```
 
-6. Run the Langgraph Server API in development mode
+6. Run the Langgraph Server API in development mode (see [langgraph-cli](https://langchain-ai.github.io/langgraph/cloud/reference/cli/#commands))
 
     ```bash
     langgraph dev
     ```
 
-7. Run the Langgraph Server API via Docker
+7. Run the Langgraph Server API via Docker (see [langgraph-cli](https://langchain-ai.github.io/langgraph/cloud/reference/cli/#commands))
 
     ```bash
     langgraph build
@@ -130,6 +132,7 @@ the currently available resources:
 ## Local Development
 The `experimental` folder organizes agents, tools, utilities and notebooks for development and testing of solutions that may eventually be published ([see Published Agent Tools](#published-agent-tools)) for community use. This folder is essentially a sandbox for Tableau AI.
 
+</br>
 
 # Contributors
 
