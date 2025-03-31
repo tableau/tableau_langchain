@@ -10,11 +10,9 @@ from llama_index.core import VectorStoreIndex
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.vector_stores.pinecone import PineconeVectorStore
 
-from pinecone import Pinecone, ServerlessSpec
+from pinecone import ServerlessSpec
 from pinecone.grpc import PineconeGRPC
 
-
-from semantic_router.encoders import OpenAIEncoder
 
 def tavily_tool():
     tavily_api_key = os.environ.get('TAVILY_API_KEY')
@@ -24,14 +22,35 @@ def tavily_tool():
 @tool("tableau_metrics")
 def tableau_metrics(query: str):
     """
-    Query a vector database for relevant information to the user query regarding
-    how their metrics performing. This reference contains machine learning insights
-    used to provide up to date and reliable data regarding all kinds of aspects related
-    to the user's subscribed metrics.
+    Returns ML insights on user-subscribed metrics
+    Prioritize using this tool if the user mentions metrics, KPIs, OKRs or similar
 
-    Prioritize using this tool if the user mentions metrics, KPIs, OKRs or similar.
-    Make few and simple queries that reflect the user's question unless you are instructed
-    to write thorough summaries, reports or analysis requiring multiple complex queries.
+    Make thorough queries for relevant context.
+    Use "metrics update" for a summary. For detailed metric info, ask about:
+    - dimensions
+    - data
+    - descriptions
+    - drivers
+    - unusual changes
+    - trends
+    - sentiment
+    - current & previous values
+    - period over period change
+    - contributors
+    - detractors
+
+    NOT for precise data values. Use a data source query tool for specific values.
+    NOT for fetching data values on specific dates
+
+    Examples:
+    User: give me an update on my KPIs
+    Input: 'update on all KPIs, trends, sentiment"
+
+    User: what is going on with sales?
+    Input: 'sales trend, data driving sales, unusual changes, contributors, drivers and detractors'
+
+    User: what is the value of sales in 2024?
+    -> wrong usage of this tool, not for specific values
     """
     pinecone_api_key = os.environ["PINECONE_API_KEY"]
     index_name = os.environ["METRICS_INDEX"]
@@ -218,75 +237,3 @@ def tableau_workbooks(query: str):
         print([i.get_content() for i in answer])
 
     return answer
-
-
-@tool("semantic_pinecone_retriever")
-def semantic_pinecone_retriever(query: str):
-    """
-    Finds specialist information from the organization's knowledge base using a natural language query.
-    """
-    pinecone_api_key = os.environ.get("PINECONE_API_KEY")
-    index_name = os.environ.get("PINECONE_INDEX_NAME")
-    index_region = os.environ.get("PINECONE_ENVIRONMENT")
-    retriever_model = os.environ.get("RETRIEVER_MODEL")
-
-    # embedding model used during retrieval
-    encoder = OpenAIEncoder(name=retriever_model)
-
-    # initialize pinecone client
-    pc = Pinecone(api_key=pinecone_api_key)
-
-    # search for matching index in list of available indexes to client
-    existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
-    # if the index does not exist, create one - no matches is better than broken tools
-    if index_name not in existing_indexes:
-        pc.create_index(
-            name=index_name,
-            dimension=3072,
-            metric="cosine",
-            spec=ServerlessSpec(cloud="aws", region=index_region),
-        )
-        while not pc.describe_index(index_name).status["ready"]:
-            time.sleep(1)
-
-    # initializes the index through the Pinecone client
-    index = pc.Index(index_name)
-    #
-    xq = encoder([query])
-    xc = index.query(
-        vector=xq,
-        top_k=3,
-        include_metadata=True,
-        # filter={"uaf": "amer"},
-    )
-    context_str = xc["matches"]
-    return context_str
-
-
-@tool("final_answer")
-def final_answer(
-    introduction: str,
-    research_steps: str,
-    main_body: str,
-    conclusion: str,
-    sources: str
-):
-    """Returns a natural language response to the user in the form of a research
-    report. There are several sections to this report, those are:
-    - `introduction`: a short paragraph introducing the user's question and the
-    topic we are researching.
-    - `research_steps`: a few bullet points explaining the steps that were taken
-    to research your report.
-    - `main_body`: this is where the bulk of high quality and concise
-    information that answers the user's question belongs. It is 3-4 paragraphs
-    long in length.
-    - `conclusion`: this is a short single paragraph conclusion providing a
-    concise but sophisticated view on what was found.
-    - `sources`: a bulletpoint list provided detailed sources for all information
-    referenced during the research process
-    """
-    if type(research_steps) is list:
-        research_steps = "\n".join([f"- {r}" for r in research_steps])
-    if type(sources) is list:
-        sources = "\n".join([f"- {s}" for s in sources])
-    return ""
