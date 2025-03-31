@@ -1,6 +1,7 @@
 FROM langchain/langgraph-api:3.12
 
 
+RUN cat /api/constraints.txt
 
 RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -c /api/constraints.txt pyproject.toml
 
