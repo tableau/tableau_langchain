@@ -95,12 +95,24 @@ To use the sandbox, do the following:
     conda activate tableau_langchain
     ```
 
-3. Install project dependencies (use this to install anytime with or without using Python environments)
+3. Install project dependencies (use this to install anytime with or without isolated Python environments)
 
     Note: dependencies are listed in the `pyproject.toml` file
 
     ```bash
     pip install
+    ```
+
+    You must also install the `langgraph-cli` developer dependency in order to run the Langgraph Server (see [langgraph-cli](https://langchain-ai.github.io/langgraph/cloud/reference/cli))
+
+    ```bash
+    pip install langgraph-cli
+    ```
+
+    If you wish to run the Langgraph Server in local development mode you will need the `inmem` extra (see [langgraph dev](https://langchain-ai.github.io/langgraph/cloud/reference/cli/#dev) command)
+
+    ```bash
+    pip install -U "langgraph-cli[inmem]"
     ```
 
 4. Declare Environment Variables
