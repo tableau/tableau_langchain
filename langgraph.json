@@ -4,7 +4,7 @@
         "pyproject.toml"
     ],
     "graphs": {
-        "superstore": "./experimental/agents/superstore/agent.py:analytics_agent"
+        "superstore": "./experimental/agents/demos/superstore/agent.py:analytics_agent"
     },
     "env": ".env"
 }

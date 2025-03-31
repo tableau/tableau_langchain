@@ -6,8 +6,8 @@ from langgraph.prebuilt import create_react_agent
 from langgraph.store.memory import InMemoryStore
 
 from experimental.agents.models import select_model
-from experimental.agents.superstore.tooling import tools
-from experimental.agents.superstore.prompt import AGENT_SYSTEM_PROMPT
+from experimental.agents.demos.superstore.tooling import tools
+from experimental.agents.demos.superstore.prompt import AGENT_SYSTEM_PROMPT
 
 
 """
