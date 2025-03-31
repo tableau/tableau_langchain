@@ -6,6 +6,9 @@ and Chains are published to the PyPi registry under [langchain-tableau](https://
 
 We welcome you to explore how Agentic tools can drive alignment between your organization's data and the day to day needs of your users. Consider contributing to this project or creating your own work on a different framework, ultimately seek to increase the flow of data and help people get answers from it.
 
+To see live demos of Agents using Tableau visit:
+- [EmbedTableau.com](https://www.embedtableau.com/) | [Github Repository](https://github.com/Tab-SE/embedding_playbook) | [@stephenlprice](https://github.com/stephenlprice)
+
 # Getting Started
 
 The easiest way to get started with `tableau_langchain` is to try the Jupyter Notebooks found in the `experimental/notebooks/` folder. These examples will guide you through different use cases and scenarios with increasing complexity.
@@ -133,7 +136,7 @@ The `experimental` folder organizes agents, tools, utilities and notebooks for d
 This the founding team for the project. Please consider contributing in your own way to further what's possible when you combine Tableau with AI Agents.
 
 * [@stephenlprice](https://github.com/stephenlprice) - Lead Developer
-* [@joeconstantino](https://github.com/joeconstantino) - Project Manager
+* [@joeconstantino](https://github.com/joeconstantino) - Product Manager
 * [@josephflu](https://github.com/josephflu) - Developer
 * [@wjsutton](https://github.com/wjsutton) - Developer
 * [@cristiansaavedra](https://github.com/cristiansaavedra) - Developer
