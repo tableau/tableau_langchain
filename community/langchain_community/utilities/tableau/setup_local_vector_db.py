@@ -14,9 +14,6 @@ from community.langchain_community.utilities.tableau.search_datasources import (
     query_datasources_vector_db
 )
 
-# Default collection name for the vector database
-DEFAULT_COLLECTION_NAME = "datasources"
-
 # Load environment variables (Tableau creds, OpenAI API key, etc.)
 load_dotenv()
 
@@ -110,19 +107,6 @@ def build_tableau_vector_db(debug: bool = False) -> None:
         "tableau:content:read",
         "tableau:viz_data_service:read"
     ]
-
-
-    # Generate Tableau API auth token using the provided credentials
-    # auth_token = jwt_connected_app(
-    #     jwt_client_id   = tableau_jwt_client_id,
-    #     jwt_secret_id   = tableau_jwt_secret_id,
-    #     jwt_secret      = tableau_jwt_secret,
-    #     tableau_domain  = tableau_server,
-    #     tableau_site    = tableau_site,
-    #     tableau_user    = tableau_user,
-    #     tableau_api     = tableau_api_version,
-    #     scopes          = access_scopes
-    # )
 
     auth_token = generate_tableau_auth_token(
             jwt_client_id=tableau_jwt_client_id,

@@ -167,6 +167,7 @@ cython_debug/
 
 data/
 vector_db/
+dashboard_images/
 chains/query_data_chain/static/dashboard_images/
 
 #Mac
