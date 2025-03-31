@@ -4,30 +4,32 @@ version = "0.1.0"
 description = "A community project to stage, test and build Tableau tools for Agents built with the Langgraph framework"
 authors = [
     { name = "Stephen Price" },
-    { name = "Joe Constantino" }
+    { name = "Joe Constantino" },
+    { name = "Joseph Fluckiger" }
 ]
 requires-python = ">=3.12.2"
 license = "MIT"
 readme = "README.md"
 
 dependencies = [
-    "python-dotenv",
-    "langchain",
-    "langgraph",
-    "langsmith",
-    "langchain-anthropic",
-    "langchain-openai",
-    "langchain-pinecone",
-    "langserve[all]",
-    "langchain-community",
-    "langchain-experimental",
-    "llama-index",
-    "llama-index-vector-stores-pinecone",
-    "pinecone-client[grpc]",
-    "semantic-router",
-    "tavily-python"
+    "python-dotenv==1.1.0",
+    "langchain==0.3.21",
+    "langgraph==0.3.21",
+    "langsmith==0.2.11",
+    "langchain-anthropic==0.3.10",
+    "langchain-openai==0.3.11",
+    "langchain-pinecone==0.2.3",
+    "langchain-tableau==0.4.35",
+    "langchain-community==0.3.20",
+    "llama-index==0.12.27",
+    "llama-index-vector-stores-pinecone==0.4.5",
+    "pinecone-client[grpc]==6.0.0",
+    "tavily-python==0.5.3",
 ]
 
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["experimental"]
