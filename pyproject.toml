@@ -4,7 +4,8 @@ version = "0.1.0"
 description = "A community project to stage, test and build Tableau tools for Agents built with the Langgraph framework"
 authors = [
     { name = "Stephen Price" },
-    { name = "Joe Constantino" }
+    { name = "Joe Constantino" },
+    { name = "Joseph Fluckiger" }
 ]
 requires-python = ">=3.12.2"
 license = "MIT"
@@ -32,3 +33,6 @@ dependencies = [
 [build-system]
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["experimental"]
