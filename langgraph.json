@@ -4,7 +4,8 @@
         "pyproject.toml"
     ],
     "graphs": {
-        "agent": "./agents/cra/agent.py:cra_agent"
+        "superstore": "./experimental/agents/demos/superstore/agent.py:analytics_agent"
     },
-    "env": ".env"
+    "env": ".env",
+    "python_version": "3.12"
 }

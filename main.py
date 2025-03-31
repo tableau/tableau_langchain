@@ -3,8 +3,8 @@ import asyncio
 
 from dotenv import load_dotenv
 
-from agents.cra.agent import cra_agent
-from agents.utils.agent_utils import stream_graph_updates, _visualize_graph
+from experimental.agents.demos.superstore.agent import analytics_agent
+from experimental.agents.utils.agent_utils import stream_graph_updates, _visualize_graph
 
 from langchain_tableau.utilities.auth import jwt_connected_app
 
@@ -80,7 +80,7 @@ async def main():
     }
 
     # initialize one of the repo's custom agents
-    agent = cra_agent
+    agent = analytics_agent
 
     # outputs a mermaid diagram of the graph in png format
     _visualize_graph(agent)
