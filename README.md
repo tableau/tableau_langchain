@@ -39,7 +39,7 @@ To use the solutions available at [langchain-tableau](https://pypi.org/project/l
    ```bash
    pip install langchain-tableau
    ```
-2. Import `langchain-tableau` and use it with your Agent
+2. Import `langchain-tableau` and use it with your Agent (in a Python file or Jupyter Notebook)
 
    ```python
     # langchain and langgraph package imports
@@ -82,28 +82,31 @@ To use the sandbox, do the following:
 
 1. Clone the repository
 
-   ```bash
-   git clone https://github.com/Tab-SE/tableau_langchain.git
-   ```
+    ```bash
+    git clone https://github.com/Tab-SE/tableau_langchain.git
+    ```
 
 2. Create a Python environment to isolate project dependencies (optional)
 
-   Note: This is an example using `conda` (environment.yml provided). If you use `conda` skip to step #4 since dependencies will already be installed. Other environment management systems should also work (`poetry`,  `venv`, `mamba` etc.)
+   Note: This is an example using `conda` (`environment.yml` file provided). If you use `conda` skip to step #4 since dependencies will already be installed. Other environment management systems should also work (`poetry`,  `venv`, `mamba` etc.)
 
-   ```bash
-   conda env create -f environment.yml
-   conda activate tableau_langchain
-   ```
+    ```bash
+    conda env create -f environment.yml
+    conda activate tableau_langchain
+    ```
 
 3. Install project dependencies (use this to install anytime with or without using Python environments)
 
-   ```bash
-   pip install
-   ```
+    Note: dependencies are listed in the `pyproject.toml` file
+
+    ```bash
+    pip install
+    ```
 
 4. Declare Environment Variables
 
     Start by duplicating the template file:
+
     ```bash
     cp .env.template .env
     ```
