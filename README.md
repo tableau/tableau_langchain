@@ -9,7 +9,7 @@ and Chains are published to the PyPi registry under [langchain-tableau](https://
 pip install langchain-tableau
 ```
 
-We welcome you to explore how Agentic tools can drive alignment between your organization's data and the day to day needs of your users. Consider contributing to this project or creating your own work on a different framework, ultimately seek to increase the flow of data and help people get answers from it.
+We welcome you to explore how Agentic tools can drive alignment between your organization's data and the day to day needs of your users. Consider contributing to this project or creating your own work on a different framework, ultimately we seek to increase the flow of data and help people get answers from it.
 
 To see live demos of Agents using Tableau visit:
 - [EmbedTableau.com](https://www.embedtableau.com/) | [Github Repository](https://github.com/Tab-SE/embedding_playbook) | [@stephenlprice](https://github.com/stephenlprice)
