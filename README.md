@@ -1,15 +1,32 @@
 # Tableau Langchain
-#### Tableau tools for Agentic use cases with Langchain
 
 This project builds Agentic tools from Tableau capabilities for use within the [Langchain](https://www.langchain.com/) and [LangGraph](https://langchain-ai.github.io/langgraph/tutorials/introduction/) frameworks. Solutions such as Tools, Utilities
 and Chains are published to the PyPi registry under [langchain-tableau](https://pypi.org/project/langchain-tableau/) following conventions for [integrations](https://python.langchain.com/docs/contributing/how_to/integrations/) to Langchain.
+
+![tableau logo](experimental/notebooks/assets/tableau_logo_text.png)
+
+```bash
+pip install langchain-tableau
+```
 
 We welcome you to explore how Agentic tools can drive alignment between your organization's data and the day to day needs of your users. Consider contributing to this project or creating your own work on a different framework, ultimately seek to increase the flow of data and help people get answers from it.
 
 To see live demos of Agents using Tableau visit:
 - [EmbedTableau.com](https://www.embedtableau.com/) | [Github Repository](https://github.com/Tab-SE/embedding_playbook) | [@stephenlprice](https://github.com/stephenlprice)
 
+# Table of Contents
+- [Tableau Langchain](#tableau-langchain)
+- [Table of Contents](#table-of-contents)
+- [Getting Started](#getting-started)
+  - [Experimental Sandbox](#experimental-sandbox)
+- [About This Project](#about-this-project)
+  - [Published Agent Tools](#published-agent-tools)
+  - [Local Development](#local-development)
+- [Contributors](#contributors)
+
 </br>
+
+![tableau logo](experimental/notebooks/assets/vizart/area_chart_banner.png)
 
 # Getting Started
 
@@ -99,20 +116,22 @@ To use the sandbox, do the following:
     python main.py
     ```
 
-6. Run the Langgraph Server API in development mode (see [langgraph-cli](https://langchain-ai.github.io/langgraph/cloud/reference/cli/#commands))
+6. Run the Langgraph Server API (see [langgraph-cli](https://langchain-ai.github.io/langgraph/cloud/reference/cli/#commands))
 
+    Note: Docker Desktop must also be running
+
+    Local Development
     ```bash
     langgraph dev
     ```
 
-7. Run the Langgraph Server API via Docker (see [langgraph-cli](https://langchain-ai.github.io/langgraph/cloud/reference/cli/#commands))
-
+    Docker Container
     ```bash
     langgraph build
     langgraph up
     ```
 
-</br>
+![tableau logo](experimental/notebooks/assets/vizart/up_down_area.png)
 
 # About This Project
 
@@ -122,7 +141,6 @@ This repository is a monorepo with two components. The main goal is to publish a
 The `pgk` folder contains production code shipped to the [PyPi registry](https://pypi.org/project/langchain-tableau/). These are
 the currently available resources:
 
-### Solutions
 1. `simple_datasource_qa.py`
      - Query a Published Datasource in natural language
      - Leverage the analytical engine provided by Tableau's VizQL Data Service
@@ -143,3 +161,5 @@ This the founding team for the project. Please consider contributing in your own
 * [@josephflu](https://github.com/josephflu) - Developer
 * [@wjsutton](https://github.com/wjsutton) - Developer
 * [@cristiansaavedra](https://github.com/cristiansaavedra) - Developer
+
+![tableau logo](experimental/notebooks/assets/vizart/area-blue-dark.png)
