@@ -14,23 +14,26 @@ We welcome you to explore how Agentic tools can drive alignment between your org
 To see live demos of Agents using Tableau visit:
 - [EmbedTableau.com](https://www.embedtableau.com/) | [Github Repository](https://github.com/Tab-SE/embedding_playbook) | [@stephenlprice](https://github.com/stephenlprice)
 
+</br>
+
 # Table of Contents
 - [Tableau Langchain](#tableau-langchain)
 - [Table of Contents](#table-of-contents)
 - [Getting Started](#getting-started)
+  - [Published Solutions](#published-solutions)
   - [Experimental Sandbox](#experimental-sandbox)
 - [About This Project](#about-this-project)
-  - [Published Agent Tools](#published-agent-tools)
-  - [Local Development](#local-development)
+  - [Published Solutions](#published-solutions-1)
+  - [Experimental Sandbox](#experimental-sandbox-1)
 - [Contributors](#contributors)
 
-</br>
-
-![tableau logo](experimental/notebooks/assets/vizart/area_chart_banner.png)
+![area chart](experimental/notebooks/assets/vizart/area_chart_banner.png)
 
 # Getting Started
 
 The easiest way to get started with `tableau_langchain` is to try the Jupyter Notebooks found in the `experimental/notebooks/` folder. These examples will guide you through different use cases and scenarios with increasing complexity.
+
+## Published Solutions
 
 To use the solutions available at [langchain-tableau](https://pypi.org/project/langchain-tableau/) in notebooks and in your code do the following:
 
@@ -73,6 +76,8 @@ To use the solutions available at [langchain-tableau](https://pypi.org/project/l
     # Run the Agent
     messages = tableauAgent.invoke({"messages": [("human",'which states sell the most? Are those the same states with the most profits?')]})
    ```
+
+</br>
 
 ## Experimental Sandbox
 
@@ -146,13 +151,13 @@ To use the sandbox, do the following:
     langgraph up
     ```
 
-![tableau logo](experimental/notebooks/assets/vizart/up_down_area.png)
+![dual axis area chart](experimental/notebooks/assets/vizart/up_down_area.png)
 
 # About This Project
 
 This repository is a monorepo with two components. The main goal is to publish and support a Langchain [integration](https://python.langchain.com/docs/contributing/how_to/integrations/). This produces a need to have a development sandbox to try these solutions before publishing them for open-source use.
 
-## Published Agent Tools
+## Published Solutions
 The `pgk` folder contains production code shipped to the [PyPi registry](https://pypi.org/project/langchain-tableau/). These are
 the currently available resources:
 
@@ -162,7 +167,7 @@ the currently available resources:
        - Supports aggregating, filtering and soon: calcs!
        - Scales securely by way of the API interface preventing SQL injection
 
-## Local Development
+## Experimental Sandbox
 The `experimental` folder organizes agents, tools, utilities and notebooks for development and testing of solutions that may eventually be published ([see Published Agent Tools](#published-agent-tools)) for community use. This folder is essentially a sandbox for Tableau AI.
 
 </br>
@@ -177,4 +182,4 @@ This the founding team for the project. Please consider contributing in your own
 * [@wjsutton](https://github.com/wjsutton) - Developer
 * [@cristiansaavedra](https://github.com/cristiansaavedra) - Developer
 
-![tableau logo](experimental/notebooks/assets/vizart/area-blue-dark.png)
+![dual axis area chart](experimental/notebooks/assets/vizart/rounded-bars-blue-dark.png)
