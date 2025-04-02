@@ -4,7 +4,7 @@
         "pyproject.toml"
     ],
     "graphs": {
-        "superstore": "./experimental/agents/demos/superstore/agent.py:analytics_agent"
+        "keynote": "./experimental/agents/demos/keynote/agent.py:analytics_agent"
     },
     "env": ".env",
     "python_version": "3.12"
