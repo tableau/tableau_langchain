@@ -3,15 +3,18 @@ async function runAgent() {
     const output = document.getElementById("response");
     output.textContent = "Thinking...";
 
+    // Load assistant ID from config
+    const config = await fetch("config.json").then(res => res.json());
+    const assistantId = config.ANALYTICS_ASSISTANT_ID;
+
     const payload = {
-      assistant_id: "17909892-e2f4-479b-825e-d97f4120b62e",
+      assistant_id: assistantId,
       input: {
         messages: [
           { type: "human", content: input }
         ]
       }
     };
-    console.log(payload);
 
     try {
       const response = await fetch("http://127.0.0.1:2024/runs/stream", {
