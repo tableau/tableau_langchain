@@ -121,7 +121,7 @@ def create_datasources_vector_db(
     # Set up embedding function
     embedding_function = embedding_functions.OpenAIEmbeddingFunction(
         api_key=os.getenv('OPENAI_API_KEY'),
-        model_name="text-embedding-ada-002"
+        model_name=os.getenv('EMBEDDING_MODEL')
     )
     
     # Initialize ChromaDB client
@@ -211,7 +211,7 @@ def query_datasources_vector_db(
     # Set up embedding function
     embedding_function = embedding_functions.OpenAIEmbeddingFunction(
         api_key=os.getenv('OPENAI_API_KEY'),
-        model_name="text-embedding-ada-002"
+        model_name=os.getenv('EMBEDDING_MODEL')
     )
     
     # Initialize ChromaDB client
@@ -254,4 +254,4 @@ def query_datasources_vector_db(
             print(f"Datasource Name: {metadata.get('name', 'Unknown')}")
             print("Excerpt:", doc[:300] + "...")
     
-    return processed_results['luid']
+    return processed_results

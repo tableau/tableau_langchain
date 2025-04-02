@@ -6,9 +6,9 @@ from uuid import uuid4
 import requests
 
 # Import helper functions from existing modules
-from community.langchain_community.utilities.tableau.auth import jwt_connected_app
-from community.langchain_community.utilities.tableau.metadata import get_datasources_metadata
-from community.langchain_community.utilities.tableau.search_datasources import (
+from experimental.utilities.auth import jwt_connected_app
+from experimental.utilities.metadata import get_datasources_metadata
+from experimental.utilities.search_datasources import (
     format_datasources_for_rag,
     create_datasources_vector_db,
     query_datasources_vector_db
@@ -28,7 +28,7 @@ tableau_jwt_secret_id    = os.getenv('TABLEAU_JWT_SECRET_ID')
 tableau_jwt_secret = os.getenv('TABLEAU_JWT_SECRET')
 tableau_api_version  = os.getenv('TABLEAU_API_VERSION') 
 
-DEFAULT_COLLECTION_NAME = f"{tableau_site}_vector_store"
+DEFAULT_COLLECTION_NAME = f"{tableau_site}_tableau_datasource_vector_search"
 
 def generate_tableau_auth_token(
     jwt_client_id, 
