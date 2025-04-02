@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?> 
+<?xml version="1.0" encoding="utf-8"?>
 <manifest manifest-version="0.1" xmlns="http://www.tableau.com/xml/extension_manifest">
   <dashboard-extension id="com.tableau.extensions.tabagenttest" extension-version="0.1.0">
     <default-locale>en_US</default-locale>
     <name resource-id="name"/>
-    <description>Tableau Agent</description>
-    <author name="Joe Constantino" email="joe.constantino@salesforce.com" organization="Tableau" website="https://www.tableau.com"/>
+    <description>Analytics Agent</description>
+    <author name="Joey Constantino" email="joe.constantino@salesforce.com" organization="Tableau" website="https://www.tableau.com"/>
     <min-api-version>1.0</min-api-version>
     <source-location>
       <url>http://localhost:8080/index.html</url>
@@ -16,7 +16,7 @@
   </dashboard-extension>
   <resources>
    <resource id="name">
-     <text locale="en_US">Tableau Agent</text>
+     <text locale="en_US">Analytics Agent</text>
    </resource>
   </resources>
 </manifest>

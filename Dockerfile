@@ -1,6 +1,5 @@
 FROM langchain/langgraph-api:3.12
 
-
 RUN cat /api/constraints.txt
 
 RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -c /api/constraints.txt pyproject.toml
@@ -15,8 +14,7 @@ RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -c /api/constraints.txt
 
 # Define multiple graphs: endpoint_name: path/to/module.py:graph_variable
 ENV LANGSERVE_GRAPHS='{ \
-    "superstore": "/deps/tableau_langchain/experimental/agents/demos/superstore/agent.py:analytics_agent", \
-    # "another": "/deps/tableau_langchain/path/to/another_agent.py:some_other_graph_app" \
+    "keynote": "/deps/tableau_langchain/experimental/agents/demos/keynote/agent.py:analytics_agent", \
 }'
 #  ^--- Start JSON object      ^--- First key-value pair        ^--- Comma separator      ^--- Second key-value pair    ^--- End JSON object
 
