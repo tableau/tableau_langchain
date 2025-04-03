@@ -3,14 +3,11 @@ from pydantic import BaseModel, Field
 
 from langchain.prompts import PromptTemplate
 from langchain_core.tools import tool, ToolException
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.messages import SystemMessage
 
-from langchain_openai import ChatOpenAI
-
-from langchain_tableau.tools.prompts import vds_prompt, vds_response
-from langchain_tableau.utilities.auth import jwt_connected_app
-from langchain_tableau.utilities.simple_datasource_qa import (
+from pkg.langchain_tableau.tools.prompts import vds_query, vds_prompt_data, vds_response
+from pkg.langchain_tableau.utilities.auth import jwt_connected_app
+from pkg.langchain_tableau.utilities.models import select_model
+from pkg.langchain_tableau.utilities.simple_datasource_qa import (
     env_vars_simple_datasource_qa,
     augment_datasource_metadata,
     get_headlessbi_data,
@@ -18,27 +15,36 @@ from langchain_tableau.utilities.simple_datasource_qa import (
 )
 
 
-class SimpleDataSourceQAInputs(BaseModel):
+class DataSourceQAInputs(BaseModel):
     """Describes inputs for usage of the simple_datasource_qa tool"""
 
     user_input: str = Field(
         ...,
-        description="Take the user query and represent it as a simple SQL query",
+        description="""Describe the user query thoroughly in natural language such as: 'orders and sales for April 20 2025'.
+        You can ask for relative dates such as last week, 3 days ago, current year, previous 3 quarters or
+        specific dates: profits and average discounts for last week""",
         examples=[
-            "SELECT Region, AVG(Discount) AS Average_Discount, SUM(Sales) AS Total_Sales, SUM(Profit) AS Total_Profit FROM SalesData GROUP BY Region ORDER BY Total_Profit DESC"
+            "sales and orders for April 20 2025"
         ]
     )
     previous_call_error: Optional[str] = Field(
         None,
-        description="If the previous interaction resulted in a VizQL Data Service error suggesting a malformed query, include the error otherwise use None.",
+        description="""If the previous interaction resulted in a VizQL Data Service error, include the error otherwise use None:
+        Error: Quantitative Filters must have a QuantitativeFilterType""",
         examples=[
             None, # no errors example
             "Error: Quantitative Filters must have a QuantitativeFilterType"
         ],
     )
-    previous_call_query: Optional[str] = Field(
+    previous_vds_payload: Optional[str] = Field(
         None,
-        description="If the previous interaction resulted in a VizQL Data Service error suggesting a malformed query, include the faulty query otherwise use None.",
+        description="""If the previous interaction resulted in a VizQL Data Service error, include the faulty VDS JSON payload
+        otherwise use None: {\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",
+        \"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],
+        \"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",
+        \"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",
+        \"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",
+        \"exclude\":true,\"contains\":\"Technology\"}]}""",
         examples=[
             None, # no errors example
             "{\"fields\":[{\"fieldCaption\":\"Sub-Category\",\"fieldAlias\":\"SubCategory\",\"sortDirection\":\"DESC\",\"sortPriority\":1},{\"function\":\"SUM\",\"fieldCaption\":\"Sales\",\"fieldAlias\":\"TotalSales\"}],\"filters\":[{\"field\":{\"fieldCaption\":\"Order Date\"},\"filterType\":\"QUANTITATIVE_DATE\",\"minDate\":\"2023-04-01\",\"maxDate\":\"2023-10-01\"},{\"field\":{\"fieldCaption\":\"Sales\"},\"filterType\":\"QUANTITATIVE_NUMERICAL\",\"quantitativeFilterType\":\"MIN\",\"min\":200000},{\"field\":{\"fieldCaption\":\"Sub-Category\"},\"filterType\":\"MATCH\",\"exclude\":true,\"contains\":\"Technology\"}]}"
@@ -55,6 +61,7 @@ def initialize_simple_datasource_qa(
     tableau_api_version: Optional[str] = None,
     tableau_user: Optional[str] = None,
     datasource_luid: Optional[str] = None,
+    model_provider: Optional[str] = None,
     tooling_llm_model: Optional[str] = None
 ):
     """
@@ -95,23 +102,24 @@ def initialize_simple_datasource_qa(
         tableau_api_version=tableau_api_version,
         tableau_user=tableau_user,
         datasource_luid=datasource_luid,
+        model_provider=model_provider,
         tooling_llm_model=tooling_llm_model
     )
 
-    @tool("simple_datasource_qa", args_schema=SimpleDataSourceQAInputs)
+    @tool("simple_datasource_qa", args_schema=DataSourceQAInputs)
     def simple_datasource_qa(
         user_input: str,
         previous_call_error: Optional[str] = None,
-        previous_call_query: Optional[str] = None
+        previous_vds_payload: Optional[str] = None
     ) -> dict:
         """
         Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
-        You need a data source to target to use this tool. If a target data source is unknown, use a data source
-        search tool to find the right resource and retry with more information or ask the user to provide it.
+        To be more efficient, describe your entire query in a single request rather than selecting small slices of
+        data in multiple requests. DO NOT perform multiple queries if all the data can be fetched at once with the
+        same filters or conditions:
 
-        Prioritize this tool if the user asks you to analyze and explore data. This tool includes Agent summarization
-        and is not meant for direct data set exports. To be more efficient, query all the data you need in a single
-        request rather than selecting small slices of data in multiple requests.
+        Good query: "Profits & average discounts by region for last week"
+        Bad queries: "profits per region last week" & "average discounts per region last week"
 
         If you received an error after using this tool, mention it in your next attempt to help the tool correct itself.
         """
@@ -151,77 +159,109 @@ def initialize_simple_datasource_qa(
         # Data source for VDS querying
         tableau_datasource = env_vars["datasource_luid"]
 
-        # 1. Initialize Langchain chat template with an augmented prompt containing metadata for the datasource
-        query_data_prompt = ChatPromptTemplate.from_messages([
-            SystemMessage(content = augment_datasource_metadata(
-                api_key = tableau_auth,
-                url = domain,
-                datasource_luid = tableau_datasource,
-                prompt = vds_prompt,
-                previous_errors = previous_call_error,
-                previous_error_query = previous_call_query
-            )),
-            ("user", "{utterance}")
-        ])
+        # 0. Obtain metadata about the data source to enhance the query writing prompt
+        query_writing_data = augment_datasource_metadata(
+            task = user_input,
+            api_key = tableau_auth,
+            url = domain,
+            datasource_luid = tableau_datasource,
+            prompt = vds_prompt_data,
+            previous_errors = previous_call_error,
+            previous_vds_payload = previous_vds_payload
+        )
+
+        # 1. Insert instruction data into the template
+        query_writing_prompt = PromptTemplate(
+            input_variables=[
+                "task"
+                "instructions",
+                "vds_schema",
+                "sample_queries",
+                "error_queries",
+                "data_dictionary",
+                "data_model",
+                "previous_call_error",
+                "previous_vds_payload"
+            ],
+            template=vds_query
+        )
 
         # 2. Instantiate language model to execute the prompt to write a VizQL Data Service query
-        query_writer = ChatOpenAI(
-            model=env_vars["tooling_llm_model"],
+        query_writer = select_model(
+            provider=env_vars["model_provider"],
+            model_name=env_vars["tooling_llm_model"],
             temperature=0
         )
 
         # 3. Query data from Tableau's VizQL Data Service using the AI written payload
         def get_data(vds_query):
+            payload = vds_query.content
             try:
                 data = get_headlessbi_data(
                     api_key = tableau_auth,
                     url = domain,
                     datasource_luid = tableau_datasource,
-                    payload = vds_query.content
+                    payload = payload
                 )
 
                 return {
-                    "vds_query": vds_query,
+                    "vds_query": payload,
                     "data_table": data,
                 }
             except Exception as e:
                 query_error_message = f"""
                 Tableau's VizQL Data Service return an error for the generated query:
-                {str(vds_query)}
+
+                {str(vds_query.content)}
 
                 The user_input used to write this query was:
+
                 {str(user_input)}
 
                 This was the error:
+
                 {str(e)}
 
-                Consider retrying this tool with the same `user_input` key but include the query and
-                the error in the `previous_call_error` key for the tool to debug the query.
+                Consider retrying this tool with the same inputs but include the previous query
+                causing the error and the error itself for the tool to correct itself on a retry.
+                If the error was an empty array, this usually indicates an incorrect filter value
+                was applied, thus returning no data
                 """
 
                 raise ToolException(query_error_message)
 
         # 4. Prepare inputs for a structured response to the calling Agent
         def response_inputs(input):
+            metadata = query_writing_data.get('meta')
             data = {
                 "query": input.get('vds_query', ''),
-                "data_source": tableau_datasource,
+                "data_source_name": metadata.get('datasource_name'),
+                "data_source_description": metadata.get('datasource_description'),
+                "data_source_maintainer": metadata.get('datasource_owner'),
                 "data_table": input.get('data_table', ''),
             }
             inputs = prepare_prompt_inputs(data=data, user_string=user_input)
             return inputs
 
         # 5. Response template for the Agent with further instructions
-        enhanced_prompt = PromptTemplate(
-            input_variables=["data_source", "vds_query", "data_table", "user_input"],
+        response_prompt = PromptTemplate(
+            input_variables=[
+                "data_source_name",
+                "data_source_description",
+                "data_source_maintainer",
+                "vds_query",
+                "data_table",
+                "user_input"
+            ],
             template=vds_response
         )
 
         # this chain defines the flow of data through the system
-        chain = query_data_prompt | query_writer | get_data | response_inputs | enhanced_prompt
+        chain = query_writing_prompt | query_writer | get_data | response_inputs | response_prompt
+
 
         # invoke the chain to generate a query and obtain data
-        vizql_data = chain.invoke(user_input)
+        vizql_data = chain.invoke(query_writing_data)
 
         # Return the structured output
         return vizql_data
