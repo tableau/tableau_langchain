@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
 from experimental.agents.tools import tableau_metrics, tavily_tool
-from experimental.tools.datasource_qa import initialize_datasource_qa
 
 # Load environment variables before accessing them
 load_dotenv()
