@@ -7,14 +7,16 @@ from experimental.agents.tools import tableau_metrics, tavily_tool
 
 # Load environment variables before accessing them
 load_dotenv()
-tableau_domain = os.environ['TABLEAU_DOMAIN']
-tableau_site = os.environ['TABLEAU_SITE']
-tableau_jwt_client_id = os.environ['TABLEAU_JWT_CLIENT_ID']
-tableau_jwt_secret_id = os.environ['TABLEAU_JWT_SECRET_ID']
-tableau_jwt_secret = os.environ['TABLEAU_JWT_SECRET']
-tableau_api_version = os.environ['TABLEAU_API_VERSION']
-tableau_user = os.environ['TABLEAU_USER']
+tableau_domain = os.environ['KEYNOTE_DOMAIN']
+tableau_site = os.environ['KEYNOTE_SITE']
+tableau_jwt_client_id = os.environ['KEYNOTE_JWT_CLIENT_ID']
+tableau_jwt_secret_id = os.environ['KEYNOTE_JWT_SECRET_ID']
+tableau_jwt_secret = os.environ['KEYNOTE_JWT_SECRET']
+tableau_api_version = os.environ['KEYNOTE_API_VERSION']
+tableau_user = os.environ['KEYNOTE_USER']
+datasource_luid = os.environ['KEYNOTE_DATASOURCE_LUID']
 tooling_llm_model = os.environ['TOOLING_MODEL']
+
 
 # Tableau VizQL Data Service Query Tool
 analyze_datasource = initialize_simple_datasource_qa(
@@ -25,7 +27,7 @@ analyze_datasource = initialize_simple_datasource_qa(
     jwt_secret=tableau_jwt_secret,
     tableau_api_version=tableau_api_version,
     tableau_user=tableau_user,
-    datasource_luid='a9623caf-c4e7-0297-fa31-83a5189dfad9',
+    datasource_luid=datasource_luid,
     tooling_llm_model=tooling_llm_model
 )
 
