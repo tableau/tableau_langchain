@@ -10,31 +10,8 @@ def get_datasource_query(luid):
       publishedDatasources(filter: {{ luid: "{luid}" }}) {{
         name
         description
-        isCertified
         owner {{
-          username
           name
-          email
-        }}
-        hasActiveWarning
-        dataQualityWarnings {{
-          authorDisplayName
-          isActive
-          isElevated
-          value
-          category
-          message
-          createdAt
-          updatedAt
-        }}
-        extractLastRefreshTime
-        extractLastIncrementalUpdateTime
-        extractLastUpdateTime
-        datasourceFilters {{
-          field {{
-            name
-            description
-          }}
         }}
         fields {{
           name

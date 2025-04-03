@@ -114,7 +114,10 @@ def augment_datasource_metadata(
     )
 
     # insert data dictionary from Tableau's Data Catalog
-    prompt['data_dictionary'] = data_dictionary
+    prompt['data_dictionary'] = data_dictionary['datasource_fields']
+    # insert data source name, description and owner into 'meta' key
+    del data_dictionary['datasource_fields']
+    prompt['meta'] = data_dictionary
 
     #  get sample values for fields from VDS metadata endpoint
     datasource_metadata = query_vds_metadata(
@@ -150,10 +153,13 @@ def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
     Returns:
         dict: Mapped inputs for PromptTemplate
     """
+
     return {
-        "vds_query": data.get('query', ''),
-        "data_source": data.get('data_source', ''),
-        "data_table": data.get('data_table', ''),
+        "vds_query": data.get('query', 'no query'),
+        "data_source_name": data.get('data_source_name', 'no name'),
+        "data_source_description": data.get('data_source_description', 'no description'),
+        "data_source_maintainer": data.get('data_source_maintainer', 'no maintainer'),
+        "data_table": data.get('data_table', 'no data'),
         "user_input": user_string
     }
 
