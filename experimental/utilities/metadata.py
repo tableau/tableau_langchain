@@ -95,6 +95,18 @@ def get_data_dictionary(api_key: str, domain: str, datasource_luid: str) -> Dict
     response = requests.post(full_url, headers=headers, data=payload)
     response.raise_for_status()  # Raise an exception for bad status codes
 
-    dictionary = response.json()
+    json_data = response.json()['data']['publishedDatasources'][0]
 
-    return dictionary['data']
+    name = json_data.get('name')
+    description = json_data.get('description')
+    owner = json_data.get('owner', {}).get('name')
+    fields = json_data.get('fields', [])
+
+    dictionary = {
+        'datasource_name': name,
+        'datasource_description': description,
+        'datasource_owner': owner,
+        'datasource_fields': fields,
+    }
+
+    return dictionary

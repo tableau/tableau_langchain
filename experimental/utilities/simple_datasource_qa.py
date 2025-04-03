@@ -114,7 +114,7 @@ def augment_datasource_metadata(
     )
 
     # insert data dictionary from Tableau's Data Catalog
-    prompt['data_dictionary'] = data_dictionary['publishedDatasources'][0]
+    prompt['data_dictionary'] = data_dictionary
 
     #  get sample values for fields from VDS metadata endpoint
     datasource_metadata = query_vds_metadata(
