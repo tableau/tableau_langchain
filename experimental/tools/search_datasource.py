@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
+from experimental.agents.shared_state import set_datasource_luid
+
 from langchain_core.tools import tool, ToolException
 from experimental.utilities.search_datasources import (
     query_datasources_vector_db,
@@ -11,8 +13,7 @@ from experimental.utilities.search_datasources import (
 )
 from experimental.utilities.metadata import get_datasources_metadata, get_data_dictionary
 from experimental.utilities.auth import jwt_connected_app
-from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
-# from experimental.agents.demos.search.tooling import create_datasource_qa_tool
+from experimental.tools.datasource_qa import initialize_datasource_qa
 
 class DataSourceSearchInputs(BaseModel):
     query: str = Field(
@@ -104,7 +105,6 @@ class DataSourceSwitchInputs(BaseModel):
         ...,
         description="The LUID (ID) of the Tableau datasource to switch to."
     )
-
 def initialize_datasource_switch():
     """
     Initializes the Langgraph tool for switching the active Tableau datasource.
@@ -115,13 +115,15 @@ def initialize_datasource_switch():
     @tool("switch_datasource", args_schema=DataSourceSwitchInputs)
     def switch_datasource(luid: str) -> str:
         """Switch to a different Tableau datasource using its LUID."""
-        global analyze_datasource, current_datasource_luid, tools  # ensure these globals are accessible
+        global analyze_datasource, current_datasource_luid
+        # Import the tools list from the module where it's defined.
+        from experimental.agents.demos.search.tooling import tools as agent_tools
 
         if not luid or luid.strip() == "":
             raise ToolException("No datasource LUID provided")
         
+        load_dotenv()
         try:
-            # Create authentication token using pre-configured credentials.
             auth_token = jwt_connected_app(
                 jwt_client_id=os.getenv('TABLEAU_JWT_CLIENT_ID'),
                 jwt_secret_id=os.getenv('TABLEAU_JWT_SECRET_ID'),
@@ -132,14 +134,17 @@ def initialize_datasource_switch():
                 tableau_api=os.getenv('TABLEAU_API_VERSION', '3.21'),
                 scopes=["tableau:content:read", "tableau:viz_data_service:read"]
             )
+            tableau_auth = auth_token['credentials']['token']
             
-            # Retrieve metadata for the datasource to validate the LUID.
-            metadata = get_data_dictionary(api_key=auth_token, domain=os.getenv('TABLEAU_DOMAIN'), datasource_luid=luid)
+            metadata = get_data_dictionary(
+                api_key=tableau_auth, 
+                domain=os.getenv('TABLEAU_DOMAIN'), 
+                datasource_luid=luid
+            )
             metadata = metadata['publishedDatasources'][0]
 
             def create_datasource_qa_tool(luid: str):
-                """Create a datasource QA tool with the specified datasource LUID"""
-                return initialize_simple_datasource_qa(
+                return initialize_datasource_qa(
                     domain=os.getenv('TABLEAU_DOMAIN'),
                     site=os.getenv('SITE_NAME'),
                     jwt_client_id=os.getenv('TABLEAU_JWT_CLIENT_ID'),
@@ -151,16 +156,17 @@ def initialize_datasource_switch():
                     tooling_llm_model=os.getenv('TOOLING_MODEL')
                 )
                         
-            # Create a new datasource QA tool instance with the new LUID.
             new_tool = create_datasource_qa_tool(luid)
             current_datasource_luid = luid
             analyze_datasource = new_tool
             
-            # Update the global tools list so the agent uses the new tool instance.
-            for idx, t in enumerate(tools):
+            # Update the global tools list from the tooling module.
+            for idx, t in enumerate(agent_tools):
                 if t.name == "datasource_qa":
-                    tools[idx] = new_tool
+                    agent_tools[idx] = new_tool
                     break
+
+            set_datasource_luid(luid)
 
             datasource_name = metadata.get("name", "Unknown")
             return f"Successfully switched to datasource: '{datasource_name}' (ID: {luid})"

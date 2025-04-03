@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
 from experimental.agents.tools import tableau_metrics, tavily_tool
+from experimental.agents.shared_state import get_datasource_luid
 from experimental.tools.datasource_qa import initialize_datasource_qa
 
 # Load environment variables before accessing them
@@ -15,7 +16,7 @@ tableau_jwt_secret_id = os.environ['TABLEAU_JWT_SECRET_ID']
 tableau_jwt_secret = os.environ['TABLEAU_JWT_SECRET']
 tableau_api_version = os.environ['TABLEAU_API_VERSION']
 tableau_user = os.environ['TABLEAU_USER']
-datasource_luid = os.environ['DATASOURCE_LUID']
+datasource_luid = get_datasource_luid()
 tooling_llm_model = os.environ['TOOLING_MODEL']
 
 # Tableau VizQL Data Service Query Tool

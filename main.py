@@ -11,6 +11,8 @@ from experimental.agents.utils.search_agent_utils import stream_graph_updates, _
 
 from langchain_tableau.utilities.auth import jwt_connected_app
 
+from experimental.agents.shared_state import set_datasource_luid, get_datasource_luid
+
 
 async def main():
     """
@@ -30,8 +32,14 @@ async def main():
 
     domain = os.environ['TABLEAU_DOMAIN']
     site = os.environ['TABLEAU_SITE']
-    datasource_luid = os.environ["DATASOURCE_LUID"]
-    # define required authorizations to Tableau resources to support Agent operations
+
+    datasource_luid = get_datasource_luid()
+
+    if datasource_luid is None:
+        datasource_luid = os.environ["DATASOURCE_LUID"]
+        set_datasource_luid(datasource_luid)
+
+        # define required authorizations to Tableau resources to support Agent operations
     access_scopes = [
         "tableau:content:read", # for quering Tableau Metadata API
         "tableau:viz_data_service:read" # for querying VizQL Data Service

@@ -3,8 +3,7 @@ import os
 import json
 
 from IPython.display import Image, display
-from experimental.agents.demos.search.tooling import current_datasource_luid
-
+from experimental.agents.shared_state import get_datasource_luid
 
 def _visualize_graph(graph):
     """
@@ -62,10 +61,12 @@ async def stream_graph_updates(message: dict, graph):
     
     # Always use the current datasource LUID (which may have been updated by the switch_datasource tool)
     datasource = message['agent_inputs']['datasource'].copy()  # Make a copy to avoid modifying the original
-    datasource['luid'] = current_datasource_luid  # Use the current LUID from tooling
+    # datasource['luid'] = current_datasource_luid  # Use the current LUID from tooling
+    datasource['luid'] = get_datasource_luid()
+    # print(f"Using datasource LUID: {current_datasource_luid}")
     
     # Print the current datasource LUID for debugging purposes
-    print(f"Using datasource LUID: {current_datasource_luid}")
+    print(f"Using datasource LUID: {get_datasource_luid()}")
 
     # this is how client apps should format their requests to the Agent API
     input_stream = {
