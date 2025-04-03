@@ -1,14 +1,12 @@
 import os
-import chromadb
 from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 
+import chromadb
 from chromadb.utils import embedding_functions
-#import chromadb.embedding_functions as embedding_functions
 from chromadb.api.models.Collection import Collection
 from chromadb.errors import InvalidCollectionException
 from chromadb.config import Settings
-
 
 def format_datasources_for_rag(
     datasources_data: Dict[str, Any], 

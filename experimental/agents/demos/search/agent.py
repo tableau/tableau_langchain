@@ -48,5 +48,3 @@ analytics_agent = create_react_agent(
     debug=debugging,
     prompt=AGENT_SYSTEM_PROMPT
 )
-
-

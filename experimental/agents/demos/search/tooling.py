@@ -7,7 +7,7 @@ from langchain_core.tools import ToolException, Tool
 from experimental.agents.tools import tableau_metrics, tavily_tool
 from experimental.agents.shared_state import get_datasource_luid
 
-# from experimental.tools.datasource_qa import initialize_datasource_qa
+# Working from experimental due to environment variable dependencies in langchain_tableau
 from experimental.tools.datasource_qa import initialize_datasource_qa
 from experimental.tools.search_datasource import initialize_datasource_search, initialize_datasource_switch
 
@@ -48,5 +48,4 @@ datasource_search = initialize_datasource_search()
 datasource_switch = initialize_datasource_switch()
 
 # List of tools used to build the state graph and for binding them to nodes
-# tools = [tableau_metrics, analyze_datasource, datasource_search, switch_datasource]
-tools = [analyze_datasource, datasource_search, datasource_switch]
+tools = [tableau_metrics, analyze_datasource, datasource_search, datasource_switch]

@@ -116,6 +116,7 @@ def initialize_datasource_switch():
     def switch_datasource(luid: str) -> str:
         """Switch to a different Tableau datasource using its LUID."""
         global analyze_datasource, current_datasource_luid
+        
         # Import the tools list from the module where it's defined.
         from experimental.agents.demos.search.tooling import tools as agent_tools
 

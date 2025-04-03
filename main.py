@@ -3,16 +3,12 @@ import asyncio
 
 from dotenv import load_dotenv
 
-# from experimental.agents.demos.superstore.agent import analytics_agent
-# from experimental.agents.utils.agent_utils import stream_graph_updates, _visualize_graph
-
+# Using Search agent
 from experimental.agents.demos.search.agent import analytics_agent
 from experimental.agents.utils.search_agent_utils import stream_graph_updates, _visualize_graph
-
-from langchain_tableau.utilities.auth import jwt_connected_app
-
 from experimental.agents.shared_state import set_datasource_luid, get_datasource_luid
 
+from langchain_tableau.utilities.auth import jwt_connected_app
 
 async def main():
     """
@@ -39,7 +35,6 @@ async def main():
         datasource_luid = os.environ["DATASOURCE_LUID"]
         set_datasource_luid(datasource_luid)
 
-        # define required authorizations to Tableau resources to support Agent operations
     access_scopes = [
         "tableau:content:read", # for quering Tableau Metadata API
         "tableau:viz_data_service:read" # for querying VizQL Data Service
