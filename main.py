@@ -3,7 +3,7 @@ import asyncio
 
 from dotenv import load_dotenv
 
-from experimental.agents.demos.superstore.agent import analytics_agent
+from experimental.agents.experimental.agent import analytics_agent
 from experimental.agents.utils.agent_utils import stream_graph_updates, _visualize_graph
 
 from langchain_tableau.utilities.auth import jwt_connected_app

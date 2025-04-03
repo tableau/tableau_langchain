@@ -15,8 +15,9 @@ RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -c /api/constraints.txt
 
 # Define multiple graphs: endpoint_name: path/to/module.py:graph_variable
 ENV LANGSERVE_GRAPHS='{ \
-    "superstore": "/deps/tableau_langchain/experimental/agents/demos/superstore/agent.py:analytics_agent", \
-    # "another": "/deps/tableau_langchain/path/to/another_agent.py:some_other_graph_app" \
+    "experimental": "/deps/tableau_langchain/experimental/agents/experimental/agent.py:analytics_agent", \
+    "superstore": "/deps/tableau_langchain/experimental/agents/superstore/agent.py:analytics_agent", \
+    "keynote": "/deps/tableau_langchain/experimental/agents/keynote/agent.py:analytics_agent" \
 }'
 #  ^--- Start JSON object      ^--- First key-value pair        ^--- Comma separator      ^--- Second key-value pair    ^--- End JSON object
 

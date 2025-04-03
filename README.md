@@ -25,6 +25,7 @@ To see live demos of Agents using Tableau visit:
 - [About This Project](#about-this-project)
   - [Published Solutions](#published-solutions-1)
   - [Experimental Sandbox](#experimental-sandbox-1)
+  - [Security](#security)
 - [Contributors](#contributors)
 
 ![area chart](experimental/notebooks/assets/vizart/area_chart_banner.png)
@@ -157,6 +158,10 @@ To use the sandbox, do the following:
 
 This repository is a monorepo with two components. The main goal is to publish and support a Langchain [integration](https://python.langchain.com/docs/contributing/how_to/integrations/). This produces a need to have a development sandbox to try these solutions before publishing them for open-source use.
 
+The code base has two top-level folders: `experimental/` and `pkg/`. Experimental is where active development takes place. Use this folder to build and test new tools, chains, and agents, or extend the resources that are already there. The `pkg/` folder packages up well-tested resources for inclusion in our public PyPi package: `langchain-tableau`. If you have a contribution to `pkg/`, first make sure it’s been tested in experimental, and then submit your PR via Github.
+
+The `main` branch will always be the latest stable branch.
+
 ## Published Solutions
 The `pgk` folder contains production code shipped to the [PyPi registry](https://pypi.org/project/langchain-tableau/). These are
 the currently available resources:
@@ -170,16 +175,25 @@ the currently available resources:
 ## Experimental Sandbox
 The `experimental` folder organizes agents, tools, utilities and notebooks for development and testing of solutions that may eventually be published ([see Published Agent Tools](#published-agent-tools)) for community use. This folder is essentially a sandbox for Tableau AI.
 
+## Security
+
+Tableau resources are accessed via supported authentication methods such as Connected Apps. Secrets, keys and other credentials used to access Tableau should not be published to Github and instead stored securely via `.env` files. See step #4 in the [Getting Started](#getting-started) section.
+
+Learn more by reading our [Security](.github/SECURITY.md) article.
+
 </br>
 
 # Contributors
 
 This the founding team for the project. Please consider contributing in your own way to further what's possible when you combine Tableau with AI Agents.
 
-* [@stephenlprice](https://github.com/stephenlprice) - Lead Developer
+* [@stephenlprice](https://github.com/stephenlprice) - Architect
 * [@joeconstantino](https://github.com/joeconstantino) - Product Manager
-* [@josephflu](https://github.com/josephflu) - Developer
+* [@josephflu](https://github.com/josephflu) - Lead Developer
 * [@wjsutton](https://github.com/wjsutton) - Developer
 * [@cristiansaavedra](https://github.com/cristiansaavedra) - Developer
+
+If you wish to contribute to this project, please refer to our [Contribution Guidelines](.github/CONTRIBUTING.md).
+Also checkout the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
 ![dual axis area chart](experimental/notebooks/assets/vizart/rounded-bars-blue-dark.png)
