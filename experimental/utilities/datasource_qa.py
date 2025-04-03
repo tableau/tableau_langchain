@@ -9,6 +9,8 @@ from experimental.utilities.vizql_data_service import query_vds, query_vds_metad
 from experimental.utilities.utils import json_to_markdown_table
 from experimental.utilities.metadata import get_data_dictionary
 
+from experimental.agents.shared_state import get_datasource_luid
+
 
 def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
     json_payload = json.loads(payload)
@@ -198,7 +200,7 @@ def env_vars_datasource_qa(
         'jwt_secret': jwt_secret or os.environ['TABLEAU_JWT_SECRET'],
         'tableau_api_version': tableau_api_version or os.environ['TABLEAU_API_VERSION'],
         'tableau_user': tableau_user or os.environ['TABLEAU_USER'],
-        'datasource_luid': datasource_luid or os.environ['DATASOURCE_LUID'],
+        'datasource_luid': datasource_luid or get_datasource_luid() or os.environ['DATASOURCE_LUID'],
         'model_provider': model_provider or os.environ['MODEL_PROVIDER'],
         'tooling_llm_model': tooling_llm_model or os.environ['TOOLING_MODEL']
     }

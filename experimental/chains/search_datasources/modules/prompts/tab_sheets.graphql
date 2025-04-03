@@ -1,4 +1,4 @@
-query sheets{
+query sheets {
   sheets {
     id
     luid

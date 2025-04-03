@@ -3,27 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <title>Search Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Search Results</h1>
-    <h2>You searched for: "{{ query }}"</h2>
-    {% if results %}
-        <ul>
-            {% for item in results %}
-                <li>
-                    <strong>Name:</strong> {{ item.name }}<br>
-                    <strong>URI:</strong> {{ item.uri }}<br>
-                    <strong>LUID:</strong> {{ item.luid }}<br>
-                    <strong>Certified?:</strong> {{ item.isCertified }}<br>
-                    <strong>Last Update:</strong> {{ item.updatedAt }}<br>
-                    <strong>Vector Distance:</strong> {{ item.distance }}<br>
-                </li>
-                <hr>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No results found for "{{ query }}".</p>
-    {% endif %}
-    <a href="/">Back to Search</a>
+    <div class="container">
+        <h1>Search Results</h1>
+        <h2>You searched for: "{{ query }}"</h2>
+        
+        <form action="/search" method="post" class="search-form">
+            <div class="input-group">
+                <input type="text" id="query" name="query" placeholder="Enter your search query" required>
+                <button type="submit"><span>Search</span></button>
+            </div>
+        </form>
+
+        {% if results %}
+            <div class="row">
+                {% for item in results %}
+                <div class="card">
+                    <div class="card-content">
+                        <div class="image-container">
+                            
+                            <img src="{{ url_for('serve_dashboard_image', filename=item.dashboard_luid + '.png') }}"
+                                 class="card-img-top" alt="Dashboard Image">
+                                 
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.sheet_name }}</h5>
+                            <p class="card-text">
+                                <a href="{{ item.url }}"><strong>{{ item.name }}</strong><br></a>
+                                {{ item.url }}<br>
+                                <strong>Certified?:</strong> {{ item.isCertified }}<br>
+                                <strong>Vector Distance:</strong> {{ item.distance }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>No results found for "{{ query }}."</p>
+            {% endif %}
+
+            
+
+        <!-- {% if results %}
+            <ul class="results-list">
+                {% for item in results %}
+                    <li class="result-item">
+                        <h3>{{ item.name }}</h3>
+                        <p><strong>URI:</strong> {{ item.uri }}</p>
+                        <p><strong>LUID:</strong> {{ item.luid }}</p>
+                        <p><strong>Dashboard LUID:</strong> {{ item.dashboard_luid }}</p>
+                        <p><strong>Certified?:</strong> {{ item.isCertified }}</p>
+                        <p><strong>Last Update:</strong> {{ item.updatedAt }}</p>
+                        <p><strong>Vector Distance:</strong> {{ item.distance }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No results found for "{{ query }}".</p>
+        {% endif %} -->
+    </div>
 </body>
-</html>
+</html> >
+

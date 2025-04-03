@@ -14,6 +14,7 @@ from experimental.utilities.datasource_qa import (
     prepare_prompt_inputs
 )
 
+from experimental.agents.shared_state import get_datasource_luid
 
 class DataSourceQAInputs(BaseModel):
     """Describes inputs for usage of the simple_datasource_qa tool"""
@@ -157,7 +158,7 @@ def initialize_datasource_qa(
         tableau_auth =  tableau_session['credentials']['token']
 
         # Data source for VDS querying
-        tableau_datasource = env_vars["datasource_luid"]
+        tableau_datasource = get_datasource_luid()
 
         # 0. Obtain metadata about the data source to enhance the query writing prompt
         query_writing_data = augment_datasource_metadata(

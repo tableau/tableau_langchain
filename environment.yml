@@ -13,6 +13,7 @@ dependencies:
     - langchain=0.3.21
     - langsmith=0.2.11
     - pip:
+        - chromadb==0.6.3
         - langgraph==0.3.21
         - langgraph-cli==0.1.81
         - langchain-anthropic==0.3.10
