@@ -2,7 +2,8 @@ import os
 from dotenv import load_dotenv
 
 from experimental.agents.tools import tableau_metrics, tavily_tool
-from experimental.tools.simple_datasource_qa import initialize_simple_datasource_qa
+# from experimental.tools.simple_datasource_qa import initialize_simple_datasource_qa
+from pkg.langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
 
 # Load environment variables before accessing them
@@ -15,6 +16,7 @@ tableau_jwt_secret = os.environ['TABLEAU_JWT_SECRET']
 tableau_api_version = os.environ['TABLEAU_API_VERSION']
 tableau_user = os.environ['TABLEAU_USER']
 datasource_luid = os.environ['DATASOURCE_LUID']
+model_provider = os.environ['MODEL_PROVIDER']
 tooling_llm_model = os.environ['TOOLING_MODEL']
 
 # Tableau VizQL Data Service Query Tool
@@ -27,6 +29,7 @@ analyze_datasource = initialize_simple_datasource_qa(
     tableau_api_version=tableau_api_version,
     tableau_user=tableau_user,
     datasource_luid=datasource_luid,
+    model_provider=model_provider,
     tooling_llm_model=tooling_llm_model
 )
 
