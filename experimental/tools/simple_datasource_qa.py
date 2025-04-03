@@ -7,8 +7,8 @@ from langchain_core.tools import tool, ToolException
 from experimental.tools.prompts import vds_query, vds_prompt_data, vds_response
 from experimental.utilities.auth import jwt_connected_app
 from experimental.utilities.models import select_model
-from experimental.utilities.datasource_qa import (
-    env_vars_datasource_qa,
+from experimental.utilities.simple_datasource_qa import (
+    env_vars_simple_datasource_qa,
     augment_datasource_metadata,
     get_headlessbi_data,
     prepare_prompt_inputs
@@ -52,7 +52,7 @@ class DataSourceQAInputs(BaseModel):
     )
 
 
-def initialize_datasource_qa(
+def initialize_simple_datasource_qa(
     domain: Optional[str] = None,
     site: Optional[str] = None,
     jwt_client_id: Optional[str] = None,
@@ -93,7 +93,7 @@ def initialize_datasource_qa(
         environment variables, typically stored in a .env file.
     """
     # if arguments are not provided, the tool obtains environment variables directly from .env
-    env_vars = env_vars_datasource_qa(
+    env_vars = env_vars_simple_datasource_qa(
         domain=domain,
         site=site,
         jwt_client_id=jwt_client_id,
@@ -106,8 +106,8 @@ def initialize_datasource_qa(
         tooling_llm_model=tooling_llm_model
     )
 
-    @tool("datasource_qa", args_schema=DataSourceQAInputs)
-    def datasource_qa(
+    @tool("simple_datasource_qa", args_schema=DataSourceQAInputs)
+    def simple_datasource_qa(
         user_input: str,
         previous_call_error: Optional[str] = None,
         previous_vds_payload: Optional[str] = None
@@ -195,16 +195,17 @@ def initialize_datasource_qa(
 
         # 3. Query data from Tableau's VizQL Data Service using the AI written payload
         def get_data(vds_query):
+            payload = vds_query.content
             try:
                 data = get_headlessbi_data(
                     api_key = tableau_auth,
                     url = domain,
                     datasource_luid = tableau_datasource,
-                    payload = vds_query.content
+                    payload = payload
                 )
 
                 return {
-                    "vds_query": vds_query,
+                    "vds_query": payload,
                     "data_table": data,
                 }
             except Exception as e:
@@ -231,9 +232,12 @@ def initialize_datasource_qa(
 
         # 4. Prepare inputs for a structured response to the calling Agent
         def response_inputs(input):
+            metadata = query_writing_data.get('meta')
             data = {
                 "query": input.get('vds_query', ''),
-                "data_source": tableau_datasource,
+                "data_source_name": metadata.get('datasource_name'),
+                "data_source_description": metadata.get('datasource_description'),
+                "data_source_maintainer": metadata.get('datasource_owner'),
                 "data_table": input.get('data_table', ''),
             }
             inputs = prepare_prompt_inputs(data=data, user_string=user_input)
@@ -241,7 +245,14 @@ def initialize_datasource_qa(
 
         # 5. Response template for the Agent with further instructions
         response_prompt = PromptTemplate(
-            input_variables=["data_source", "vds_query", "data_table", "user_input"],
+            input_variables=[
+                "data_source_name",
+                "data_source_description",
+                "data_source_maintainer",
+                "vds_query",
+                "data_table",
+                "user_input"
+            ],
             template=vds_response
         )
 
@@ -255,4 +266,4 @@ def initialize_datasource_qa(
         # Return the structured output
         return vizql_data
 
-    return datasource_qa
+    return simple_datasource_qa

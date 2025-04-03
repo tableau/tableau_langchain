@@ -448,7 +448,6 @@ vds_schema = {
     }
 }
 
-
 sample_queries = [
     {
         "example": "a simple query",
@@ -776,8 +775,12 @@ sample_queries = [
         "query": {
             "fields": [
                 {
-                    "fieldCaption": "Order Date"
-                },{
+                    "fieldCaption": "Order Date",
+                    "function": "TRUNC_DAY",
+                    "sortPriority": 1,
+                    "sortDirection": "ASC"
+                },
+                {
                     "fieldCaption": "Sales",
                     "function": "SUM"
                 },
@@ -817,92 +820,275 @@ sample_queries = [
             ]
         }
     },
-]
-
-
-faq_queries = [
     {
-        "user_input": "Average discount, total sales, number of orders and profits by region sorted by profit",
-        "best_practices": "",
-        "JSON": {
+        "example": "Filtering data to a specific date using DATE filter, dates shown with TRUNC_DAY for day level accuracy, anchorDate is optional and if left empty defaults to today",
+        "query": {
             "fields": [
-                {"fieldCaption": "Region"},
-                {"fieldCaption": "Discount", "function": "AVG", "maxDecimalPlaces": 2},
-                {"fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2},
-                {"fieldCaption": "Order ID", "function": "COUNT", "columnAlias": "Number of Orders"},
-                {"fieldCaption": "Profit", "function": "SUM", "maxDecimalPlaces": 2, "sortPriority": 1, "sortDirection": "DESC"}
+                {
+                    "fieldCaption": "Sales",
+                    "function": "SUM"
+                },
+                {
+                    "fieldCaption": "Order Date",
+                    "function": "TRUNC_DAY",
+                    "sortPriority": 1,
+                    "sortDirection": "ASC"
+                }
+            ],
+            "filters": [
+                {
+                    "filterType": "DATE",
+                    "field": {
+                        "fieldCaption": "Date"
+                    },
+                    "periodType": "DAYS",
+                    "dateRangeType": "CURRENT",
+                    "anchorDate": "2021-01-01"
+                }
             ]
         }
     },
     {
-        "user_input": "What are the top 5 sub-categories by sales with a minimum of $200,000 in the last 6 months, excluding Technology?",
-        "best_practices": "",
-        "JSON": {
+        "example": "Relative DATE filter to handle questions about last 2 weeks where rangeN is used, anchorDate is optional and if left empty defaults to today",
+        "query": {
             "fields": [
-                { "fieldCaption": "Category" },
-                { "fieldCaption": "Sub-Category" },
-                { "fieldCaption": "Sales", "function": "SUM", "maxDecimalPlaces": 2, "sortPriority": 1, "sortDirection": "DESC" }
+                {
+                    "fieldCaption": "Sales",
+                    "function": "SUM"
+                },
+                {
+                    "fieldCaption": "Orders",
+                    "function": "SUM"
+                },
+                {
+                    "fieldCaption": "Order Date",
+                    "function": "TRUNC_DAY",
+                    "sortPriority": 1,
+                    "sortDirection": "ASC"
+                },
             ],
             "filters": [
                 {
-                    "field": {
-                        "fieldCaption": "Category"
-                    },
-                    "filterType": "SET",
-                    "values": ["Technology"],
-                    "exclude": "true",
-                    "context": "true"
-                },
-                {
-                    "field": {
-                        "fieldCaption": "Category"
-                    },
-                    "filterType": "TOP",
-                    "direction": "TOP",
-                    "howMany": 5,
-                    "fieldToMeasure": {
-                        "fieldCaption": "Sales",
-                        "function": "SUM"
-                    }
-                },
-                {
-                    "field": { "fieldCaption": "Order Date" },
                     "filterType": "DATE",
-                    "periodtype": "MONTHS",
+                    "field": {
+                        "fieldCaption": "Order Date"
+                    },
+                    "periodType": "WEEKS",
                     "dateRangeType": "LASTN",
-                    "rangeN": 6
+                    "rangeN": 2,
+                    "anchorDate": "2025-02-22"
+                }
+            ]
+        }
+    },
+    {
+        "example": "Relative DATE filter to handle questions about last week, rangeN is not used here, anchorDate is optional and if left empty defaults to today",
+        "query": {
+            "fields": [
+                {
+                    "fieldCaption": "Sales",
+                    "function": "SUM"
                 },
                 {
+                    "fieldCaption": "Orders",
+                    "function": "SUM"
+                },
+                {
+                    "fieldCaption": "Order Date",
+                    "function": "TRUNC_DAY",
+                    "sortPriority": 1,
+                    "sortDirection": "ASC"
+                },
+            ],
+            "filters": [
+                {
+                    "filterType": "DATE",
                     "field": {
-                        "fieldCaption": "Sales"
+                        "fieldCaption": "Order Date"
                     },
-                    "filterType": "QUANTITATIVE_NUMERICAL",
-                    "quantitativeFilterType": "MIN",
-                    "min": 200000
+                    "periodType": "WEEKS",
+                    "dateRangeType": "LAST"
                 }
             ]
         }
     }
 ]
 
+error_queries = [
+    {
+        "observation": "ERROR when querying data for a specific date, you need to use RANGE with minDate and maxDate on the same field",
+        "error": "Cannot have multiple Filters for the same Field, or the same Field with the same function",
+        "error_query": {
+            "fields": [
+                {
+                "fieldCaption": "Orders",
+                "function": "SUM"
+                }
+            ],
+            "filters": [
+                {
+                "field": {
+                    "fieldCaption": "Date"
+                },
+                "filterType": "QUANTITATIVE_DATE",
+                "quantitativeFilterType": "MIN",
+                "minDate": "2025-01-20"
+                },
+                {
+                "field": {
+                    "fieldCaption": "Date"
+                },
+                "filterType": "QUANTITATIVE_DATE",
+                "quantitativeFilterType": "MAX",
+                "maxDate": "2025-01-20"
+                }
+            ]
+        },
+        "correction": {
+            "fields": [
+                {
+                "fieldCaption": "Orders",
+                "function": "SUM"
+                }
+            ],
+            "filters": [
+                {
+                "field": {
+                    "fieldCaption": "Date"
+                },
+                "filterType": "QUANTITATIVE_DATE",
+                "quantitativeFilterType": "RANGE",
+                "minDate": "2025-01-20",
+                "maxDate": "2025-01-20"
+                }
+            ]
+        }
+    },
+    {
+        "observation": "ERROR when applying `sortDirection` to the entire payload, these properties only apply to fields",
+        "error": "Error at 'query': Additional property 'sortDirection' is not allowed",
+        "error_query": {
+            "fields": [
+                {
+                    "fieldCaption":"Order Date",
+                    "function":"YEAR"
+                },
+                {
+                    "fieldCaption":"Orders",
+                    "function":"SUM"
+                }
+            ],
+            "filters":[],
+            "sortDirection":"ASC",
+            "sortPriority":1
+        },
+        "correction": {
+            "fields": [
+                {
+                    "fieldCaption":"Order Date",
+                    "function":"YEAR",
+                    "sortDirection":"ASC",
+                    "sortPriority":1
+                },
+                {
+                    "fieldCaption":"Orders",
+                    "function":"SUM"
+                }
+            ],
+            "filters":[]
+        }
+    },
+    {
+        "observation": "ERROR caused by non-existant property",
+        "error": "Error at 'query.filters.0.filterType': Value 'RELATIVE_DATE' is not defined in the schema",
+        "error_query": {
+            "fields": [
+                {
+                "fieldCaption": "Order Date",
+                "function": "TRUNC_DAY",
+                "sortDirection": "ASC",
+                "sortPriority": 1
+                },
+                {
+                "fieldCaption": "Profit",
+                "function": "SUM"
+                },
+            ],
+            "filters": [
+                {
+                "field": {
+                    "fieldCaption": "Order Date"
+                },
+                "filterType": "RELATIVE_DATE",
+                "periodType": "WEEKS",
+                "dateRangeType": "LASTN",
+                "rangeN": 5
+                }
+            ]
+        },
+        "correction": {
+            "fields": [
+                {
+                "fieldCaption": "Order Date",
+                "function": "TRUNC_DAY",
+                "sortDirection": "ASC",
+                "sortPriority": 1
+                },
+                {
+                "fieldCaption": "Profit",
+                "function": "SUM"
+                },
+            ],
+            "filters": [
+                {
+                "field": {
+                    "fieldCaption": "Order Date"
+                },
+                "filterType": "DATE",
+                "periodType": "WEEKS",
+                "dateRangeType": "LAST",
+                }
+            ]
+        }
+    }
+]
 
-vds_instructions = f"""
+vds_prompt_data = {
+    "task": {},
+    "meta": {},
+    "data_dictionary": {},
+    "data_model": {},
+    "vds_schema": vds_schema,
+    "sample_queries": sample_queries,
+    "error_queries": error_queries,
+    "previous_call_error": {},
+    "previous_vds_payload": {}
+}
+
+vds_query = """
 Task:
 Your job is to write the main body of a request to the Tableau VizQL Data Service (VDS) API to
-obtain data that answers the user's question or satisfies the task they commanded you to do
+obtain data that answers the task given to you by the user:
+
+User Task: {task}
 
 Data Dictionary:
-The `data_dictionary` key is crucial to map the user's natural language questions to the fields of data
-available in the data source and to be aware of any additional operations that may be needed to conceptualize
-the data correctly according to business semantics or logic such as applying filters, aggregations, dates, etc.
+Use this to map the user's natural language questions to the fields of data available in the data source and
+to be aware of any additional operations that may be needed to conceptualize the data correctly according to business
+semantics or other logic such as applying filters, aggregations, dates, etc.
+
+{data_dictionary}
 
 Data Model:
-To obtain metadata and sample values for fields in the data source look at the `data_model` key, this is useful
-in particular when aggregating or filtering
+Provides sample values for fields in the data source. This is useful in particular when aggregating or inferring
+filter values
 
-Schema:
-Refer to the `vds_schema` key to understand how to formulate correct JSON syntax for the payloads sent to the
-VDS API
+{data_model}
+
+VDS Schema:
+OpenAPI schema describing JSON payloads to the VDS API, use this to generate queries with correct syntax
+
+{vds_schema}
 
 Query:
 The query must be written according to the `vds_schema.Query` key. Which describes two properties: fields (required)
@@ -926,12 +1112,15 @@ Sorting:
 Sort fields as often as possible to highlight data of interest in the query even if not explicitly stated by the user. That
 means that if they asked about a field in particular, find a way to sort it that makes sense. Sorting is composed of two
 properties applied to `vds_schema.Field`: "sortDirection" described by `vds_schema.SortDirection` and "SortPriority" which
-is sets the sort order for fields in the query. "SortPriority" is only needed for fields you wish to sort
+is sets the sort order for fields in the query. "SortPriority" is only needed for fields you wish to sort. DO NOT apply
+sorting to the entire query or payload, this applies only to fields
 
 Filtering:
 Add filters to narrow down the data set according to user specifications and to avoid unnecessary large volumes of data.
 Filters are the second and optional property of `vds_schema.Query` and should be written according to `vds_schema.Filter`.
-The `vds_schema.Filter` spec references `vds_schema.FilterField`
+The `vds_schema.Filter` spec references `vds_schema.FilterField`. When asked about values for a specific date, use
+QuantitativeDateFilter with RANGE and always include both minDate and maxDate properties. When asked about last week,
+previous month, current year, this quarter, previous 10 years, last 2 quarters use `RelativeDateFilter`
 
 There are many types of filters. To choose the right kind of filters you must first use the `data_model` key to map the
 target field to the kind of filters it supports. Use the "dataType" for each field (ex. "dataType": "STRING") and the
@@ -940,60 +1129,54 @@ following list of filter types to make this determination:
 - MatchFilter (defined at `vds_schema.MatchFilter`):
 - QuantitativeFilterBase (defined at `vds_schema.QuantitativeFilterBase`):
 - QuantitativeNumericalFilter (defined at `vds_schema.QuantitativeNumericalFilter`):
-- QuantitativeDateFilter (defined at `vds_schema.QuantitativeDateFilter`):
+- QuantitativeDateFilter (defined at `vds_schema.QuantitativeDateFilter`): Always include minDate and maxDate properties for
+specific dates
 - SetFilter (defined at `vds_schema.SetFilter`):
-- RelativeDateFilter (defined at `vds_schema.RelativeDateFilter`):
+- RelativeDateFilter (defined at `vds_schema.RelativeDateFilter`): Ideal for relative dates such as last week, previous month,
+current year, this quarter, previous 10 years, last 2 quarters
 - TopNFilter (defined at `vds_schema.TopNFilter`): Use this filter when the user asked a Top 10 or Top N question so that
 you filter the data response to analyze
 
-You may not have all filter members for fields of type "STRING" in the `data_model`, only sample values. Therefore, you must
-generate educated guesses for actual filter values and refer to any previous errors in case you used an incorrect filter value
-in a previous attempt
-
-Calculations:
-Write Tableau calculations to answer user questions with original analysis that does not exist in the target data source,
-use this to create fields that do not exist that will be useful to answer the question. Do not write redundant calculations
-if the field already exists. The user should be more explicit about wanting calculations to be written on top of the existing
-data
+You may not have all filter members for fields of type "STRING" in the Data Model, only sample values. Therefore, you must
+generate educated guesses for actual filter values and use any previous empty array errors to retry with better values
 
 Sample Queries:
-The `sample_queries` key contains sample queries you can reference as strategies to satisfy the user input. These examples
-show distinct ways to interact with the VDS API in order to obtain data in different shapes.
+Reference these examples as best practices to execute tasks. These examples show distinct ways to interact with the VDS API
+in order to obtain data in different shapes.
 
-Frequently Asked Questions (FAQ):
-The `faq_queries` key is a List of common user queries and the query strategy used to satisfy their request. Use these
-references to generate the right queries for questions from regular users who are not familiar with the data or with
-more precise analytical terms.
+{sample_queries}
 
-Errors:
-Pay attention to the `previous_call_error` and `previous_call_query` keys, if they contain information then the previous
-attempt had an error and you have to avoid it by checking instructions again to fix any mistakes
+Error Queries:
+These examples demonstrate common errors you have generated in the past, avoid these scenarios by using correct syntax instead
+
+{error_queries}
+
+Previous Tool Call Errors:
+If this section has data, then the previous attempt resulted in an error described here:
+
+{previous_call_error}
+
+If the array was empty without syntax errors this indicates that a filter was applied with an incorrect value
+
+The query you generated that caused the error is this:
+
+{previous_vds_payload}
 
 Output:
-Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability
+Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability.
+If the data source does not contain fields of data that can answer the user_input, return a message so the agent knows to
+use a different tool
 """
 
-
-vds_prompt = {
-    "instructions": vds_instructions,
-    "vds_schema": vds_schema,
-    "sample_queries": sample_queries,
-    "data_dictionary": {},
-    "data_model": {},
-    "faq_queries": faq_queries,
-    "previous_call_error": {},
-    "previous_call_query": {}
-}
-
-
 vds_response = """
-This is the output of a data query tool used to fetch information via Tableau's VizQL API,
-your task is synthesizing all of this information to provide a clear, concise answer to the end user.
+This is the output of a data query tool used to fetch information via Tableau's VizQL API
+Your task is to synthesize all of this information to provide a clear, concise answer to the end user.
 
-This is the data source queried with the tool:
-{data_source}
+Data Source Name: {data_source_name}
+Description: {data_source_description}
+Maintainer: {data_source_maintainer}
 
-This is the query written to Tableau's VizQL API for the data source:
+This is the query written to Tableau's VizQL API:
 {vds_query}
 
 This is the resulting data from the query:
@@ -1003,14 +1186,10 @@ This was the user_input (question or task):
 {user_input}
 
 Based on the provided context, formulate a comprehensive and informative response to the user's query.
-Your response should be:
-1. Describe the data source used in the query unless it has been mentioned previously
-2. Translate the query to a simple query plan for end users who do not understand SQL
-3. Use the data_table to answer the user's question or task
-4. Provide insights or conclusions only when relevant to the user, don't generate additional insights
-that are unasked for unless the request asked for a detailed analysis
-5. Short and concise, if the data table is too long only return the relevant rows or a small sample
-6. Avoid generating too much redundant information unless specified by the user or they asked for detailed analysis
+Your response should:
+1. Describe the data source name, description and maintainer if this is the first interaction the user has with it
+2. Use the resulting data to answer the user's question or task
+3. Be short and concise, if the data table is too long only return the relevant rows or a small sample
 
 Your synthesized response:
 """

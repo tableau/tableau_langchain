@@ -5,9 +5,9 @@ import logging
 from typing import Dict, Optional
 from dotenv import load_dotenv
 
-from langchain_tableau.utilities.vizql_data_service import query_vds, query_vds_metadata
-from langchain_tableau.utilities.utils import json_to_markdown_table
-from langchain_tableau.utilities.metadata import get_data_dictionary
+from pkg.langchain_tableau.utilities.vizql_data_service import query_vds, query_vds_metadata
+from pkg.langchain_tableau.utilities.utils import json_to_markdown_table
+from pkg.langchain_tableau.utilities.metadata import get_data_dictionary
 
 
 def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
@@ -73,12 +73,13 @@ def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
 
 
 def augment_datasource_metadata(
+    task: str,
     api_key: str,
     url: str,
     datasource_luid: str,
     prompt: Dict[str, str],
     previous_errors: Optional[str] = None,
-    previous_error_query: Optional[str] = None
+    previous_vds_payload: Optional[str] = None
 ):
     """
     Augment datasource metadata with additional information and format as JSON.
@@ -93,7 +94,7 @@ def augment_datasource_metadata(
         datasource_luid (str): The unique identifier of the datasource.
         prompt (Dict[str, str]): Initial prompt dictionary to be augmented.
         previous_errors (Optional[str]): Any errors from previous function calls. Defaults to None.
-        previous_error_query (Optional[str]): The query that caused errors in previous calls. Defaults to None.
+        previous_vds_payload (Optional[str]): The query that caused errors in previous calls. Defaults to None.
 
     Returns:
         str: A JSON string containing the augmented prompt dictionary with datasource metadata.
@@ -102,6 +103,9 @@ def augment_datasource_metadata(
         This function relies on external functions `get_data_dictionary` and `query_vds_metadata`
         to retrieve the necessary datasource information.
     """
+    # insert the user input as a task
+    prompt['task'] = task
+
     # get dictionary for the data source from the Metadata API
     data_dictionary = get_data_dictionary(
         api_key=api_key,
@@ -109,7 +113,11 @@ def augment_datasource_metadata(
         datasource_luid=datasource_luid
     )
 
-    prompt['data_dictionary'] = data_dictionary['publishedDatasources'][0]
+    # insert data dictionary from Tableau's Data Catalog
+    prompt['data_dictionary'] = data_dictionary['datasource_fields']
+    # insert data source name, description and owner into 'meta' key
+    del data_dictionary['datasource_fields']
+    prompt['meta'] = data_dictionary
 
     #  get sample values for fields from VDS metadata endpoint
     datasource_metadata = query_vds_metadata(
@@ -122,15 +130,16 @@ def augment_datasource_metadata(
         del field['fieldName']
         del field['logicalTableId']
 
+    # insert the data model with sample values from Tableau's VDS metadata API
     prompt['data_model'] = datasource_metadata['data']
 
     # include previous error and query to debug in current run
     if previous_errors:
         prompt['previous_call_error'] = previous_errors
-    if previous_error_query:
-        prompt['previous_error_query'] = previous_error_query
+    if previous_vds_payload:
+        prompt['previous_vds_payload'] = previous_vds_payload
 
-    return json.dumps(prompt)
+    return prompt
 
 
 def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
@@ -144,10 +153,13 @@ def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
     Returns:
         dict: Mapped inputs for PromptTemplate
     """
+
     return {
-        "vds_query": data.get('query', ''),
-        "data_source": data.get('data_source', ''),
-        "data_table": data.get('data_table', ''),
+        "vds_query": data.get('query', 'no query'),
+        "data_source_name": data.get('data_source_name', 'no name'),
+        "data_source_description": data.get('data_source_description', 'no description'),
+        "data_source_maintainer": data.get('data_source_maintainer', 'no maintainer'),
+        "data_table": data.get('data_table', 'no data'),
         "user_input": user_string
     }
 
@@ -161,6 +173,7 @@ def env_vars_simple_datasource_qa(
     tableau_api_version=None,
     tableau_user=None,
     datasource_luid=None,
+    model_provider=None,
     tooling_llm_model=None
 ):
     """
@@ -192,6 +205,7 @@ def env_vars_simple_datasource_qa(
         'tableau_api_version': tableau_api_version or os.environ['TABLEAU_API_VERSION'],
         'tableau_user': tableau_user or os.environ['TABLEAU_USER'],
         'datasource_luid': datasource_luid or os.environ['DATASOURCE_LUID'],
+        'model_provider': model_provider or os.environ['MODEL_PROVIDER'],
         'tooling_llm_model': tooling_llm_model or os.environ['TOOLING_MODEL']
     }
 
