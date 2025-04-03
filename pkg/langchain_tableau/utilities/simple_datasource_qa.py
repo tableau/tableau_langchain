@@ -73,12 +73,13 @@ def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
 
 
 def augment_datasource_metadata(
+    task: str,
     api_key: str,
     url: str,
     datasource_luid: str,
     prompt: Dict[str, str],
     previous_errors: Optional[str] = None,
-    previous_error_query: Optional[str] = None
+    previous_vds_payload: Optional[str] = None
 ):
     """
     Augment datasource metadata with additional information and format as JSON.
@@ -93,7 +94,7 @@ def augment_datasource_metadata(
         datasource_luid (str): The unique identifier of the datasource.
         prompt (Dict[str, str]): Initial prompt dictionary to be augmented.
         previous_errors (Optional[str]): Any errors from previous function calls. Defaults to None.
-        previous_error_query (Optional[str]): The query that caused errors in previous calls. Defaults to None.
+        previous_vds_payload (Optional[str]): The query that caused errors in previous calls. Defaults to None.
 
     Returns:
         str: A JSON string containing the augmented prompt dictionary with datasource metadata.
@@ -102,6 +103,9 @@ def augment_datasource_metadata(
         This function relies on external functions `get_data_dictionary` and `query_vds_metadata`
         to retrieve the necessary datasource information.
     """
+    # insert the user input as a task
+    prompt['task'] = task
+
     # get dictionary for the data source from the Metadata API
     data_dictionary = get_data_dictionary(
         api_key=api_key,
@@ -109,6 +113,7 @@ def augment_datasource_metadata(
         datasource_luid=datasource_luid
     )
 
+    # insert data dictionary from Tableau's Data Catalog
     prompt['data_dictionary'] = data_dictionary['publishedDatasources'][0]
 
     #  get sample values for fields from VDS metadata endpoint
@@ -122,15 +127,16 @@ def augment_datasource_metadata(
         del field['fieldName']
         del field['logicalTableId']
 
+    # insert the data model with sample values from Tableau's VDS metadata API
     prompt['data_model'] = datasource_metadata['data']
 
     # include previous error and query to debug in current run
     if previous_errors:
         prompt['previous_call_error'] = previous_errors
-    if previous_error_query:
-        prompt['previous_error_query'] = previous_error_query
+    if previous_vds_payload:
+        prompt['previous_vds_payload'] = previous_vds_payload
 
-    return json.dumps(prompt)
+    return prompt
 
 
 def prepare_prompt_inputs(data: dict, user_string: str) -> dict:
@@ -161,6 +167,7 @@ def env_vars_simple_datasource_qa(
     tableau_api_version=None,
     tableau_user=None,
     datasource_luid=None,
+    model_provider=None,
     tooling_llm_model=None
 ):
     """
@@ -192,6 +199,7 @@ def env_vars_simple_datasource_qa(
         'tableau_api_version': tableau_api_version or os.environ['TABLEAU_API_VERSION'],
         'tableau_user': tableau_user or os.environ['TABLEAU_USER'],
         'datasource_luid': datasource_luid or os.environ['DATASOURCE_LUID'],
+        'model_provider': model_provider or os.environ['MODEL_PROVIDER'],
         'tooling_llm_model': tooling_llm_model or os.environ['TOOLING_MODEL']
     }
 
