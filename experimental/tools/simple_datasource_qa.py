@@ -7,8 +7,8 @@ from langchain_core.tools import tool, ToolException
 from experimental.tools.prompts import vds_query, vds_prompt_data, vds_response
 from experimental.utilities.auth import jwt_connected_app
 from experimental.utilities.models import select_model
-from experimental.utilities.datasource_qa import (
-    env_vars_datasource_qa,
+from experimental.utilities.simple_datasource_qa import (
+    env_vars_simple_datasource_qa,
     augment_datasource_metadata,
     get_headlessbi_data,
     prepare_prompt_inputs
@@ -52,7 +52,7 @@ class DataSourceQAInputs(BaseModel):
     )
 
 
-def initialize_datasource_qa(
+def initialize_simple_datasource_qa(
     domain: Optional[str] = None,
     site: Optional[str] = None,
     jwt_client_id: Optional[str] = None,
@@ -93,7 +93,7 @@ def initialize_datasource_qa(
         environment variables, typically stored in a .env file.
     """
     # if arguments are not provided, the tool obtains environment variables directly from .env
-    env_vars = env_vars_datasource_qa(
+    env_vars = env_vars_simple_datasource_qa(
         domain=domain,
         site=site,
         jwt_client_id=jwt_client_id,
