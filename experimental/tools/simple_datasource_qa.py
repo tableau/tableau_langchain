@@ -106,8 +106,8 @@ def initialize_simple_datasource_qa(
         tooling_llm_model=tooling_llm_model
     )
 
-    @tool("datasource_qa", args_schema=DataSourceQAInputs)
-    def datasource_qa(
+    @tool("simple_datasource_qa", args_schema=DataSourceQAInputs)
+    def simple_datasource_qa(
         user_input: str,
         previous_call_error: Optional[str] = None,
         previous_vds_payload: Optional[str] = None
@@ -266,4 +266,4 @@ def initialize_simple_datasource_qa(
         # Return the structured output
         return vizql_data
 
-    return datasource_qa
+    return simple_datasource_qa
