@@ -195,16 +195,17 @@ def initialize_simple_datasource_qa(
 
         # 3. Query data from Tableau's VizQL Data Service using the AI written payload
         def get_data(vds_query):
+            payload = vds_query.content
             try:
                 data = get_headlessbi_data(
                     api_key = tableau_auth,
                     url = domain,
                     datasource_luid = tableau_datasource,
-                    payload = vds_query.content
+                    payload = payload
                 )
 
                 return {
-                    "vds_query": vds_query,
+                    "vds_query": payload,
                     "data_table": data,
                 }
             except Exception as e:
@@ -231,9 +232,12 @@ def initialize_simple_datasource_qa(
 
         # 4. Prepare inputs for a structured response to the calling Agent
         def response_inputs(input):
+            metadata = query_writing_data.get('meta')
             data = {
                 "query": input.get('vds_query', ''),
-                "data_source": tableau_datasource,
+                "data_source_name": metadata.get('datasource_name'),
+                "data_source_description": metadata.get('datasource_description'),
+                "data_source_maintainer": metadata.get('datasource_owner'),
                 "data_table": input.get('data_table', ''),
             }
             inputs = prepare_prompt_inputs(data=data, user_string=user_input)
@@ -241,7 +245,14 @@ def initialize_simple_datasource_qa(
 
         # 5. Response template for the Agent with further instructions
         response_prompt = PromptTemplate(
-            input_variables=["data_source", "vds_query", "data_table", "user_input"],
+            input_variables=[
+                "data_source_name",
+                "data_source_description",
+                "data_source_maintainer",
+                "vds_query",
+                "data_table",
+                "user_input"
+            ],
             template=vds_response
         )
 
