@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Tableau Datasources by Similarity</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+    .link {
+      stroke: #999;
+      stroke-opacity: 0.6;
+    }
+    .node {
+      stroke: #fff;
+      stroke-width: 1.5px;
+    }
+    .legend text {
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tableau Datasources by Similarity</h1>
+  <h2>The network diagram below arranges Tableau datasources by how similar they are to each other</h2>
+  <svg width="1600" height="700"></svg>
+  <script>
+    const width = 1600;
+    const height = 700;
+    const svg = d3.select("svg")
+      .attr("width", width)
+      .attr("height", height);
+
+    // const width = 960, height = 600;
+    // const svg = d3.select("svg");
+
+    // Load the similarities.json file
+    d3.json("similarities.json").then(data => {
+
+      // Create the simulation with forces
+      const simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink(data.links)
+          .id(d => d.id)
+          // Set link distance: higher similarity (close to 1) means shorter distance
+          .distance(d => {
+            const minDistance = 1;   // distance when similarity is 1
+            const maxDistance = 750; // distance when similarity is 0
+            return minDistance + (maxDistance - minDistance) * (1 - d.similarity);
+          })
+        )
+        .force("charge", d3.forceManyBody().strength(-100))
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+      // --- Sizing the circles based on the total number_of_workbooks ---
+      const totalWorkbooks = d3.sum(data.nodes, d => d.number_of_workbooks);
+      const sizeScale = d3.scaleLinear()
+        .domain([0, totalWorkbooks])
+        .range([5, 20])
+        .clamp(true);
+
+      // --- Coloring the circles based on last_refresh_time ---
+      // Use d3.utcParse to correctly parse the ISO date string.
+      const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%SZ");
+      const now = new Date();
+      // Define a sequential color scale: 1 day old maps to blue, 50 days old maps to orange.
+      const colorScale = d3.scaleLinear()
+        .domain([1, 50])
+        .range(["blue", "orange"])
+        .clamp(true);
+
+      // Create link elements
+      const link = svg.append("g")
+        .attr("class", "links")
+        .selectAll("line")
+        .data(data.links)
+        .enter().append("line")
+        .attr("class", "link")
+        .attr("stroke-width", d => Math.sqrt(d.similarity * 10));
+
+      // Create node elements with updated size and color
+      const node = svg.append("g")
+        .attr("class", "nodes")
+        .selectAll("circle")
+        .data(data.nodes)
+        .enter().append("circle")
+        .attr("class", "node")
+        .attr("r", d => sizeScale(d.number_of_workbooks))
+        .attr("fill", d => {
+          // If last_refresh_time is null, use gray
+          if (!d.last_refresh_time) return "gray";
+          const refreshTime = parseDate(d.last_refresh_time);
+          if (!refreshTime) return "gray";
+          // Calculate the age in days
+          const ageInDays = (now - refreshTime) / (1000 * 60 * 60 * 24);
+          return colorScale(ageInDays);
+        })
+        .call(drag(simulation));
+
+      // Tooltip to display datasource name on hover
+      node.append("title")
+        .text(d => d.name);
+
+      // Add data labels for each node (datasource name)
+      const labels = svg.append("g")
+        .attr("class", "labels")
+        .selectAll("text")
+        .data(data.nodes)
+        .enter().append("text")
+        .attr("font-size", "10px")
+        .attr("text-anchor", "start")
+        .text(d => d.name);
+
+      // Create legend for circle size (number of workbooks)
+      const legendSize = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(20, 20)");
+
+      legendSize.append("text")
+        .attr("x", 0)
+        .attr("y", -10)
+        .text("Number of Workbooks");
+
+      // Use two representative values: 0 and the total number of workbooks
+      const legendSizeValues = [0, totalWorkbooks];
+      legendSizeValues.forEach((val, i) => {
+        const cy = i * 40;
+        legendSize.append("circle")
+          .attr("cx", 10)
+          .attr("cy", cy)
+          .attr("r", sizeScale(val))
+          .attr("fill", "none")
+          .attr("stroke", "black");
+
+        legendSize.append("text")
+          .attr("x", 40)
+          .attr("y", cy)
+          .attr("dy", "0.35em")
+          .text(val);
+      });
+
+      // Create legend for color (last refresh)
+      const legendColor = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(20, 120)");
+
+      legendColor.append("text")
+        .attr("x", 0)
+        .attr("y", -10)
+        .text("Last Refresh (Age in days)");
+
+      // Representative values: 1 day, 25 days, 50 days
+      const colorLegendValues = [1, 25, 50];
+      colorLegendValues.forEach((val, i) => {
+        const cy = i * 30;
+        legendColor.append("circle")
+          .attr("cx", 10)
+          .attr("cy", cy)
+          .attr("r", 8)
+          .attr("fill", colorScale(val))
+          .attr("stroke", "black");
+
+        legendColor.append("text")
+          .attr("x", 30)
+          .attr("y", cy)
+          .attr("dy", "0.35em")
+          .text(val + " day" + (val > 1 ? "s" : ""));
+      });
+
+      // Legend item for nodes with null last_refresh_time
+      const nullLegendY = colorLegendValues.length * 30;
+      legendColor.append("circle")
+          .attr("cx", 10)
+          .attr("cy", nullLegendY)
+          .attr("r", 8)
+          .attr("fill", "gray")
+          .attr("stroke", "black");
+
+      legendColor.append("text")
+          .attr("x", 30)
+          .attr("y", nullLegendY)
+          .attr("dy", "0.35em")
+          .text("No Refresh");
+
+      // Update positions on every tick of the simulation
+      simulation.on("tick", () => {
+        // Update link positions
+        link
+          .attr("x1", d => d.source.x)
+          .attr("y1", d => d.source.y)
+          .attr("x2", d => d.target.x)
+          .attr("y2", d => d.target.y);
+
+        // Update node positions
+        node
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y);
+
+        // Update label positions, offsetting labels to the right of the node
+        labels
+          .attr("x", d => d.x + sizeScale(d.number_of_workbooks) + 5)
+          .attr("y", d => d.y);
+      });
+
+      // Drag functionality to make nodes movable
+      function drag(simulation) {
+        function dragstarted(event, d) {
+          if (!event.active) simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        }
+        function dragged(event, d) {
+          d.fx = event.x;
+          d.fy = event.y;
+        }
+        function dragended(event, d) {
+          if (!event.active) simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+        }
+        return d3.drag()
+          .on("start", dragstarted)
+          .on("drag", dragged)
+          .on("end", dragended);
+      }
+    }).catch(error => {
+      console.error("Error loading the JSON data: ", error);
+    });
+  </script>
+</body>
+</html>

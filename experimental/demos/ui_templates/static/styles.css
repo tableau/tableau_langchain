@@ -162,9 +162,18 @@ form .input-group button span {
 /* Style the card-body to take up the remaining 60% */
 .card-body {
     flex: 1;
-    max-width: 60%;
+    max-width: 100%;
     padding-left: 20px; /* Space between image and text */
 }
+
+.card-title {
+    font-size: 1rem;    /* Adjust to your preferred size, e.g. 20px or 1.25rem */
+    white-space: nowrap;   /* Prevent wrapping */
+    overflow: hidden;      /* Hide anything that doesn't fit */
+    text-overflow: ellipsis; /* Display "..." if text is too long */
+    display: inline-block; /* Needed for text-overflow to work with width constraints */
+    max-width: 90%;        /* Adjust to your layout so it doesn't overflow the card */
+  }
 
 /* Optional: Adjust card styles */
 .card {
@@ -188,3 +197,19 @@ form .input-group button span {
         padding-top: 10px;
     }
 }
+
+
+.badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    margin-left: 8px;
+  }
+  
+  .badge.certified {
+    background-color: #10b981; /* green color for "certified" */
+    color: #ffffff;
+    font-weight: 600;
+  }
+  

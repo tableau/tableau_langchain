@@ -1,0 +1,171 @@
+{
+    "nodes": [
+        {
+            "id": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "name": "TestPDS",
+            "description": null,
+            "has_active_warning": false,
+            "is_certified": false,
+            "last_refresh_time": "2025-03-27T16:04:34Z",
+            "last_update_time": "2025-03-27T16:04:34Z",
+            "project_name": "Joe",
+            "luid": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "number_of_columns": 41,
+            "number_of_workbooks": 0
+        },
+        {
+            "id": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "name": "superhero_data (superhero_data_20250329)",
+            "description": null,
+            "has_active_warning": false,
+            "is_certified": false,
+            "last_refresh_time": null,
+            "last_update_time": null,
+            "project_name": "Nik",
+            "luid": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "number_of_columns": 10,
+            "number_of_workbooks": 0
+        },
+        {
+            "id": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "name": "Superstore Sales",
+            "description": null,
+            "has_active_warning": false,
+            "is_certified": false,
+            "last_refresh_time": "2025-03-27T11:11:24Z",
+            "last_update_time": "2025-03-27T11:11:24Z",
+            "project_name": "Will",
+            "luid": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "number_of_columns": 28,
+            "number_of_workbooks": 0
+        },
+        {
+            "id": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "name": "Paris 2024 Olympic Summer Games Athletes",
+            "description": null,
+            "has_active_warning": false,
+            "is_certified": false,
+            "last_refresh_time": null,
+            "last_update_time": null,
+            "project_name": "Will",
+            "luid": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "number_of_columns": 37,
+            "number_of_workbooks": 0
+        },
+        {
+            "id": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "name": "Superstore Datasource",
+            "description": null,
+            "has_active_warning": false,
+            "is_certified": false,
+            "last_refresh_time": null,
+            "last_update_time": null,
+            "project_name": "Samples",
+            "luid": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "number_of_columns": 34,
+            "number_of_workbooks": 1
+        }
+    ],
+    "links": [
+        {
+            "source": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "target": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "similarity": 0.7563263178
+        },
+        {
+            "source": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "target": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "similarity": 0.7264162898
+        },
+        {
+            "source": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "target": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "similarity": 0.4451333284
+        },
+        {
+            "source": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "target": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "similarity": 0.4141084552
+        },
+        {
+            "source": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "target": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "similarity": 0.5329276919
+        },
+        {
+            "source": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "target": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "similarity": 0.5043998361
+        },
+        {
+            "source": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "target": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "similarity": 0.4902398586
+        },
+        {
+            "source": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "target": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "similarity": 0.4141084552
+        },
+        {
+            "source": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "target": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "similarity": 0.9296048284
+        },
+        {
+            "source": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "target": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "similarity": 0.7264162898
+        },
+        {
+            "source": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "target": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "similarity": 0.496258378
+        },
+        {
+            "source": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "target": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "similarity": 0.4902398586
+        },
+        {
+            "source": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "target": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "similarity": 0.5329276919
+        },
+        {
+            "source": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "target": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "similarity": 0.496258378
+        },
+        {
+            "source": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "target": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "similarity": 0.4874566495
+        },
+        {
+            "source": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "target": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "similarity": 0.4451333284
+        },
+        {
+            "source": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "target": "3dc475f2-8b3f-46ff-9448-a90f62519b2c",
+            "similarity": 0.9296048284
+        },
+        {
+            "source": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "target": "f83d1afb-fb58-496e-a457-5feb5d80e28e",
+            "similarity": 0.7563263178
+        },
+        {
+            "source": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "target": "c78ab015-ad2a-4544-958d-d13b2b41c87a",
+            "similarity": 0.5043998361
+        },
+        {
+            "source": "5df29aa2-4c42-4518-a90d-f461ed1b04f9",
+            "target": "12ea126b-5ba1-4304-b274-1dac411067cc",
+            "similarity": 0.4874566495
+        }
+    ]
+}

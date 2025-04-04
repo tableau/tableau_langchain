@@ -13,7 +13,8 @@ collection_name = f"{tableau_site}_tableau_datasource_vector_search"
 
 # Initialize Flask app with correct template folder
 template_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 
-                           'experimental/utilities/ui_templates')
+                           'ui_templates')
+
 static_dir = os.path.join(template_dir, 'static')
 
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
