@@ -462,17 +462,18 @@ sample_queries = [
             ]
         }
     },
-    {
-       "example": "a simple Tableau calculation",
-       "query": {
-            "fields": [
-                {
-                    "fieldCaption": "AOV",
-                    "calculation": "SUM([Profit])/COUNTD([Order ID])"
-                }
-            ]
-        }
-    },
+     # removing until we can support this with higher reliability
+    # {
+    #    "example": "a simple Tableau calculation",
+    #    "query": {
+    #         "fields": [
+    #             {
+    #                 "fieldCaption": "AOV",
+    #                 "calculation": "SUM([Profit])/COUNTD([Order ID])"
+    #             }
+    #         ]
+    #     }
+    # },
     {
         "example": "applying a set filter",
         "query": {
