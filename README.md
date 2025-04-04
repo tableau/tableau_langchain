@@ -192,6 +192,7 @@ This the founding team for the project. Please consider contributing in your own
 * [@josephflu](https://github.com/josephflu) - Lead Developer
 * [@wjsutton](https://github.com/wjsutton) - Developer
 * [@cristiansaavedra](https://github.com/cristiansaavedra) - Developer
+* [@antoineissaly](https://github.com/antoineissaly) - Developer
 
 If you wish to contribute to this project, please refer to our [Contribution Guidelines](.github/CONTRIBUTING.md).
 Also checkout the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
