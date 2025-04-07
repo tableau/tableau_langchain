@@ -45,9 +45,13 @@ def generate_tableau_auth_token(
     :return: Authentication token (X-Tableau-Auth)
     """
     # Generate JWT for initial authentication
+    # access_scopes = [
+    #     "tableau:content:read",
+    #     "tableau:viz_data_service:read"
+    # ]
+
     access_scopes = [
-        "tableau:content:read",
-        "tableau:viz_data_service:read"
+        "tableau:content:read"
     ]
     
     jwt_token = jwt.encode(
@@ -103,9 +107,13 @@ def build_tableau_vector_db(debug: bool = False) -> None:
     This fetches all Tableau datasources, formats them for RAG, and stores them in a ChromaDB collection.
     """
 
+    # access_scopes = [
+    #     "tableau:content:read",
+    #     "tableau:viz_data_service:read"
+    # ]
+
     access_scopes = [
-        "tableau:content:read",
-        "tableau:viz_data_service:read"
+        "tableau:content:read"
     ]
 
     auth_token = generate_tableau_auth_token(

@@ -228,6 +228,8 @@ def get_similar_datasources_query() -> str:
     """
     return query
 
+
+
 def get_similar_datasources_metadata(api_key: str, domain: str) -> Dict:
     """
     Synchronously query Tableau Metadata API for all datasources.

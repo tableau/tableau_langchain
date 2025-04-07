@@ -4,70 +4,95 @@
   <meta charset="utf-8">
   <title>Tableau Datasources by Similarity</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      overflow: hidden;
     }
     .link {
-      stroke: #999;
-      stroke-opacity: 0.6;
+      stroke: #ccc;
+      stroke-opacity: 0.3;
     }
     .node {
       stroke: #fff;
       stroke-width: 1.5px;
+      cursor: pointer;
     }
     .legend text {
       font-size: 12px;
+    }
+    .tooltip {
+      position: absolute;
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      pointer-events: none;
+      font-size: 14px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      max-width: 300px;
+    }
+    .tooltip h4 {
+      margin: 0 0 5px 0;
+    }
+    .tooltip p {
+      margin: 5px 0;
     }
   </style>
 </head>
 <body>
   <h1>Tableau Datasources by Similarity</h1>
   <h2>The network diagram below arranges Tableau datasources by how similar they are to each other</h2>
-  <svg width="1600" height="700"></svg>
+  <svg width="100%" height="90vh"></svg>
   <script>
-    const width = 1600;
-    const height = 700;
+    // Create tooltip div
+    const tooltip = d3.select("body").append("div")
+      .attr("class", "tooltip")
+      .style("opacity", 0);
+    
+    // Set dimensions to fit viewport
+    const width = window.innerWidth * 0.95;
+    const height = window.innerHeight * 0.8;
+    
     const svg = d3.select("svg")
-      .attr("width", width)
-      .attr("height", height);
-
-    // const width = 960, height = 600;
-    // const svg = d3.select("svg");
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
 
     // Load the similarities.json file
     d3.json("similarities.json").then(data => {
-
-      // Create the simulation with forces
-      const simulation = d3.forceSimulation(data.nodes)
-        .force("link", d3.forceLink(data.links)
-          .id(d => d.id)
-          // Set link distance: higher similarity (close to 1) means shorter distance
-          .distance(d => {
-            const minDistance = 1;   // distance when similarity is 1
-            const maxDistance = 750; // distance when similarity is 0
-            return minDistance + (maxDistance - minDistance) * (1 - d.similarity);
-          })
-        )
-        .force("charge", d3.forceManyBody().strength(-100))
-        .force("center", d3.forceCenter(width / 2, height / 2));
-
-      // --- Sizing the circles based on the total number_of_workbooks ---
-      const totalWorkbooks = d3.sum(data.nodes, d => d.number_of_workbooks);
+      // --- First define all scaling functions ---
+      
+      // Sizing the circles based on the total number_of_workbooks
       const sizeScale = d3.scaleLinear()
-        .domain([0, totalWorkbooks])
-        .range([5, 20])
+        .domain([0, d3.max(data.nodes, d => d.number_of_workbooks)])
+        .range([5, 25])
         .clamp(true);
 
-      // --- Coloring the circles based on last_refresh_time ---
-      // Use d3.utcParse to correctly parse the ISO date string.
+      // Coloring the circles based on last_refresh_time
       const parseDate = d3.utcParse("%Y-%m-%dT%H:%M:%SZ");
       const now = new Date();
-      // Define a sequential color scale: 1 day old maps to blue, 50 days old maps to orange.
       const colorScale = d3.scaleLinear()
         .domain([1, 50])
         .range(["blue", "orange"])
         .clamp(true);
+
+      // NOW create the simulation with forces - AFTER defining sizeScale
+      const simulation = d3.forceSimulation(data.nodes)
+        .force("link", d3.forceLink(data.links)
+          .id(d => d.id)
+          .distance(d => {
+            const minDistance = 1;
+            const maxDistance = 50;
+            return minDistance + (maxDistance - minDistance) * (1 - d.similarity);
+          })
+        )
+        .force("charge", d3.forceManyBody().strength(-120))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("x", d3.forceX(width / 2).strength(0.03))
+        .force("y", d3.forceY(height / 2).strength(0.07))
+        .force("collision", d3.forceCollide().radius(d => sizeScale(d.number_of_workbooks) + 6));
 
       // Create link elements
       const link = svg.append("g")
@@ -76,7 +101,7 @@
         .data(data.links)
         .enter().append("line")
         .attr("class", "link")
-        .attr("stroke-width", d => Math.sqrt(d.similarity * 10));
+        .attr("stroke-width", d => Math.sqrt(d.similarity * 5));
 
       // Create node elements with updated size and color
       const node = svg.append("g")
@@ -87,29 +112,58 @@
         .attr("class", "node")
         .attr("r", d => sizeScale(d.number_of_workbooks))
         .attr("fill", d => {
-          // If last_refresh_time is null, use gray
           if (!d.last_refresh_time) return "gray";
           const refreshTime = parseDate(d.last_refresh_time);
           if (!refreshTime) return "gray";
-          // Calculate the age in days
           const ageInDays = (now - refreshTime) / (1000 * 60 * 60 * 24);
           return colorScale(ageInDays);
         })
-        .call(drag(simulation));
+        .call(drag(simulation))
+        .on("mouseover", function(event, d) {
+          let refreshInfo = "No refresh data";
+          if (d.last_refresh_time) {
+            const refreshTime = parseDate(d.last_refresh_time);
+            if (refreshTime) {
+              const ageInDays = Math.floor((now - refreshTime) / (1000 * 60 * 60 * 24));
+              const formattedDate = refreshTime.toLocaleDateString();
+              refreshInfo = `${formattedDate} (${ageInDays} days ago)`;
+            }
+          }
+          
+          d3.select(this).attr("stroke", "#000").attr("stroke-width", 2);
+          
+          tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+          
+          tooltip.html(`
+            <h4>${d.name}</h4>
+            <p><strong>Workbooks:</strong> ${d.number_of_workbooks}</p>
+            <p><strong>Last Refresh:</strong> ${refreshInfo}</p>
+          `)
+            .style("left", (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function() {
+          d3.select(this).attr("stroke", "#fff").attr("stroke-width", 1.5);
+          tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+        });
 
-      // Tooltip to display datasource name on hover
-      node.append("title")
-        .text(d => d.name);
-
-      // Add data labels for each node (datasource name)
+      // For small datasets, you might want labels
       const labels = svg.append("g")
         .attr("class", "labels")
         .selectAll("text")
         .data(data.nodes)
         .enter().append("text")
-        .attr("font-size", "10px")
-        .attr("text-anchor", "start")
-        .text(d => d.name);
+        .attr("font-size", "8px")
+        .attr("text-anchor", "middle")
+        .attr("dy", "-1em")
+        .text(d => {
+          return d.number_of_workbooks > (d3.max(data.nodes, n => n.number_of_workbooks) / 5) ? d.name : '';
+        })
+        .style("pointer-events", "none");
 
       // Create legend for circle size (number of workbooks)
       const legendSize = svg.append("g")
@@ -121,10 +175,15 @@
         .attr("y", -10)
         .text("Number of Workbooks");
 
-      // Use two representative values: 0 and the total number of workbooks
-      const legendSizeValues = [0, totalWorkbooks];
+      // Use representative values for size legend
+      const legendSizeValues = [
+        1,
+        Math.floor(d3.max(data.nodes, d => d.number_of_workbooks) / 2),
+        d3.max(data.nodes, d => d.number_of_workbooks)
+      ];
+      
       legendSizeValues.forEach((val, i) => {
-        const cy = i * 40;
+        const cy = i * 50 + 10;
         legendSize.append("circle")
           .attr("cx", 10)
           .attr("cy", cy)
@@ -142,7 +201,7 @@
       // Create legend for color (last refresh)
       const legendColor = svg.append("g")
         .attr("class", "legend")
-        .attr("transform", "translate(20, 120)");
+        .attr("transform", "translate(20, 220)");
 
       legendColor.append("text")
         .attr("x", 0)
@@ -152,7 +211,7 @@
       // Representative values: 1 day, 25 days, 50 days
       const colorLegendValues = [1, 25, 50];
       colorLegendValues.forEach((val, i) => {
-        const cy = i * 30;
+        const cy = i * 25 + 10;
         legendColor.append("circle")
           .attr("cx", 10)
           .attr("cy", cy)
@@ -168,7 +227,7 @@
       });
 
       // Legend item for nodes with null last_refresh_time
-      const nullLegendY = colorLegendValues.length * 30;
+      const nullLegendY = colorLegendValues.length * 25 + 10;
       legendColor.append("circle")
           .attr("cx", 10)
           .attr("cy", nullLegendY)
@@ -182,8 +241,23 @@
           .attr("dy", "0.35em")
           .text("No Refresh");
 
+      // Add zoom capability
+      const zoom = d3.zoom()
+        .scaleExtent([0.1, 4])
+        .on("zoom", (event) => {
+          svg.selectAll("g").attr("transform", event.transform);
+        });
+
+      svg.call(zoom);
+
       // Update positions on every tick of the simulation
       simulation.on("tick", () => {
+        // Keep nodes within the svg boundaries
+        data.nodes.forEach(d => {
+          d.x = Math.max(sizeScale(d.number_of_workbooks), Math.min(width - sizeScale(d.number_of_workbooks), d.x));
+          d.y = Math.max(sizeScale(d.number_of_workbooks), Math.min(height - sizeScale(d.number_of_workbooks), d.y));
+        });
+        
         // Update link positions
         link
           .attr("x1", d => d.source.x)
@@ -196,9 +270,9 @@
           .attr("cx", d => d.x)
           .attr("cy", d => d.y);
 
-        // Update label positions, offsetting labels to the right of the node
+        // Update label positions
         labels
-          .attr("x", d => d.x + sizeScale(d.number_of_workbooks) + 5)
+          .attr("x", d => d.x)
           .attr("y", d => d.y);
       });
 
@@ -223,8 +297,40 @@
           .on("drag", dragged)
           .on("end", dragended);
       }
+
+      // Add a reset zoom button
+      svg.append("rect")
+        .attr("x", width - 100)
+        .attr("y", 20)
+        .attr("width", 80)
+        .attr("height", 30)
+        .attr("rx", 5)
+        .attr("fill", "#f0f0f0")
+        .attr("stroke", "#999")
+        .style("cursor", "pointer")
+        .on("click", function() {
+          svg.transition().duration(750).call(
+            zoom.transform,
+            d3.zoomIdentity
+          );
+        });
+
+      svg.append("text")
+        .attr("x", width - 60)
+        .attr("y", 40)
+        .attr("text-anchor", "middle")
+        .text("Reset zoom")
+        .style("cursor", "pointer")
+        .style("pointer-events", "none");
+      
     }).catch(error => {
       console.error("Error loading the JSON data: ", error);
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      svg.attr("width", window.innerWidth * 0.95)
+         .attr("height", window.innerHeight * 0.8);
     });
   </script>
 </body>

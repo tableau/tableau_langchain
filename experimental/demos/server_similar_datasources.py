@@ -12,7 +12,6 @@ from experimental.utilities.similar_datasources import (
     write_similarities_to_csv,
     export_vector_db_metadata_to_csv,
     export_combined_to_json,
-    get_similar_datasources_metadata,
     transform_json_to_dataframe,
 )
 from experimental.utilities.setup_local_vector_db import generate_tableau_auth_token
@@ -23,15 +22,115 @@ import socketserver
 load_dotenv()
 
 # Read Tableau authentication config from environment
-tableau_server   = os.getenv('TABLEAU_DOMAIN')
-tableau_site     = os.getenv('SITE_NAME')
-tableau_user     = os.getenv('TABLEAU_USER')
+tableau_server   = 'https://' + os.getenv('TABLEAU_SRV_DOMAIN')   
+tableau_site     = os.getenv('SRV_SITE_NAME')        
+tableau_user     = os.getenv('TABLEAU_SRV_USER')     
 
-# Credentials for generating auth token via connected app
-tableau_jwt_client_id    = os.getenv('TABLEAU_JWT_CLIENT_ID')
-tableau_jwt_secret_id    = os.getenv('TABLEAU_JWT_SECRET_ID')
-tableau_jwt_secret       = os.getenv('TABLEAU_JWT_SECRET')
-tableau_api_version      = os.getenv('TABLEAU_API_VERSION')
+# Credentials for generating auth token via connnected app
+tableau_jwt_client_id    = os.getenv('TABLEAU_SRV_JWT_CLIENT_ID')
+tableau_jwt_secret_id    = os.getenv('TABLEAU_SRV_JWT_SECRET_ID')
+tableau_jwt_secret = os.getenv('TABLEAU_SRV_JWT_SECRET')
+tableau_api_version  = os.getenv('TABLEAU_SRV_API') 
+
+def get_similar_datasources_query() -> str:
+    """
+    Generate GraphQL query for retrieving published datasources metadata.
+    
+    Returns:
+        GraphQL query string.
+    """
+    query = """
+    query ConnectedWorkbooks {
+        tableauSites(filter: { name: "Demonstration" }) {
+            name
+            luid
+            publishedDatasources {
+                id
+                luid
+                uri
+                name
+                createdAt
+                updatedAt
+                extractLastUpdateTime
+                extractLastRefreshTime
+                extractLastIncrementalUpdateTime
+                projectName
+                fields { 
+                    id
+                }
+                downstreamWorkbooks {
+                    id
+                } 
+            }
+        }
+    }
+    """
+    return query
+
+
+
+def get_similar_datasources_metadata(api_key: str, domain: str):
+    """
+    Synchronously query Tableau Metadata API for all datasources.
+    
+    Args:
+        api_key: X-Tableau-Auth token.
+        domain: Tableau server domain.
+    
+    Returns:
+        Datasources metadata dictionary.
+    """
+    full_url = f"{domain}/api/metadata/graphql"
+    query = get_similar_datasources_query()
+    payload = json.dumps({
+        "query": query,
+        "variables": {}
+    })
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "X-Tableau-Auth": api_key
+    }
+    response = requests.post(full_url, headers=headers, data=payload)
+    response.raise_for_status()  # Raise an exception for bad responses
+    dictionary = response.json()
+    return dictionary["data"]
+
+def transform_json_to_dataframe(json_obj) -> pd.DataFrame:
+    """
+    Transform JSON object of datasources metadata into a pandas DataFrame.
+    
+    Args:
+        json_obj: JSON object with datasource metadata.
+    
+    Returns:
+        pandas DataFrame with columns:
+            - luid
+            - name
+            - createdAt
+            - updatedAt
+            - extractLastUpdateTime
+            - extractLastRefreshTime
+            - extractLastIncrementalUpdateTime
+            - number_of_columns (count of fields)
+            - number_of_workbooks (count of downstreamWorkbooks)
+    """
+    output = []
+    for site in json_obj.get("tableauSites", []):
+        for ds in site.get("publishedDatasources", []):
+            transformed_ds = {
+                "luid": ds.get("luid"),
+                "name": ds.get("name"),
+                "createdAt": ds.get("createdAt"),
+                "updatedAt": ds.get("updatedAt"),
+                "extractLastUpdateTime": ds.get("extractLastUpdateTime"),
+                "extractLastRefreshTime": ds.get("extractLastRefreshTime"),
+                "extractLastIncrementalUpdateTime": ds.get("extractLastIncrementalUpdateTime"),
+                "number_of_columns": len(ds.get("fields", [])),
+                "number_of_workbooks": len(ds.get("downstreamWorkbooks", []))
+            }
+            output.append(transformed_ds)
+    return pd.DataFrame(output)
 
 def main():
     # Parse command-line arguments
