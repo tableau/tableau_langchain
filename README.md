@@ -106,7 +106,7 @@ To use the sandbox, do the following:
     Note: dependencies are listed in the `pyproject.toml` file
 
     ```bash
-    pip install
+    pip install pyproject.toml
     ```
 
     You must also install the `langgraph-cli` developer dependency in order to run the Langgraph Server (see [langgraph-cli](https://langchain-ai.github.io/langgraph/cloud/reference/cli))
