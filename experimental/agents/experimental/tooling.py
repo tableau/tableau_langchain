@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 
-from experimental.agents.tools import tableau_metrics, tavily_tool
 # from experimental.tools.simple_datasource_qa import initialize_simple_datasource_qa
 from pkg.langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
@@ -32,9 +31,6 @@ analyze_datasource = initialize_simple_datasource_qa(
     model_provider=model_provider,
     tooling_llm_model=tooling_llm_model
 )
-
-# Web Search tool
-# web_search = tavily_tool()
 
 # List of tools used to build the state graph and for binding them to nodes
 tools = [ analyze_datasource ]
