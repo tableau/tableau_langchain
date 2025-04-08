@@ -16,6 +16,7 @@ def get_datasource_query(luid):
         fields {{
           name
           description
+          isHidden
         }}
       }}
     }}
@@ -77,7 +78,8 @@ def get_data_dictionary(api_key: str, domain: str, datasource_luid: str) -> Dict
     name = json_data.get('name')
     description = json_data.get('description')
     owner = json_data.get('owner', {}).get('name')
-    fields = json_data.get('fields', [])
+    fields = [field for field in json_data.get('fields', []) if not field.get('isHidden')]
+
 
     dictionary = {
         'datasource_name': name,
