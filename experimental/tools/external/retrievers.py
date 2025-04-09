@@ -3,7 +3,6 @@ import time
 
 from langchain_core.tools import tool
 from langchain_core.prompts import PromptTemplate
-from langchain_community.tools.tavily_search import TavilySearchResults
 
 
 from llama_index.core import VectorStoreIndex
@@ -13,11 +12,6 @@ from llama_index.vector_stores.pinecone import PineconeVectorStore
 from pinecone import ServerlessSpec
 from pinecone.grpc import PineconeGRPC
 
-
-def tavily_tool():
-    tavily_api_key = os.environ.get('TAVILY_API_KEY')
-    tavily = TavilySearchResults(tavily_api_key=tavily_api_key, max_results=2)
-    return tavily
 
 @tool("tableau_metrics")
 def tableau_metrics(query: str):
