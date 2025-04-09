@@ -28,13 +28,24 @@ def authenticate_tableau():
         Exception: If the authentication fails.
     """
     # Read Tableau authentication config from environment variables
-    tableau_server          = os.getenv('TABLEAU_DOMAIN')
-    tableau_site            = os.getenv('SITE_NAME')
-    tableau_user            = os.getenv('TABLEAU_USER')
-    tableau_jwt_client_id   = os.getenv('TABLEAU_JWT_CLIENT_ID')
-    tableau_jwt_secret_id   = os.getenv('TABLEAU_JWT_SECRET_ID')
-    tableau_jwt_secret      = os.getenv('TABLEAU_JWT_SECRET')
-    tableau_api_version     = os.getenv('TABLEAU_API_VERSION')
+    # tableau_server          = os.getenv('TABLEAU_DOMAIN')
+    # tableau_site            = os.getenv('SITE_NAME')
+    # tableau_user            = os.getenv('TABLEAU_USER')
+    # tableau_jwt_client_id   = os.getenv('TABLEAU_JWT_CLIENT_ID')
+    # tableau_jwt_secret_id   = os.getenv('TABLEAU_JWT_SECRET_ID')
+    # tableau_jwt_secret      = os.getenv('TABLEAU_JWT_SECRET')
+    # tableau_api_version     = os.getenv('TABLEAU_API_VERSION')
+
+    # Read Tableau authentication config from environment
+    tableau_server   = 'https://' + os.getenv('TABLEAU_SRV_DOMAIN')   
+    tableau_site     = os.getenv('SRV_SITE_NAME')        
+    tableau_user     = os.getenv('TABLEAU_SRV_USER')     
+
+    # Credentials for generating auth token via connnected app
+    tableau_jwt_client_id    = os.getenv('TABLEAU_SRV_JWT_CLIENT_ID')
+    tableau_jwt_secret_id    = os.getenv('TABLEAU_SRV_JWT_SECRET_ID')
+    tableau_jwt_secret = os.getenv('TABLEAU_SRV_JWT_SECRET')
+    tableau_api_version  = os.getenv('TABLEAU_SRV_API') 
 
     # Define the access scopes for the JWT
     access_scopes = [
@@ -74,7 +85,7 @@ def authenticate_tableau():
     return server
 
 
-def save_dashboard_image(server, dashboard_luid, image_dir='dashboard_images'):
+def save_dashboard_images(server, dashboard_luids, image_dir='dashboard_images'):
     """
     Save a dashboard image to disk, skipping if the file already exists.
     
@@ -84,21 +95,21 @@ def save_dashboard_image(server, dashboard_luid, image_dir='dashboard_images'):
         image_dir (str): Directory to save the image files.
     """
     folder_path = os.path.join(os.getcwd(), image_dir)
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
+    os.makedirs(folder_path, exist_ok=True)
 
-    image_path = os.path.join(image_dir, f"{dashboard_luid}.png")
-    if os.path.exists(image_path):
-        print(f"Skipping image for dashboard LUID: {dashboard_luid} - file already exists.")
-        return
-    
-    try:
-        selected_view = server.views.get_by_id(dashboard_luid)
-        server.views.populate_image(selected_view)
-        os.makedirs(image_dir, exist_ok=True)
-        with open(image_path, 'wb') as f:
-            f.write(selected_view.image)
-        print(f"Saved image for dashboard LUID: {dashboard_luid}")
-    except Exception as e:
-        print(f"Error saving image for dashboard LUID: {dashboard_luid} - {str(e)}")
+    for dashboard_luid in dashboard_luids:
+        image_path = os.path.join(folder_path, f"{dashboard_luid}.png")
+
+        if os.path.exists(image_path):
+            print(f"Skipping image for dashboard LUID: {dashboard_luid} - file already exists.")
+            continue
+
+        try:
+            selected_view = server.views.get_by_id(dashboard_luid)
+            server.views.populate_image(selected_view)
+            with open(image_path, 'wb') as f:
+                f.write(selected_view.image)
+            print(f"Saved image for dashboard LUID: {dashboard_luid}")
+        except Exception as e:
+            print(f"Error saving image for dashboard LUID: {dashboard_luid} - {str(e)}")
 

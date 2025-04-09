@@ -5,40 +5,6 @@ from experimental.demos.server_vector_db_utils import (
     query_tableau_vector_db
 )
 
-# # Load environment variables (Tableau creds, OpenAI API key, etc.)
-load_dotenv()
-
-# # Read Tableau authentication config from environment
-# tableau_server   = 'https://' + os.getenv('TABLEAU_SRV_DOMAIN')   
-# tableau_site     = os.getenv('SRV_SITE_NAME')        
-# tableau_user     = os.getenv('TABLEAU_SRV_USER')     
-
-# # Credentials for generating auth token via connnected app
-# tableau_jwt_client_id    = os.getenv('TABLEAU_SRV_JWT_CLIENT_ID')
-# tableau_jwt_secret_id    = os.getenv('TABLEAU_SRV_JWT_SECRET_ID')
-# tableau_jwt_secret = os.getenv('TABLEAU_SRV_JWT_SECRET')
-# tableau_api_version  = os.getenv('TABLEAU_SRV_API') 
-
-# DEFAULT_COLLECTION_NAME = f"{tableau_site}_tableau_datasource_vector_search"
-# debug = False
-
-
-# collection_name = f"{tableau_site}_tableau_datasource_vector_search"
-# print(collection_name)
-
-# # Simple query example
-# query_text = "who won gold in olympic rowing?"
-# results = query_tableau_vector_db(
-#     query_text=query_text,
-#     collection_name=collection_name,
-#     n_results=10,
-#     debug=False
-# )
-
-# print(results)
-
-
-# from modules import graphql, vectorstore
 from flask import Flask, request, jsonify, render_template, send_file
 import json 
 import os

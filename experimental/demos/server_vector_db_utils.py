@@ -127,6 +127,7 @@ def get_datasources_query():
             description
             luid
             isCertified
+            vizportalUrlId
             owner {
             username
             name
@@ -239,6 +240,7 @@ Datasource Columns:
             'dashboard_overview': dashboard_overview,
             'name': datasource_name,
             'luid': datasource.get('luid'),
+            'url' : tableau_server + '/#/site/' + tableau_site + '/datasources/'+ datasource.get('vizportalUrlId') + '/connections',
             'description': datasource.get('description', 'No description'),
             'project_name': datasource.get('projectName'),
             'is_certified': datasource.get('isCertified'),
@@ -348,3 +350,99 @@ def query_tableau_vector_db(query_text: str, collection_name: str,n_results: int
             score   = top_scores[idx-1]
             excerpt = top_documents[idx-1][:200].replace('\n', ' ') + "..."
     return results
+
+
+def get_databoards_query():
+    """
+    Generate GraphQL query for retrieving published datasources metadata.
+    
+    :return: GraphQL query string
+    """
+    query = """
+        query dashboards{ 
+        tableauSites(filter: { name: "Demonstration" }) {
+            workbooks {
+                dashboards {
+                luid
+                name
+                path
+                createdAt
+                updatedAt
+                }
+            }
+        }
+    }
+    """
+    return query
+
+def get_dashboards_metadata(api_key: str, domain: str):
+    """
+    Synchronously query Tableau Metadata API for all datasources
+    
+    :param api_key: X-Tableau-Auth token
+    :param domain: Tableau server domain
+    :return: Datasources metadata dictionary
+    """
+    full_url = f"{domain}/api/metadata/graphql"
+
+    query = get_databoards_query()
+
+    payload = json.dumps({
+        "query": query,
+        "variables": {}
+    })
+
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'X-Tableau-Auth': api_key
+    }
+
+    response = requests.post(full_url, headers=headers, data=payload)
+    response.raise_for_status()  # Raise an exception for bad status codes
+
+    dictionary = response.json()
+
+    return dictionary['data']
+
+def format_dashboards_for_rag(dashboards_data, debug: bool = False):
+    """
+    Format Tableau dashboards for RAG (Retrieval-Augmented Generation) purposes
+    
+    :param dashboards_data: Raw GraphQL response data from get_dashboards_metadata
+    :param debug: Enable debug logging
+    :return: List of formatted datasource dictionaries optimized for RAG search
+    """
+    if not dashboards_data or not isinstance(dashboards_data, dict):
+        raise ValueError("Invalid dashboards data provided.")
+    
+    formatted_dashboards = []
+    
+    # Extract publishedDatasources from the response
+    # published_dashboards = dashboards_data.get('publishedDatasources', [])
+    published_dashboards = dashboards_data.get('dashboards', [])
+    
+    if debug:
+        print(f"Total dashboards to process: {len(published_dashboards)}")
+    
+    for dashboard in published_dashboards:
+        # Skip dashboards without a name
+        dashboard_name = dashboard.get('name')
+        if not dashboard_name:
+            continue
+        
+        # Prepare formatted dashboard dictionary
+        formatted_dashboard = {
+            'name': dashboard_name,
+            'luid': dashboard.get('luid'),
+            'path': dashboard.get('path'),
+            'created_at': dashboard.get('createdAt'),
+            'updated_at': dashboard.get('updatedAt')
+        }
+        
+        formatted_dashboards.append(formatted_dashboard)
+    
+    if debug:
+        print(f"Processed {len(formatted_dashboards)} dashboards for RAG")
+    
+    return formatted_dashboards

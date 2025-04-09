@@ -132,6 +132,94 @@ def transform_json_to_dataframe(json_obj) -> pd.DataFrame:
             output.append(transformed_ds)
     return pd.DataFrame(output)
 
+def create_similarities_report_server():
+    # Load environment variables (Tableau creds, OpenAI API key, etc.)
+    load_dotenv()
+
+    # Read Tableau authentication config from environment
+    tableau_server   = 'https://' + os.getenv('TABLEAU_SRV_DOMAIN')   
+    tableau_site     = os.getenv('SRV_SITE_NAME')        
+    tableau_user     = os.getenv('TABLEAU_SRV_USER')     
+
+    # Credentials for generating auth token via connnected app
+    tableau_jwt_client_id    = os.getenv('TABLEAU_SRV_JWT_CLIENT_ID')
+    tableau_jwt_secret_id    = os.getenv('TABLEAU_SRV_JWT_SECRET_ID')
+    tableau_jwt_secret = os.getenv('TABLEAU_SRV_JWT_SECRET')
+    tableau_api_version  = os.getenv('TABLEAU_SRV_API') 
+
+    # Define the output directory where the final JSON file will be saved.
+    OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "ui_templates")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    COMBINED_JSON = os.path.join(OUTPUT_DIR, "similarities.json")
+
+    # Use a temporary directory for intermediate files
+    with tempfile.TemporaryDirectory() as temp_dir:
+        SIMILARITIES_CSV = os.path.join(temp_dir, "similarities.csv")
+        VECTOR_CSV = os.path.join(temp_dir, "vector_db_export.csv")
+
+        # -------------------------------
+        # Vector Database Processing
+        # -------------------------------
+        tableau_site_val = os.getenv('SITE_NAME', 'default_site')
+        COLLECTION_NAME = f"{tableau_site_val}_tableau_datasource_vector_search"
+        DB_PATH = "vector_db"  # Path to your Chroma vector database
+
+        try:
+            # Compute pairwise similarities and write results to the temporary CSV file
+            results = compute_pairwise_similarities(
+                collection_name=COLLECTION_NAME,
+                db_path=DB_PATH,
+                top_k=5
+            )
+            write_similarities_to_csv(results, SIMILARITIES_CSV)
+            print(f"Temporary CSV file '{SIMILARITIES_CSV}' created with the similarity data.")
+        except ValueError as e:
+            print("Error computing similarities:", e)
+            return
+
+        # Export vector database metadata to a temporary CSV file
+        export_vector_db_metadata_to_csv(
+            collection_name=COLLECTION_NAME,
+            db_path=DB_PATH,
+            output_csv=VECTOR_CSV
+        )
+
+        # -------------------------------
+        # Tableau Metadata API Query
+        # -------------------------------
+        auth_token = generate_tableau_auth_token(
+            jwt_client_id=tableau_jwt_client_id,
+            jwt_secret_id=tableau_jwt_secret_id,
+            jwt_secret=tableau_jwt_secret,
+            tableau_server=tableau_server,
+            tableau_site=tableau_site,
+            tableau_user=tableau_user,
+            tableau_api_version=tableau_api_version
+        )
+        api_key = auth_token
+        domain = tableau_server
+        if api_key and domain:
+            print("Querying Tableau Metadata API for datasources metadata...")
+            metadata_json = get_similar_datasources_metadata(api_key, domain)
+
+            df = transform_json_to_dataframe(metadata_json)
+            df = df[['luid', 'number_of_columns', 'number_of_workbooks']]
+            vec_df = pd.read_csv(VECTOR_CSV)
+            vec_df = pd.merge(vec_df, df, how='left', left_on='id', right_on='luid')
+            vec_df.to_csv(VECTOR_CSV, index=False)
+        else:
+            print("TABLEAU_API_KEY and/or TABLEAU_DOMAIN environment variables not set.")
+
+        # -------------------------------
+        # Combine CSV files into a single JSON report saved in the OUTPUT_DIR
+        # -------------------------------
+        export_combined_to_json(
+            vector_csv=VECTOR_CSV,
+            similarities_csv=SIMILARITIES_CSV,
+            output_filename=COMBINED_JSON
+        )
+        print(f"Combined JSON report saved to '{COMBINED_JSON}'.")
+
 def main():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(
@@ -151,7 +239,7 @@ def main():
     args = parser.parse_args()
 
     # Define the output directory where the final JSON file will be saved.
-    OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "html")
+    OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "ui_templates")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     COMBINED_JSON = os.path.join(OUTPUT_DIR, "similarities.json")
 

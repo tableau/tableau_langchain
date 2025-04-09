@@ -3,12 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <title>Search Tableau Datasources</title>
-    <!-- Link to external CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <!-- Include Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            position: relative;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+        }
+        .nav-button:hover {
+            background-color: #45a049;
+        }
+        .top-nav {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+        .container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            margin-top: 50px;
+        }
+    </style>
 </head>
 <body>
+    <div class="top-nav">
+        <a href="{{ url_for('similar_datasources') }}" class="nav-button">View Similar Datasources</a>
+    </div>
+    
     <div class="container">
         <h1>Search Tableau Datasources</h1>
         <form action="/search" method="post">

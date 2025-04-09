@@ -1,13 +1,53 @@
-<!-- results.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Search Results</title>
-  <!-- Main CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    body {
+        position: relative;
+        margin: 0;
+        padding: 0;
+    }
+    .nav-button {
+        padding: 10px 15px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        text-decoration: none;
+    }
+    .nav-button:hover {
+        background-color: #45a049;
+    }
+    .top-nav {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 100;
+    }
+    .container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    h1 {
+        margin-top: 50px;
+    }
+    .back-button {
+        margin-top: 20px;
+        display: inline-block;
+    }
+  </style>
 </head>
 <body>
+  <div class="top-nav">
+    <a href="{{ url_for('similar_datasources') }}" class="nav-button">View Similar Datasources</a>
+  </div>
+
   <div class="container">
     <h1>Search Results</h1>
     <h2>You searched for: "{{ query }}"</h2>
@@ -25,7 +65,6 @@
         <div class="card">
           <div class="card-content">
             <div class="card-body">
-              <!-- Use the icon -->
               <h5 class="card-title">
                 <img src="{{ url_for('static', filename='icons/datasource.png') }}"
                      alt="Datasource icon"
@@ -34,7 +73,7 @@
               </h5>
               <p class="card-text">
                 <strong>Project:</strong> {{ item.project_name }}<br>
-                <strong>Relevance:</strong> {{ item.distance }}
+                <a href="{{ item.url }}" target="_blank"><strong>Go to Datasource</strong></a>
               </p>
             </div>
           </div>
@@ -44,6 +83,8 @@
     {% else %}
       <p>No results found for "{{ query }}."</p>
     {% endif %}
+    
+    <a href="{{ url_for('search') }}" class="nav-button back-button">New Search</a>
   </div>
 </body>
 </html>
