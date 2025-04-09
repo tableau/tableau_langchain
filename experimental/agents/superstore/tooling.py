@@ -36,7 +36,11 @@ tableau_metrics = pinecone_retriever_tool(
     Prioritize using this tool if the user mentions metrics, KPIs, OKRs or similar
 
     Make thorough queries for relevant context.
-    Use "metrics update" for a summary. For detailed metric info, ask about:
+    For a high level summary ask this way:
+    - start with requesting a KPI metrics summary
+    - dive deeper on those results using the methods for detailed metric info described below
+
+    For detailed metric info, ask using the target metric plus any of these topics:
     - dimensions
     - data
     - descriptions
