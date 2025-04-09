@@ -1,11 +1,11 @@
 import os
 from dotenv import load_dotenv
 
-# importing from latest local `pkg`
-# from pkg.langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
+# importing from latest local
+from experimental.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
 # importing from remote `pkg`
-from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
+# from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
 
 # Load environment variables before accessing them
