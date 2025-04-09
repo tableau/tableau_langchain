@@ -12,15 +12,18 @@ dependencies:
     - pyjwt=2.10.1
     - langchain=0.3.21
     - langsmith=0.2.11
+    - twine=6.1.0
     - pip:
         - langgraph==0.3.21
         - langgraph-cli==0.1.81
         - langchain-anthropic==0.3.10
         - langchain-openai==0.3.11
         - langchain-pinecone==0.2.3
-        - langchain-tableau==0.4.35
+        - langchain-tableau
         - langchain-community==0.3.20
         - llama-index==0.12.27
         - llama-index-vector-stores-pinecone==0.4.5
         - "pinecone-client[grpc]==6.0.0"
         - tavily-python==0.5.3
+        - build==1.2.2
+

@@ -4,10 +4,10 @@ from pydantic import BaseModel, Field
 from langchain.prompts import PromptTemplate
 from langchain_core.tools import tool, ToolException
 
-from pkg.langchain_tableau.tools.prompts import vds_query, vds_prompt_data, vds_response
-from pkg.langchain_tableau.utilities.auth import jwt_connected_app
-from pkg.langchain_tableau.utilities.models import select_model
-from pkg.langchain_tableau.utilities.simple_datasource_qa import (
+from langchain_tableau.tools.prompts import vds_query, vds_prompt_data, vds_response
+from langchain_tableau.utilities.auth import jwt_connected_app
+from langchain_tableau.utilities.models import select_model
+from langchain_tableau.utilities.simple_datasource_qa import (
     env_vars_simple_datasource_qa,
     augment_datasource_metadata,
     get_headlessbi_data,
