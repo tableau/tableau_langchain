@@ -35,7 +35,7 @@ analyze_datasource = initialize_simple_datasource_qa(
 
 tableau_metrics = pinecone_retriever_tool(
     name='tableau_metrics',
-    description="""Returns ML insights on user-subscribed metrics
+    description="""Returns ML insights & predictive analytics on user-subscribed metrics
     Prioritize using this tool if the user mentions metrics, KPIs, OKRs or similar
 
     Make thorough queries for relevant context.
@@ -72,10 +72,9 @@ tableau_metrics = pinecone_retriever_tool(
 
 tableau_datasources = pinecone_retriever_tool(
     name='tableau_datasources_catalog',
-    description="""Query a vector database to find the most relevant or useful Tableau data source
-    to answer the user query. Datasources will have descriptions and fields that may match the needs
-    of the user, use this information to determine the best data resource to target. Use this tool
-    if you must query a data source but you do not know which one to target.
+    description="""Find the most relevant or useful Tableau data sources to answer the user query. Datasources often
+    have descriptions and fields that may match the needs of the user, use this information to determine the best data
+    resource for the user to consult.
 
     Output is various chunks of text in vector format for summarization.
 
@@ -91,12 +90,14 @@ tableau_datasources = pinecone_retriever_tool(
     embedding_model=os.environ["EMBEDDING_MODEL"]
 )
 
-tableau_workbooks = pinecone_retriever_tool(
-    name='tableau_workbooks_catalog',
-    description="""Query a vector database to find the most relevant or useful Tableau workbooks
-    to answer the user query. Workbooks contain multiple individual charts and dashboards with a
-    description that may match the needs of the user, use this information to recommend the best
-    visual analytics resource to explore.
+tableau_analytics = pinecone_retriever_tool(
+    name='tableau_analytics_catalog',
+    description="""Find the most relevant or useful Tableau workbooks, dashboards, charts, reports and other forms
+    of visual analytics to help the user find canonical answers to their query. Unless the user specifically requests
+    for charts, workbooks, dashboards, etc. don't assume this is what they intend to find, if in doubt confirm by
+    letting them know you can search the catalog in their behalf.
+
+    If nothing matches the user's needs, then you might need to try a different approach such as querying a data source.
 
     Output is various chunks of text in vector format for summarization.
 
@@ -112,9 +113,8 @@ tableau_workbooks = pinecone_retriever_tool(
     embedding_model=os.environ["EMBEDDING_MODEL"]
 )
 
-
 # Web Search tool
 web_search = tavily_tool()
 
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_workbooks, web_search ]
+tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics, web_search ]
