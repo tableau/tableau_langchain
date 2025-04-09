@@ -1103,12 +1103,11 @@ fields, including those not directly related to the topics mentioned by the user
 calculations are needed, the additional fields may be useful. DO NOT HALLUCINATE FIELD NAMES
 
 Aggregations:
-ALWAYS AGGREGATE THE DATA to avoid row-level results that are too granular and not insightful. The only reason to avoid
-aggregations would be if the user expicitly asked for unaggregated or row-level results. Aggregations are a property of
-`vds_schema.Field` called "functions" and are described in `vds_schema.Functions`. For INTEGER or REAL fields, you must
-always aggregate it with one of these: SUM, AVG, MEDIAN, COUNT, COUNTD, MIN or MAX. For DATETIME or DATE fields, you must
-always aggregate it with one of these: YEAR, QUARTER, MONTH, WEEK, DAY, TRUNC_YEAR, TRUNC_QUARTER, TRUNC_MONTH, TRUNC_WEEK
-or TRUNC_DAY
+Aggregations are a property of `vds_schema.Field` called "functions" and are described in `vds_schema.Functions`.
+For INTEGER or REAL fields, you must always aggregate it with one of these: SUM, AVG, MEDIAN, COUNT, COUNTD, MIN or MAX.
+For DATETIME or DATE fields, you must always aggregate it with one of these: YEAR, QUARTER, MONTH, WEEK, DAY, TRUNC_YEAR,
+TRUNC_QUARTER, TRUNC_MONTH, TRUNC_WEEK or TRUNC_DAY. If you get an error from VDS that the response size is too large,
+try further aggregating or filtering the data to avoid row-level results that are too granular and not insightful.
 
 Sorting:
 Sort fields as often as possible to highlight data of interest in the query even if not explicitly stated by the user. That
