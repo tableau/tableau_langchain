@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from langgraph.prebuilt import create_react_agent
 from langgraph.store.memory import InMemoryStore
 
-from experimental.agents.models import select_model
+from experimental.utilities.models import select_model
 from experimental.agents.keynote.tooling import tools
 from experimental.agents.keynote.prompt import AGENT_SYSTEM_PROMPT
 
