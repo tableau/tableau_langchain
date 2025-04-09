@@ -480,7 +480,8 @@ sample_queries = [
             "fields": [
                 {
                     "fieldCaption": "Ship Mode"
-                },{
+                },
+                {
                     "fieldCaption": "Sales",
                     "function": "SUM"
                 }

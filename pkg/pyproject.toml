@@ -1,6 +1,6 @@
 [project]
 name = "langchain_tableau"
-version = "0.4.35"
+version = "0.4.39"
 description = "Tableau tools for Agentic use cases with Langchain"
 authors = [
     { name = "Stephen Price" },

@@ -2,6 +2,8 @@
 
 The Tableau developer community (aka DataDev) is more than welcome to contribute to this project by enhancing either the `experimental` or `pkg` folders.
 
+![datadev](../experimental/notebooks/assets/datadev.png)
+
 # About This Project
 
 This repository is a monorepo with two components. The main goal is to publish and support a Langchain [integration](https://python.langchain.com/docs/contributing/how_to/integrations/). This produces a need to have a development sandbox to try these solutions before publishing them for open-source use.
@@ -18,3 +20,4 @@ the currently available resources:
 
 ## Experimental Sandbox
 The `experimental` folder organizes agents, tools, utilities and notebooks for development and testing of solutions that may eventually be published ([see Published Agent Tools](#published-agent-tools)) for community use. This folder is essentially a sandbox for Tableau AI.
+
