@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 
 from experimental.tools.simple_datasource_qa import initialize_simple_datasource_qa
+# from pkg.langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
+
 from experimental.tools.external.retrievers import tableau_metrics
 from experimental.tools.external.web_search import tavily_tool
 
