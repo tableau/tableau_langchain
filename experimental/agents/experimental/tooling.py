@@ -70,9 +70,51 @@ tableau_metrics = pinecone_retriever_tool(
     embedding_model=os.environ["EMBEDDING_MODEL"]
 )
 
+tableau_datasources = pinecone_retriever_tool(
+    name='tableau_datasources_catalog',
+    description="""Query a vector database to find the most relevant or useful Tableau data source
+    to answer the user query. Datasources will have descriptions and fields that may match the needs
+    of the user, use this information to determine the best data resource to target. Use this tool
+    if you must query a data source but you do not know which one to target.
+
+    Output is various chunks of text in vector format for summarization.
+
+    Args:
+        query (str): A natural language query describing the data to retrieve or an open-ended question
+        that can be answered using information contained in the data source
+
+    Returns:
+        dict: A data set relevant to the user's query
+    """,
+    pinecone_index=os.environ["DATASOURCES_INDEX"],
+    model_provider=os.environ["MODEL_PROVIDER"],
+    embedding_model=os.environ["EMBEDDING_MODEL"]
+)
+
+tableau_workbooks = pinecone_retriever_tool(
+    name='tableau_workbooks_catalog',
+    description="""Query a vector database to find the most relevant or useful Tableau workbooks
+    to answer the user query. Workbooks contain multiple individual charts and dashboards with a
+    description that may match the needs of the user, use this information to recommend the best
+    visual analytics resource to explore.
+
+    Output is various chunks of text in vector format for summarization.
+
+    Args:
+        query (str): A natural language query describing the data to retrieve or an open-ended question
+        that can be answered using information contained in the data source
+
+    Returns:
+        dict: A data set relevant to the user's query
+    """,
+    pinecone_index=os.environ["WORKBOOKS_INDEX"],
+    model_provider=os.environ["MODEL_PROVIDER"],
+    embedding_model=os.environ["EMBEDDING_MODEL"]
+)
+
 
 # Web Search tool
 web_search = tavily_tool()
 
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ analyze_datasource, tableau_metrics, web_search ]
+tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_workbooks, web_search ]
