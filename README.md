@@ -1,5 +1,8 @@
 # Tableau Langchain
 
+[![PyPI version](https://badge.fury.io/py/langchain-tableau.svg)](https://badge.fury.io/py/langchain-tableau)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/Tab-SE/tableau_langchain)
+
 This project builds Agentic tools from Tableau capabilities for use within the [Langchain](https://www.langchain.com/) and [LangGraph](https://langchain-ai.github.io/langgraph/tutorials/introduction/) frameworks. Solutions such as Tools, Utilities
 and Chains are published to the PyPi registry under [langchain-tableau](https://pypi.org/project/langchain-tableau/) following conventions for [integrations](https://python.langchain.com/docs/contributing/how_to/integrations/) to Langchain.
 
