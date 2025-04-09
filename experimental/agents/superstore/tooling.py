@@ -3,8 +3,7 @@ from dotenv import load_dotenv
 
 from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 
-from experimental.tools.external.retrievers import tableau_metrics
-from experimental.tools.external.web_search import tavily_tool
+from experimental.tools.external.retrievers import pinecone_retriever_tool
 
 # Load environment variables before accessing them
 load_dotenv()
@@ -31,8 +30,5 @@ analyze_datasource = initialize_simple_datasource_qa(
     tooling_llm_model=tooling_llm_model
 )
 
-# Web Search tool
-# web_search = tavily_tool()
-
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ tableau_metrics, analyze_datasource ]
+tools = [ analyze_datasource ]
