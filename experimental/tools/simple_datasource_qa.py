@@ -115,11 +115,16 @@ def initialize_simple_datasource_qa(
         """
         Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
         To be more efficient, describe your entire query in a single request rather than selecting small slices of
-        data in multiple requests. DO NOT perform multiple queries if all the data can be fetched at once with the
+        data in multiple requests. Try note to perform multiple queries if all the data can be fetched at once with the
         same filters or conditions:
 
         Good query: "Profits & average discounts by region for last week"
         Bad queries: "profits per region last week" & "average discounts per region last week"
+
+        DO NOT HALLUCINATE FILTERS OR CONDITIONS UNLESS THEY ARE EXPLICITLY MENTIONED IN THE USER INPUT. For example, for the query
+        'which suppliers have high purchasing volumes, but lower than average prices?' DO NOT HALLUCINATE the meaning of high purchasing
+        volumes or lower than average prices. Instead, use query for all the suppliers and their purchasing volumes and average prices and
+        then introspect on the output.
 
         If you received an error after using this tool, mention it in your next attempt to help the tool correct itself.
         """

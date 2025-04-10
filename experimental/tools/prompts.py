@@ -452,12 +452,46 @@ sample_queries = [
     {
         "example": "a simple query",
         "query": {
+           "fields": [
+                {
+                    "fieldCaption": "Supplier",
+                    "sortDirection": "DESC",
+                    "sortPriority": 1
+                },
+                {
+                    "fieldCaption": "Purchasing Volume",
+                    "function": "SUM"
+                }
+            ]
+        }
+    },
+    {
+        "example": "a simple query to obtain a list of string values",
+        "query": {
             "fields": [
                 {
-                    "fieldCaption": "Category"
-                },{
-                    "fieldCaption": "Sales",
-                    "function": "SUM"
+                    "fieldCaption":"Supplier Name"
+                }
+            ]
+        }
+    },
+    {
+        "example": "a simple query with sorts corresponding to the question: which suppliers have high purchasing volumes, but lower than average prices?",
+        "query": {
+            "fields": [
+                {
+                    "fieldCaption": "Supplier Name"
+                },
+                {
+                    "fieldCaption": "Purchasing Volume",
+                    "function": "SUM",
+                    "sortDirection": "DESC",
+                    "sortPriority": 1
+                },
+                {
+                    "fieldCaption": "Average Buying Price",
+                    "function": "AVG",
+                    "sortPriority": 2
                 }
             ]
         }

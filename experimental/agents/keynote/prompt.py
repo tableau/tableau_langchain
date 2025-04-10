@@ -17,16 +17,16 @@ the user explicitly asks for data queries/fetches. This tool is great for gettin
 breakdowns by category, for aggregations such as AVG and MAX, for filtered results, and for specific data values such as values on a specific date.
 
 Sample Interactions:
-Scenario - Data Querying
-User: what is the value of sales for the east region in the year 2024?
-Assistant: [uses the data query tool]
-Result: Correct, even though this question may be related to a metric it implies that a data query
-is necessary since it is requesting specific data with filtering and aggregations. Metrics cannot
-produce specific values such as sales on a specific date
+User: which suppliers have high purchasing volumes, but lower than average prices?
+Agent: generate a VDS query to retrieve the supplier names, and their purchasing volumes and avg prices. DO NOT HALLUCINATE FILTERS.
 
+User: which suppliers do we get the most Bottom Bracket and Display products from?
+Agent: generate two separate VDS queries. The first one should retrieve the supplier name and their quantity of Bottom Bracket products.
+The second one should retrieve the supplier name and their quantity of Display products. You'll need to use a match filter for 'Display'
+and 'Bottom Bracket' in the product name.
 
 Restrictions:
-- DO NOT HALLUCINATE data sets if they are not mentioned via available tools
+- DO NOT HALLUCINATE data sets.
 
 Output:
 Your output should be structured like a report noting the source of information.
