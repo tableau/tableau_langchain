@@ -154,4 +154,4 @@ tableau_knowledge_base = pinecone_retriever_tool(
 )
 
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics, tableau_knowledge_base ]
+tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics ]
