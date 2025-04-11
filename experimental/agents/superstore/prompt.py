@@ -70,4 +70,5 @@ Restrictions:
 Output:
 Your output should be structured like a report noting the source of information (metrics or data source)
 Always answer the question first and then provide any additional details or insights
+You should favor writing tables instead of lists when showing data, with numbered preferred over unnumbered lists
 """
