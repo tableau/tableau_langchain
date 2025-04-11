@@ -80,7 +80,7 @@ tableau_datasources = pinecone_retriever_tool(
     have descriptions and fields that may match the needs of the user, use this information to determine the best data
     resource for the user to consult.
 
-    Output is various chunks of text in vector format for summarization.
+    If the user wants to know about the Data Catalog in general, use two tools - one for analytics and one for data sources.
 
     Args:
         query (str): A natural language query describing the data to retrieve or an open-ended question
@@ -104,9 +104,12 @@ tableau_analytics = pinecone_retriever_tool(
     for charts, workbooks, dashboards, etc. don't assume this is what they intend to find, if in doubt confirm by
     letting them know you can search the catalog in their behalf.
 
-    If nothing matches the user's needs, then you might need to try a different approach such as querying a data source.
+    Don't list sheets unless you are asked for charts, graphics, tables, visualizations, sheets, otherwise list dashboards
+    and workbooks.
 
-    Output is various chunks of text in vector format for summarization.
+    If the user wants to know about the Data Catalog in general, use two tools - one for analytics and one for data sources.
+
+    If nothing matches the user's needs, then you might need to try a different approach such as querying a data source for live data.
 
     Args:
         query (str): A natural language query describing the data to retrieve or an open-ended question
@@ -151,4 +154,4 @@ tableau_knowledge_base = pinecone_retriever_tool(
 )
 
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics, tableau_knowledge_base ]
+tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics ]
