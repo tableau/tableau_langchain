@@ -5,8 +5,8 @@ description = "A community project to stage, test and build Tableau tools for Ag
 authors = [
     { name = "Stephen Price" },
     { name = "Joe Constantino" },
-    { name = "Joseph Fluckiger" }
-    { name = "Antoine Issalyr" }
+    { name = "Joseph Fluckiger" },
+    { name = "Antoine Issaly" }
 ]
 requires-python = ">=3.12.2"
 license = "MIT"
