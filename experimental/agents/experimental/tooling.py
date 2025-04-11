@@ -39,7 +39,11 @@ tableau_metrics = pinecone_retriever_tool(
     Prioritize using this tool if the user mentions metrics, KPIs, OKRs or similar
 
     Make thorough queries for relevant context.
-    Use "metrics update" for a summary. For detailed metric info, ask about:
+    For a high level summary ask this way:
+    - start with requesting a KPI metrics summary
+    - dive deeper on those results using the methods for detailed metric info described below
+
+    For detailed metric info, ask using the target metric plus any of these topics:
     - dimensions
     - data
     - descriptions
@@ -65,9 +69,12 @@ tableau_metrics = pinecone_retriever_tool(
     User: what is the value of sales in 2024?
     -> wrong usage of this tool, not for specific values
     """,
-    pinecone_index=os.environ["METRICS_INDEX"],
-    model_provider=os.environ["MODEL_PROVIDER"],
-    embedding_model=os.environ["EMBEDDING_MODEL"]
+    pinecone_index = os.environ["METRICS_INDEX"],
+    model_provider = os.environ["MODEL_PROVIDER"],
+    embedding_model = os.environ["EMBEDDING_MODEL"],
+    text_key = "_node_content",
+    search_k = 6,
+    max_concurrency = 5
 )
 
 tableau_datasources = pinecone_retriever_tool(
@@ -87,7 +94,10 @@ tableau_datasources = pinecone_retriever_tool(
     """,
     pinecone_index=os.environ["DATASOURCES_INDEX"],
     model_provider=os.environ["MODEL_PROVIDER"],
-    embedding_model=os.environ["EMBEDDING_MODEL"]
+    embedding_model=os.environ["EMBEDDING_MODEL"],
+    text_key = "_node_content",
+    search_k = 6,
+    max_concurrency = 5
 )
 
 tableau_analytics = pinecone_retriever_tool(
@@ -110,7 +120,10 @@ tableau_analytics = pinecone_retriever_tool(
     """,
     pinecone_index=os.environ["WORKBOOKS_INDEX"],
     model_provider=os.environ["MODEL_PROVIDER"],
-    embedding_model=os.environ["EMBEDDING_MODEL"]
+    embedding_model=os.environ["EMBEDDING_MODEL"],
+    text_key = "_node_content",
+    search_k = 6,
+    max_concurrency = 5
 )
 
 # Web Search tool
