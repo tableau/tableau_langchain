@@ -6,13 +6,15 @@ authors = [
     { name = "Stephen Price" },
     { name = "Joe Constantino" },
     { name = "Joseph Fluckiger" }
+    { name = "Antoine Issalyr" }
 ]
 requires-python = ">=3.12.2"
 license = "MIT"
 readme = "README.md"
 
 dependencies = [
-    "python-dotenv==1.1.0",
+    "build==1.2.2",
+    "ipython==9.0.2",
     "langchain==0.3.21",
     "langgraph==0.3.21",
     "langsmith==0.2.11",
@@ -24,9 +26,9 @@ dependencies = [
     "llama-index==0.12.27",
     "llama-index-vector-stores-pinecone==0.4.5",
     "pinecone-client[grpc]==6.0.0",
+    "python-dotenv==1.1.0",
+    "slack-sdk==3.35.0",
     "tavily-python==0.5.3",
-    "ipython==9.0.2",
-    "build==1.2.2",
     "twine==6.1.0"
 ]
 
