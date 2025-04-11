@@ -462,7 +462,7 @@ sample_queries = [
             ]
         }
     },
-    # removing until we can support this with higher reliability
+     # removing until we can support this with higher reliability
     # {
     #    "example": "a simple Tableau calculation",
     #    "query": {
@@ -480,8 +480,7 @@ sample_queries = [
             "fields": [
                 {
                     "fieldCaption": "Ship Mode"
-                },
-                {
+                },{
                     "fieldCaption": "Sales",
                     "function": "SUM"
                 }
@@ -1083,24 +1082,24 @@ semantics or other logic such as applying filters, aggregations, dates, etc.
 
 Data Model:
 Provides sample values for fields in the data source. This is useful in particular when aggregating or inferring
-filter values
+filter values.
 
 {data_model}
 
 VDS Schema:
-OpenAPI schema describing JSON payloads to the VDS API, use this to generate queries with correct syntax
+OpenAPI schema describing JSON payloads to the VDS API, use this to generate queries with correct syntax.
 
 {vds_schema}
 
 Query:
 The query must be written according to the `vds_schema.Query` key. Which describes two properties: fields (required)
-and filters (optional)
+and filters (optional)l.
 
 Fields:
 To satisfy the required "fields" property of `vds_schema.Query`, add fields according to the `vds_schema.Field` key,
 which references `vds_schema.FieldBase`. Use the `data_dictionary` and `data_model` keys to query all useful or related
 fields, including those not directly related to the topics mentioned by the user. Even if additional transformations or
-calculations are needed, the additional fields may be useful. DO NOT HALLUCINATE FIELD NAMES
+calculations are needed, the additional fields may be useful. DO NOT HALLUCINATE FIELD NAMES.
 
 Aggregations:
 Aggregations are a property of `vds_schema.Field` called "functions" and are described in `vds_schema.Functions`.
@@ -1108,20 +1107,21 @@ For INTEGER or REAL fields, you must always aggregate it with one of these: SUM,
 For DATETIME or DATE fields, you must always aggregate it with one of these: YEAR, QUARTER, MONTH, WEEK, DAY, TRUNC_YEAR,
 TRUNC_QUARTER, TRUNC_MONTH, TRUNC_WEEK or TRUNC_DAY. If you get an error from VDS that the response size is too large,
 try further aggregating or filtering the data to avoid row-level results that are too granular and not insightful.
+Fields of type STRING, BOOLEAN, SPATIAL and UNKNOWN - MUST NOT BE AGGREGATED.
 
 Sorting:
 Sort fields as often as possible to highlight data of interest in the query even if not explicitly stated by the user. That
 means that if they asked about a field in particular, find a way to sort it that makes sense. Sorting is composed of two
 properties applied to `vds_schema.Field`: "sortDirection" described by `vds_schema.SortDirection` and "SortPriority" which
 is sets the sort order for fields in the query. "SortPriority" is only needed for fields you wish to sort. DO NOT apply
-sorting to the entire query or payload, this applies only to fields
+sorting to the entire query or payload, this applies only to fields.
 
 Filtering:
 Add filters to narrow down the data set according to user specifications and to avoid unnecessary large volumes of data.
 Filters are the second and optional property of `vds_schema.Query` and should be written according to `vds_schema.Filter`.
 The `vds_schema.Filter` spec references `vds_schema.FilterField`. When asked about values for a specific date, use
 QuantitativeDateFilter with RANGE and always include both minDate and maxDate properties. When asked about last week,
-previous month, current year, this quarter, previous 10 years, last 2 quarters use `RelativeDateFilter`
+previous month, current year, this quarter, previous 10 years, last 2 quarters use `RelativeDateFilter`.
 
 There are many types of filters. To choose the right kind of filters you must first use the `data_model` key to map the
 target field to the kind of filters it supports. Use the "dataType" for each field (ex. "dataType": "STRING") and the
@@ -1139,7 +1139,7 @@ current year, this quarter, previous 10 years, last 2 quarters
 you filter the data response to analyze
 
 You may not have all filter members for fields of type "STRING" in the Data Model, only sample values. Therefore, you must
-generate educated guesses for actual filter values and use any previous empty array errors to retry with better values
+generate educated guesses for actual filter values and use any previous empty array errors to retry with better values.
 
 Sample Queries:
 Reference these examples as best practices to execute tasks. These examples show distinct ways to interact with the VDS API
@@ -1166,7 +1166,7 @@ The query you generated that caused the error is this:
 Output:
 Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability.
 If the data source does not contain fields of data that can answer the user_input, return a message so the agent knows to
-use a different tool
+use a different tool.
 """
 
 vds_response = """
