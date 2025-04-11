@@ -123,5 +123,32 @@ tableau_analytics = pinecone_retriever_tool(
     max_concurrency = 5
 )
 
+tableau_knowledge_base = pinecone_retriever_tool(
+    name='tableau_knowledge_base',
+    description="""A knowledge base collecting whitepapers, help articles, technical documentation and similar resources describing
+    Tableau's developer platform. Use this tool when the customer is asking a Tableau, embedded analytics and AI. This tool provides
+    sample embed code and best practices on how to use APIs. This tool also describes the Tableau demo app which is the context in
+    which you operate. Include additional context to your inputs besides the verbatim user query so that you can pull in as much useful
+    context as possible
+
+    Args:
+        query (str): A natural language query describing the data to retrieve or an open-ended question
+        that can be answered using information contained in the data source
+
+    Returns:
+        dict: A data set relevant to the user's query
+
+    Examples:
+    User: What is row-level security?
+    Input: 'what is row-level security? security, filtering, row-level, permissions, heirarchies'
+    """,
+    pinecone_index='literature',
+    model_provider=os.environ["MODEL_PROVIDER"],
+    embedding_model=os.environ["EMBEDDING_MODEL"],
+    text_key = "_node_content",
+    search_k = 6,
+    max_concurrency = 5
+)
+
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics ]
+tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics, tableau_knowledge_base ]
