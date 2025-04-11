@@ -66,9 +66,12 @@ tableau_metrics = pinecone_retriever_tool(
     User: what is the value of sales in 2024?
     -> wrong usage of this tool, not for specific values
     """,
-    pinecone_index=os.environ["METRICS_INDEX"],
-    model_provider=os.environ["MODEL_PROVIDER"],
-    embedding_model=os.environ["EMBEDDING_MODEL"]
+    pinecone_index = os.environ["METRICS_INDEX"],
+    model_provider = os.environ["MODEL_PROVIDER"],
+    embedding_model = os.environ["EMBEDDING_MODEL"],
+    text_key = "_node_content",
+    search_k = 6,
+    max_concurrency = 5
 )
 
 tableau_datasources = pinecone_retriever_tool(
@@ -88,7 +91,10 @@ tableau_datasources = pinecone_retriever_tool(
     """,
     pinecone_index=os.environ["DATASOURCES_INDEX"],
     model_provider=os.environ["MODEL_PROVIDER"],
-    embedding_model=os.environ["EMBEDDING_MODEL"]
+    embedding_model=os.environ["EMBEDDING_MODEL"],
+    text_key = "_node_content",
+    search_k = 6,
+    max_concurrency = 5
 )
 
 tableau_analytics = pinecone_retriever_tool(
@@ -97,6 +103,9 @@ tableau_analytics = pinecone_retriever_tool(
     of visual analytics to help the user find canonical answers to their query. Unless the user specifically requests
     for charts, workbooks, dashboards, etc. don't assume this is what they intend to find, if in doubt confirm by
     letting them know you can search the catalog in their behalf.
+
+    Don't list sheets unless you are asked for charts, graphics, tables, visualizations, sheets, otherwise list dashboards
+    and workbooks.
 
     If nothing matches the user's needs, then you might need to try a different approach such as querying a data source.
 
@@ -111,7 +120,37 @@ tableau_analytics = pinecone_retriever_tool(
     """,
     pinecone_index=os.environ["WORKBOOKS_INDEX"],
     model_provider=os.environ["MODEL_PROVIDER"],
-    embedding_model=os.environ["EMBEDDING_MODEL"]
+    embedding_model=os.environ["EMBEDDING_MODEL"],
+    text_key = "_node_content",
+    search_k = 6,
+    max_concurrency = 5
+)
+
+tableau_knowledge_base = pinecone_retriever_tool(
+    name='tableau_knowledge_base',
+    description="""A knowledge base collecting whitepapers, help articles, technical documentation and similar resources describing
+    Tableau's developer platform. Use this tool when the customer is asking a Tableau, embedded analytics and AI. This tool provides
+    sample embed code and best practices on how to use APIs. This tool also describes the Tableau demo app which is the context in
+    which you operate. Include additional context to your inputs besides the verbatim user query so that you can pull in as much useful
+    context as possible
+
+    Args:
+        query (str): A natural language query describing the data to retrieve or an open-ended question
+        that can be answered using information contained in the data source
+
+    Returns:
+        dict: A data set relevant to the user's query
+
+    Examples:
+    User: What is row-level security?
+    Input: 'what is row-level security? security, filtering, row-level, permissions, heirarchies'
+    """,
+    pinecone_index='literature',
+    model_provider=os.environ["MODEL_PROVIDER"],
+    embedding_model=os.environ["EMBEDDING_MODEL"],
+    text_key = "_node_content",
+    search_k = 6,
+    max_concurrency = 5
 )
 
 # List of tools used to build the state graph and for binding them to nodes
