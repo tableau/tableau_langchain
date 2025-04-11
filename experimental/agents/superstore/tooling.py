@@ -104,6 +104,9 @@ tableau_analytics = pinecone_retriever_tool(
     for charts, workbooks, dashboards, etc. don't assume this is what they intend to find, if in doubt confirm by
     letting them know you can search the catalog in their behalf.
 
+    Don't list sheets unless you are asked for charts, graphics, tables, visualizations, sheets, otherwise list dashboards
+    and workbooks.
+
     If nothing matches the user's needs, then you might need to try a different approach such as querying a data source.
 
     Output is various chunks of text in vector format for summarization.
