@@ -38,6 +38,12 @@ def jwt_connected_app(
         Dict[str, Any]: A dictionary containing the response from the Tableau authentication endpoint,
         typically including an API key or session that is valid for 2 hours and user information.
     """
+    print('tableau_user', tableau_user)
+    print('tableau_user', scopes)
+    print('tableau_domain', tableau_domain)
+
+
+
     # Encode the payload and secret key to generate the JWT
     token = jwt.encode(
         {
@@ -56,6 +62,8 @@ def jwt_connected_app(
         }
     )
 
+    print('token', token)
+
     # authentication endpoint + request headers & payload
     endpoint = f"{tableau_domain}/api/{tableau_api}/auth/signin"
 
@@ -72,6 +80,9 @@ def jwt_connected_app(
         }
         }
     }
+
+    print('payload', payload)
+
 
     response = requests.post(endpoint, headers=headers, json=payload)
 
