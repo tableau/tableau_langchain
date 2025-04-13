@@ -8,7 +8,7 @@ from experimental.tools.external.retrievers import pinecone_retriever_tool
 # Load environment variables before accessing them
 load_dotenv()
 tableau_domain = os.environ['BOOTH_DOMAIN']
-tableau_site = os.environ['BOOTH_SITE']
+tableau_site = ''
 tableau_jwt_client_id = os.environ['BOOTH_JWT_CLIENT_ID']
 tableau_jwt_secret_id = os.environ['BOOTH_JWT_SECRET_ID']
 tableau_jwt_secret = os.environ['BOOTH_JWT_SECRET']
