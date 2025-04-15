@@ -7,14 +7,14 @@ from experimental.tools.external.retrievers import pinecone_retriever_tool
 
 # Load environment variables before accessing them
 load_dotenv()
-tableau_domain = os.environ['BOOTH_DOMAIN']
-tableau_site = ''
-tableau_jwt_client_id = os.environ['BOOTH_JWT_CLIENT_ID']
-tableau_jwt_secret_id = os.environ['BOOTH_JWT_SECRET_ID']
-tableau_jwt_secret = os.environ['BOOTH_JWT_SECRET']
-tableau_api_version = os.environ['BOOTH_API_VERSION']
-tableau_user = os.environ['BOOTH_USER']
-datasource_luid = os.environ['BOOTH_DATASOURCE_LUID']
+tableau_domain = os.environ['KEYNOTE_DOMAIN']
+tableau_site = os.environ['KEYNOTE_SITE']
+tableau_jwt_client_id = os.environ['KEYNOTE_JWT_CLIENT_ID']
+tableau_jwt_secret_id = os.environ['KEYNOTE_JWT_SECRET_ID']
+tableau_jwt_secret = os.environ['KEYNOTE_JWT_SECRET']
+tableau_api_version = os.environ['KEYNOTE_API_VERSION']
+tableau_user = os.environ['KEYNOTE_USER']
+datasource_luid = os.environ['KEYNOTE_DATASOURCE_LUID']
 tooling_llm_model = os.environ['TOOLING_MODEL']
 
 # Tableau VizQL Data Service Query Tool
