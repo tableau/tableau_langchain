@@ -17,6 +17,8 @@ RUN PYTHONDONTWRITEBYTECODE=1 pip install --no-cache-dir -c /api/constraints.txt
 ENV LANGSERVE_GRAPHS='{ \
     "experimental": "/deps/tableau_langchain/experimental/agents/experimental/agent.py:analytics_agent", \
     "superstore": "/deps/tableau_langchain/experimental/agents/superstore/agent.py:analytics_agent", \
+    "makana": "/deps/tableau_langchain/experimental/agents/makana/agent.py:analytics_agent", \
+    "cumulus": "/deps/tableau_langchain/experimental/agents/cumulus/agent.py:analytics_agent", \
     "keynote": "/deps/tableau_langchain/experimental/agents/keynote/agent.py:analytics_agent" \
 }'
 #  ^--- Start JSON object      ^--- First key-value pair        ^--- Comma separator      ^--- Second key-value pair    ^--- End JSON object
