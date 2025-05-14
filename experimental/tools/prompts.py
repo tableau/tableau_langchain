@@ -462,18 +462,6 @@ sample_queries = [
             ]
         }
     },
-     # removing until we can support this with higher reliability
-    # {
-    #    "example": "a simple Tableau calculation",
-    #    "query": {
-    #         "fields": [
-    #             {
-    #                 "fieldCaption": "AOV",
-    #                 "calculation": "SUM([Profit])/COUNTD([Order ID])"
-    #             }
-    #         ]
-    #     }
-    # },
     {
         "example": "applying a set filter",
         "query": {
@@ -1103,11 +1091,12 @@ calculations are needed, the additional fields may be useful. DO NOT HALLUCINATE
 
 Aggregations:
 Aggregations are a property of `vds_schema.Field` called "functions" and are described in `vds_schema.Functions`.
-For INTEGER or REAL fields, you must always aggregate it with one of these: SUM, AVG, MEDIAN, COUNT, COUNTD, MIN or MAX.
-For DATETIME or DATE fields, you must always aggregate it with one of these: YEAR, QUARTER, MONTH, WEEK, DAY, TRUNC_YEAR,
+For INTEGER or REAL fields, you must aggregate with one of these: SUM, AVG, MEDIAN, COUNT, COUNTD, MIN or MAX.
+For DATETIME or DATE fields, you must aggregate with one of these: YEAR, QUARTER, MONTH, WEEK, DAY, TRUNC_YEAR,
 TRUNC_QUARTER, TRUNC_MONTH, TRUNC_WEEK or TRUNC_DAY. If you get an error from VDS that the response size is too large,
 try further aggregating or filtering the data to avoid row-level results that are too granular and not insightful.
-Fields of type STRING, BOOLEAN, SPATIAL and UNKNOWN - MUST NOT BE AGGREGATED.
+
+Fields of type STRING, BOOLEAN, SPATIAL and UNKNOWN - MUST NOT BE AGGREGATED! DO NOT AGGREGATE STRING FIELDS!
 
 Sorting:
 Sort fields as often as possible to highlight data of interest in the query even if not explicitly stated by the user. That
