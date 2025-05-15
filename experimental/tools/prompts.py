@@ -1139,6 +1139,18 @@ you filter the data response to analyze
 You may not have all filter members for fields of type "STRING" in the Data Model, only sample values. Therefore, you must
 generate educated guesses for actual filter values and use any previous empty array errors to retry with better values
 
+Calculations:
+If you used the generate_calc_sql tool, you should include the calculation string in the query object. The calculation must
+be written according to the vds schema. Put the actual calculation string as the value of the "calculation" property, like so:
+"query": {
+            "fields": [
+                {
+                    "fieldCaption": "AOV",
+                    "calculation": "SUM([Profit])/COUNTD([Order ID])"
+                }
+            ]
+        }
+
 Sample Queries:
 Reference these examples as best practices to execute tasks. These examples show distinct ways to interact with the VDS API
 in order to obtain data in different shapes.

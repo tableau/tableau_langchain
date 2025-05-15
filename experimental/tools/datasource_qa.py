@@ -118,6 +118,9 @@ def initialize_datasource_qa(
         data in multiple requests. DO NOT perform multiple queries if all the data can be fetched at once with the
         same filters or conditions:
 
+        If the user's query requires creating a derived or calculated field, use the `generate_calc_string` tool first and then
+        use the output of the generate_calc_string tool to inform your query_datasource.
+
         Good query: "Profits & average discounts by region for last week"
         Bad queries: "profits per region last week" & "average discounts per region last week"
 
