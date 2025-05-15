@@ -14,7 +14,7 @@ dependencies:
     - langsmith=0.2.11
     - twine=6.1.0
     - pip:
-        - langgraph==0.3.21
+        - langgraph==0.3.27
         - langgraph-cli==0.1.81
         - langchain-anthropic==0.3.10
         - langchain-openai==0.3.11
