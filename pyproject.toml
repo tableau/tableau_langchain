@@ -16,7 +16,7 @@ dependencies = [
     "build==1.2.2",
     "ipython==9.0.2",
     "langchain==0.3.21",
-    "langgraph==0.3.21",
+    "langgraph==0.3.27",
     "langsmith==0.2.11",
     "langchain-anthropic==0.3.10",
     "langchain-openai==0.3.11",
