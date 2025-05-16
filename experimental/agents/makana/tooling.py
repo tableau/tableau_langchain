@@ -12,7 +12,7 @@ tableau_jwt_secret_id = os.environ['TABLEAU_JWT_SECRET_ID']
 tableau_jwt_secret = os.environ['TABLEAU_JWT_SECRET']
 tableau_api_version = os.environ['TABLEAU_API_VERSION']
 tableau_user = os.environ['TABLEAU_USER']
-datasource_luid = os.environ['DATASOURCE_LUID']
+# datasource_luid = os.environ['DATASOURCE_LUID']
 tooling_llm_model = os.environ['TOOLING_MODEL']
 
 # Tableau VizQL Data Service Query Tool
@@ -24,7 +24,7 @@ analyze_datasource = initialize_simple_datasource_qa(
     jwt_secret=tableau_jwt_secret,
     tableau_api_version=tableau_api_version,
     tableau_user=tableau_user,
-    datasource_luid=datasource_luid,
+    datasource_luid='4d692431-5ce6-4802-9b3b-9b35f53164ef',
     tooling_llm_model=tooling_llm_model
 )
 
