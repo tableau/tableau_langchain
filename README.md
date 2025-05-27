@@ -1,9 +1,24 @@
 # Tableau Langchain
 
+[![Community Supported](https://img.shields.io/badge/Support%20Level-Community%20Supported-457387.svg)](https://www.tableau.com/support-levels-it-and-developer-tools)
 [![PyPI version](https://badge.fury.io/py/langchain-tableau.svg)](https://badge.fury.io/py/langchain-tableau)
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/Tab-SE/tableau_langchain)
 
 This project builds Agentic tools from Tableau capabilities for use within the [Langchain](https://www.langchain.com/) and [LangGraph](https://langchain-ai.github.io/langgraph/tutorials/introduction/) frameworks. Solutions such as Tools, Utilities, and Chains are published to the PyPi registry under [langchain-tableau](https://pypi.org/project/langchain-tableau/) following conventions for [integrations](https://python.langchain.com/docs/contributing/how_to/integrations/) to Langchain.
+
+> [!IMPORTANT]
+> On May 27 2025 this project was moved from the Tableau Solution Engineering GitHub organization to the main Tableau OSS one:
+> * from: https://github.com/Tab-SE/tableau_langchain
+> * to: https://github.com/tableau/tableau_langchain
+>
+> Everything should be moved over intact and everyone should still have the same access.
+>
+> All links to the previous location should automatically redirect to the new location. If you have a copy of this project cloned locally, we recommend updating to point to the new location:
+>
+> ```sh
+> git remote set-url origin https://github.com/tableau/tableau_langchain
+> ```
+
 
 ![tableau logo](experimental/notebooks/assets/tableau_logo_text.png)
 
@@ -14,7 +29,7 @@ pip install langchain-tableau
 We'd like you to explore how Agentic tools can drive alignment between your organization's data and the day-to-day needs of your users. Consider contributing to this project or creating your own work on a different framework, ultimately we seek to increase the flow of data and help people get answers from it.
 
 To see live demos of Agents using Tableau, visit:
-- [EmbedTableau.com](https://www.embedtableau.com/) | [Github Repository](https://github.com/Tab-SE/embedding_playbook) | [@stephenlprice](https://github.com/stephenlprice)
+- [EmbedTableau.com](https://www.embedtableau.com/) | [Github Repository](https://github.com/Tab-SE/embedding_playbook)
 
 </br>
 
@@ -28,7 +43,7 @@ To see live demos of Agents using Tableau, visit:
   - [Published Solutions](#published-solutions-1)
   - [Experimental Sandbox](#experimental-sandbox-1)
   - [Security](#security)
-- [Contributors](#contributors)
+- [Contributing](#contributing)
 
 ![area chart](experimental/notebooks/assets/vizart/area_chart_banner.png)
 
@@ -165,7 +180,7 @@ The code base has two top-level folders: `experimental/` and `pkg/`. Experimenta
 The `main` branch will always be the latest stable branch.
 
 ## Published Solutions
-The `pgk` folder contains production code shipped to the [PyPi registry](https://pypi.org/project/langchain-tableau/). 
+The `pgk` folder contains production code shipped to the [PyPi registry](https://pypi.org/project/langchain-tableau/).
 These are available resources:
 
 1. `simple_datasource_qa.py`
@@ -183,11 +198,11 @@ Tableau resources are accessed via supported authentication methods such as Conn
 
 Learn more by reading our [Security](.github/SECURITY.md) article.
 
-</br>
+# Contributing
 
-# Contributors
+The Tableau developer community (aka DataDev) is more than welcome to contribute to this project by enhancing either the `experimental` or `pkg` folders.
 
-This the founding team for the project. Please consider contributing in your own way to further what's possible when you combine Tableau with AI Agents.
+This is the founding team for the project. Please consider contributing in your own way to further what's possible when you combine Tableau with AI Agents.
 
 * Stephen Price [@stephenlprice](https://github.com/stephenlprice) - Architect
 * Joe Constantino [@joeconstantino](https://github.com/joeconstantino) - Product Manager
@@ -196,7 +211,7 @@ This the founding team for the project. Please consider contributing in your own
 * Cristian Saavedra [@cristiansaavedra](https://github.com/cristiansaavedra) - Developer
 * Antoine Issaly [@antoineissaly](https://github.com/antoineissaly) - Developer
 
-If you wish to contribute to this project, please refer to our [Contribution Guidelines](.github/CONTRIBUTING.md).
-Also, check out the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
+If you wish to contribute to this project, please refer to our [Contribution Guidelines](CONTRIBUTING.md).
+Also, check out the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-![dual axis area chart](experimental/notebooks/assets/vizart/rounded-bars-blue-dark.png)
+![datadev](experimental/notebooks/assets/datadev.png)
