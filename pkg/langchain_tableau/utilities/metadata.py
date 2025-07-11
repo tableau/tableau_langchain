@@ -146,6 +146,7 @@ def get_data_dictionary(api_key: str, domain: str, datasource_luid: str) -> Dict
 
     response = requests.post(full_url, headers=headers, data=payload)
     response.raise_for_status()  # Raise an exception for bad status codes
+    print(response)
 
     response_data = response.json()
     if 'errors' in response_data:
