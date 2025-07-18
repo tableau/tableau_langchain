@@ -5,13 +5,13 @@ from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datas
 
 # Load environment variables before accessing them
 load_dotenv()
-tableau_domain = os.environ['EACLOUD_TABLEAU_DOMAIN']
-tableau_site = os.environ['EACLOUD_TABLEAU_SITE']
-tableau_jwt_client_id = os.environ['EACLOUD_TABLEAU_JWT_CLIENT_ID']
-tableau_jwt_secret_id = os.environ['EACLOUD_TABLEAU_JWT_SECRET_ID']
-tableau_jwt_secret = os.environ['EACLOUD_TABLEAU_JWT_SECRET']
-tableau_api_version = os.environ['EACLOUD_TABLEAU_API_VERSION']
-tableau_user = os.environ['EACLOUD_TABLEAU_USER']
+tableau_domain = os.environ['EACANADA_TABLEAU_DOMAIN']
+tableau_site = os.environ['EACANADA_TABLEAU_SITE']
+tableau_jwt_client_id = os.environ['EACANADA_TABLEAU_JWT_CLIENT_ID']
+tableau_jwt_secret_id = os.environ['EACANADA_TABLEAU_JWT_SECRET_ID']
+tableau_jwt_secret = os.environ['EACANADA_TABLEAU_JWT_SECRET']
+tableau_api_version = os.environ['EACANADA_TABLEAU_API_VERSION']
+tableau_user = os.environ['EACANADA_TABLEAU_USER']
 datasource_luid = os.environ['OMNICELL_DATASOURCE_LUID']
 tooling_llm_model = os.environ['TOOLING_MODEL']
 
