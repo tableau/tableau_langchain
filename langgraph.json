@@ -8,7 +8,9 @@
         "superstore": "./experimental/agents/superstore/agent.py:analytics_agent",
         "cumulus": "./experimental/agents/cumulus/agent.py:analytics_agent",
         "makana": "./experimental/agents/makana/agent.py:analytics_agent",
-        "keynote": "./experimental/agents/keynote/agent.py:analytics_agent"
+        "keynote": "./experimental/agents/keynote/agent.py:analytics_agent",
+        "omnicell": "./experimental/agents/omnicell/agent.py:analytics_agent"
+
     },
     "env": ".env",
     "python_version": "3.12"
