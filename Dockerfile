@@ -20,6 +20,7 @@ ENV LANGSERVE_GRAPHS='{ \
     "makana": "/deps/tableau_langchain/experimental/agents/makana/agent.py:analytics_agent", \
     "cumulus": "/deps/tableau_langchain/experimental/agents/cumulus/agent.py:analytics_agent", \
     "keynote": "/deps/tableau_langchain/experimental/agents/keynote/agent.py:analytics_agent" \
+    "omnicell": "/deps/tableau_langchain/experimental/agents/omnicell/agent.py:analytics_agent" \
 }'
 #  ^--- Start JSON object      ^--- First key-value pair        ^--- Comma separator      ^--- Second key-value pair    ^--- End JSON object
 
