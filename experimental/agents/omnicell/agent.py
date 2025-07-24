@@ -1,4 +1,5 @@
 import os
+import langchain
 
 from dotenv import load_dotenv
 
@@ -24,6 +25,9 @@ Agent for specific applications
 """
 # environment variables available to current process and sub processes
 load_dotenv()
+
+# Forcefully disable verbose logging to prevent intermediate outputs
+langchain.verbose = False
 
 # configure running model for the agent
 llm = select_model(
