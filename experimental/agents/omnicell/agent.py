@@ -35,16 +35,9 @@ llm = select_model(
 # initialize a memory store
 memory = InMemoryStore()
 
-# set agent debugging state
-if os.getenv('DEBUG') == '1':
-    debugging = True
-else:
-    debugging = False
-
 # define the agent graph
 analytics_agent = create_react_agent(
     model=llm,
     tools=tools,
-    debug=debugging,
     prompt=AGENT_SYSTEM_PROMPT
 )
