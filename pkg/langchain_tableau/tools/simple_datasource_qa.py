@@ -4,14 +4,13 @@ from pydantic import BaseModel, Field
 from langchain.prompts import PromptTemplate
 from langchain_core.tools import tool, ToolException
 
-from langchain_tableau.tools.prompts import vds_query, vds_prompt_data, vds_response
+from langchain_tableau.tools.prompts import vds_query, vds_prompt_data
 from langchain_tableau.utilities.auth import jwt_connected_app
 from langchain_tableau.utilities.models import select_model
 from langchain_tableau.utilities.simple_datasource_qa import (
     env_vars_simple_datasource_qa,
     augment_datasource_metadata,
     get_headlessbi_data,
-    prepare_prompt_inputs
 )
 
 
@@ -111,7 +110,7 @@ def initialize_simple_datasource_qa(
         user_input: str,
         previous_call_error: Optional[str] = None,
         previous_vds_payload: Optional[str] = None
-    ) -> dict:
+    ) -> str:
         """
         Queries a Tableau data source for analytical Q&A. Returns a data set you can use to answer user questions.
         To be more efficient, describe your entire query in a single request rather than selecting small slices of
@@ -163,7 +162,7 @@ def initialize_simple_datasource_qa(
         query_writing_data = augment_datasource_metadata(
             task = user_input,
             api_key = tableau_auth,
-            url = domain,
+            url = env_vars["domain"],
             datasource_luid = tableau_datasource,
             prompt = vds_prompt_data,
             previous_errors = previous_call_error,
@@ -173,8 +172,7 @@ def initialize_simple_datasource_qa(
         # 1. Insert instruction data into the template
         query_writing_prompt = PromptTemplate(
             input_variables=[
-                "task"
-                "instructions",
+                "task",
                 "vds_schema",
                 "sample_queries",
                 "error_queries",
@@ -193,77 +191,44 @@ def initialize_simple_datasource_qa(
             temperature=0
         )
 
+        # This chain now only writes the query
+        query_writing_chain = query_writing_prompt | query_writer
+
+        # Invoke the chain to generate a query
+        vds_query_result = query_writing_chain.invoke(query_writing_data)
+        vds_payload = vds_query_result.content
+
         # 3. Query data from Tableau's VizQL Data Service using the AI written payload
-        def get_data(vds_query):
-            payload = vds_query.content
-            try:
-                data = get_headlessbi_data(
-                    api_key = tableau_auth,
-                    url = domain,
-                    datasource_luid = tableau_datasource,
-                    payload = payload
-                )
+        try:
+            data_table = get_headlessbi_data(
+                api_key = tableau_auth,
+                url = env_vars["domain"],
+                datasource_luid = tableau_datasource,
+                payload = vds_payload
+            )
+            # The tool should just return the data table as a string.
+            # The agent will then use this data to form the final answer.
+            return data_table
+        except Exception as e:
+            query_error_message = f"""
+            Tableau's VizQL Data Service return an error for the generated query:
 
-                return {
-                    "vds_query": payload,
-                    "data_table": data,
-                }
-            except Exception as e:
-                query_error_message = f"""
-                Tableau's VizQL Data Service return an error for the generated query:
+            {str(vds_payload)}
 
-                {str(vds_query.content)}
+            The user_input used to write this query was:
 
-                The user_input used to write this query was:
+            {str(user_input)}
 
-                {str(user_input)}
+            This was the error:
 
-                This was the error:
+            {str(e)}
 
-                {str(e)}
+            Consider retrying this tool with the same inputs but include the previous query
+            causing the error and the error itself for the tool to correct itself on a retry.
+            If the error was an empty array, this usually indicates an incorrect filter value
+            was applied, thus returning no data
+            """
 
-                Consider retrying this tool with the same inputs but include the previous query
-                causing the error and the error itself for the tool to correct itself on a retry.
-                If the error was an empty array, this usually indicates an incorrect filter value
-                was applied, thus returning no data
-                """
-
-                raise ToolException(query_error_message)
-
-        # 4. Prepare inputs for a structured response to the calling Agent
-        def response_inputs(input):
-            metadata = query_writing_data.get('meta')
-            data = {
-                "query": input.get('vds_query', ''),
-                "data_source_name": metadata.get('datasource_name'),
-                "data_source_description": metadata.get('datasource_description'),
-                "data_source_maintainer": metadata.get('datasource_owner'),
-                "data_table": input.get('data_table', ''),
-            }
-            inputs = prepare_prompt_inputs(data=data, user_string=user_input)
-            return inputs
-
-        # 5. Response template for the Agent with further instructions
-        response_prompt = PromptTemplate(
-            input_variables=[
-                "data_source_name",
-                "data_source_description",
-                "data_source_maintainer",
-                "vds_query",
-                "data_table",
-                "user_input"
-            ],
-            template=vds_response
-        )
-
-        # this chain defines the flow of data through the system
-        chain = query_writing_prompt | query_writer | get_data | response_inputs | response_prompt
-
-
-        # invoke the chain to generate a query and obtain data
-        vizql_data = chain.invoke(query_writing_data)
-
-        # Return the structured output
-        return vizql_data
+            raise ToolException(query_error_message)
 
     return simple_datasource_qa
