@@ -49,14 +49,10 @@ def initialize_simple_datasource_qa(
         datasource_luid=datasource_luid, model_provider=model_provider, tooling_llm_model=tooling_llm_model
     )
 
-    @tool
-    def simple_datasource_qa(user_input: str) -> str:
-        """
-        You are an AI Analyst. When you need to answer a question about data, use this tool.
-        Provide the full, natural language question from the user.
-        For example: 'What were the total sales for each region last quarter?'
-        The tool will return a markdown table with the data.
-        """
+    @tool("ask_pharmacy_database")
+    def simple_datasource_qa(question_in_plain_english: str) -> str:
+        """Use this to ask a question about pharmacy data. Pass the user's full question in plain English. Do NOT create JSON or code. Just provide the English question."""
+        user_input = question_in_plain_english
         # Session scopes
         access_scopes = ["tableau:content:read", "tableau:viz_data_service:read"]
         try:
@@ -122,6 +118,6 @@ def initialize_simple_datasource_qa(
                 if attempt == max_retries - 1:
                     raise ToolException(f"The tool failed to query the data source after {max_retries} attempts. Last error: {e}")
 
-        return "Tool failed to retrieve data after multiple attempts." # Should not be reached
+        return "Tool failed to retrieve data after multiple attempts."
 
     return simple_datasource_qa
