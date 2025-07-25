@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 from pydantic import BaseModel, Field
 
@@ -196,7 +197,28 @@ def initialize_simple_datasource_qa(
 
         # Invoke the chain to generate a query
         vds_query_result = query_writing_chain.invoke(query_writing_data)
-        vds_payload = vds_query_result.content
+        raw_output = vds_query_result.content
+
+        # Extract the JSON payload from between the tags
+        match = re.search(r"<json_payload>(.*?)</json_payload>", raw_output, re.DOTALL)
+        if not match:
+            # If the model doesn't follow instructions, try to find any JSON blob as a fallback.
+            json_match = re.search(r"\{.*\}", raw_output, re.DOTALL)
+            if json_match:
+                vds_payload = json_match.group(0).strip()
+            else:
+                raise ToolException(f"Tool Error: The query-writing model failed to return a valid JSON payload. Output: {raw_output}")
+        else:
+            vds_payload = match.group(1).strip()
+
+        # Check for an error message from the model
+        try:
+            payload_dict = json.loads(vds_payload)
+            if 'error' in payload_dict:
+                return f"Could not complete the request. Reason: {payload_dict['error']}"
+        except json.JSONDecodeError:
+            raise ToolException(f"Tool Error: The query-writing model returned malformed JSON. Output: {vds_payload}")
+
 
         # 3. Query data from Tableau's VizQL Data Service using the AI written payload
         try:

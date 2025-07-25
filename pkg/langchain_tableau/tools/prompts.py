@@ -1164,7 +1164,17 @@ The query you generated that caused the error is this:
 {previous_vds_payload}
 
 Output:
-Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability.
-If the data source does not contain fields of data that can answer the user_input, return a message so the agent knows to
-use a different tool.
+Your output MUST be a single JSON object wrapped in <json_payload> tags. Do not include any other text or formatting.
+If the data source does not contain fields of data that can answer the user_input, return a message inside the tags like this:
+<json_payload>
+{{ "error": "Could not answer the question with the available data." }}
+</json_payload>
+
+Example of a valid query output:
+<json_payload>
+{{
+  "fields": [ {{ "fieldCaption": "Medication Name" }} ],
+  "filters": [ {{ "field": {{ "fieldCaption": "Total Cost" }}, "filterType": "QUANTITATIVE_NUMERICAL", "quantitativeFilterType": "MIN", "min": 1000 }} ]
+}}
+</json_payload>
 """
