@@ -1166,8 +1166,7 @@ Data Source Name: {data_source_name}
 Description: {data_source_description}
 Maintainer: {data_source_maintainer}
 
-This is the query written to Tableau's VizQL API:
-{vds_query}
+
 
 This is the resulting data from the query:
 {data_table}
