@@ -33,7 +33,7 @@ langchain.verbose = False
 llm = select_model(
     provider=os.environ["MODEL_PROVIDER"],
     model_name=os.environ["AGENT_MODEL"],
-    temperature=0.1
+    temperature=0.2
 )
 
 # initialize a memory store
