@@ -3,25 +3,14 @@ channels:
     - conda-forge
     - defaults
 dependencies:
+    # 1. Define the base interpreter and core tools
     - python=3.12.2
-    - pip=23.3.1
+    - pip>=23.3.1
     - conda-forge::notebook=7.3.3
     - conda-forge::nb_conda_kernels=2.5.1
     - ipykernel=6.29.5
-    - python-dotenv=1.1.0
-    - pyjwt=2.10.1
-    - langchain=0.3.21
-    - langsmith=0.2.11
-    - twine=6.1.0
-    - pip:
-        - langgraph>==0.4.0
-        - langgraph-cli==0.3.5
-        - langchain-anthropic==0.3.10
-        - langchain-openai==0.3.11
-        - langchain-pinecone==0.2.3
-        - langchain-tableau
-        - langchain-community==0.3.20
-        - "pinecone-client[grpc]==6.0.0"
-        - tavily-python==0.5.3
-        - build==1.2.2
 
+    # 2. Tell pip to install your project and its dependencies
+    #    from pyproject.toml
+    - pip:
+        - -e .
