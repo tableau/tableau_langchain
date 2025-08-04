@@ -1164,33 +1164,17 @@ The query you generated that caused the error is this:
 {previous_vds_payload}
 
 Output:
-Your output must be minimal, containing only the VDS query in JSON format without any extra formatting for readability.
-If the data source does not contain fields of data that can answer the user_input, return a message so the agent knows to
-use a different tool.
-"""
+Your output MUST be a single JSON object wrapped in <json_payload> tags. Do not include any other text or formatting.
+If the data source does not contain fields of data that can answer the user_input, return a message inside the tags like this:
+<json_payload>
+{{ "error": "Could not answer the question with the available data." }}
+</json_payload>
 
-vds_response = """
-This is the output of a data query tool used to fetch information via Tableau's VizQL API
-Your task is to synthesize all of this information to provide a clear, concise answer to the end user.
-
-Data Source Name: {data_source_name}
-Description: {data_source_description}
-Maintainer: {data_source_maintainer}
-
-This is the query written to Tableau's VizQL API:
-{vds_query}
-
-This is the resulting data from the query:
-{data_table}
-
-This was the user_input (question or task):
-{user_input}
-
-Based on the provided context, formulate a comprehensive and informative response to the user's query.
-Your response should:
-1. Describe the data source name, description and maintainer if this is the first interaction the user has with it
-2. Use the resulting data to answer the user's question or task
-3. Be short and concise, if the data table is too long only return the relevant rows or a small sample
-
-Your synthesized response:
+Example of a valid query output:
+<json_payload>
+{{
+  "fields": [ {{ "fieldCaption": "Medication Name" }} ],
+  "filters": [ {{ "field": {{ "fieldCaption": "Total Cost" }}, "filterType": "QUANTITATIVE_NUMERICAL", "quantitativeFilterType": "MIN", "min": 1000 }} ]
+}}
+</json_payload>
 """
