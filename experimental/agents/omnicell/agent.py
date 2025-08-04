@@ -1,5 +1,4 @@
 import os
-import langchain
 
 from dotenv import load_dotenv
 
@@ -26,9 +25,6 @@ Agent for specific applications
 # environment variables available to current process and sub processes
 load_dotenv()
 
-# Forcefully disable verbose logging to prevent intermediate outputs
-langchain.verbose = False
-
 # configure running model for the agent
 llm = select_model(
     provider=os.environ["MODEL_PROVIDER"],
@@ -39,9 +35,16 @@ llm = select_model(
 # initialize a memory store
 memory = InMemoryStore()
 
+# set agent debugging state
+if os.getenv('DEBUG') == '1':
+    debugging = True
+else:
+    debugging = False
+
 # define the agent graph
 analytics_agent = create_react_agent(
     model=llm,
     tools=tools,
+    debug=debugging,
     prompt=AGENT_SYSTEM_PROMPT
 )
