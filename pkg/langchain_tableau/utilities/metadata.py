@@ -1,7 +1,9 @@
 import json
 import requests
+import os
 from typing import Dict
 from langchain_tableau.utilities.utils import http_post
+from .mcp_client import get_mcp_data_dictionary
 
 
 def get_datasource_query(luid):
@@ -55,6 +57,23 @@ async def get_data_dictionary_async(api_key: str, domain: str, datasource_luid: 
 
 
 def get_data_dictionary(api_key: str, domain: str, datasource_luid: str) -> Dict:
+    """
+    Get data dictionary using MCP server instead of direct Metadata API.
+    This function maintains compatibility with existing code while using MCP.
+    """
+    # Get MCP server URL from environment or use default
+    mcp_server_url = os.environ.get('MCP_SERVER_URL', 'https://your-mcp-server.herokuapp.com/tableau-mcp')
+
+    try:
+        return get_mcp_data_dictionary(mcp_server_url, datasource_luid)
+    except Exception as e:
+        # Fallback to original implementation if MCP fails
+        print(f"MCP data dictionary failed, falling back to direct API: {e}")
+        return get_data_dictionary_fallback(api_key, domain, datasource_luid)
+
+
+def get_data_dictionary_fallback(api_key: str, domain: str, datasource_luid: str) -> Dict:
+    """Fallback method using direct Metadata API if MCP fails"""
     full_url = f"{domain}/api/metadata/graphql"
 
     query = get_datasource_query(datasource_luid)

@@ -1068,7 +1068,7 @@ vds_prompt_data = {
 
 vds_query = """
 Task:
-Your job is to write the main body of a request to the Tableau VizQL Data Service (VDS) API to
+Your job is to write the main body of a request to the Tableau MCP server to
 obtain data that answers the task given to you by the user:
 
 User Task: {task}
@@ -1170,14 +1170,14 @@ use a different tool.
 """
 
 vds_response = """
-This is the output of a data query tool used to fetch information via Tableau's VizQL API
+This is the output of a data query tool used to fetch information via Tableau's MCP server
 Your task is to synthesize all of this information to provide a clear, concise answer to the end user.
 
 Data Source Name: {data_source_name}
 Description: {data_source_description}
 Maintainer: {data_source_maintainer}
 
-This is the query written to Tableau's VizQL API:
+This is the query written to Tableau's MCP server:
 {vds_query}
 
 This is the resulting data from the query:

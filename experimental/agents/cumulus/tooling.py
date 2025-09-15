@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 # from langchain_tableau.tools.simple_datasource_qa import initialize_simple_datasource_qa
 from experimental.tools.simple_datasource_qa import initialize_simple_datasource_qa
+from experimental.tools.tableau_mcp_tool import initialize_tableau_mcp_tool
 
 # Load environment variables before accessing them
 load_dotenv()
@@ -29,5 +30,8 @@ analyze_datasource = initialize_simple_datasource_qa(
     tooling_llm_model=tooling_llm_model
 )
 
+# Enhanced Tableau MCP Tool for general questions
+tableau_mcp_tool = initialize_tableau_mcp_tool()
+
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ analyze_datasource ]
+tools = [ analyze_datasource, tableau_mcp_tool ]

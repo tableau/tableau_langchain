@@ -1,55 +1,25 @@
 from typing import Dict, Any
-import requests
+import os
+from .mcp_client import query_mcp_datasource, query_mcp_metadata
 
 
 def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any]) -> Dict[str, Any]:
-    full_url = f"{url}/api/v1/vizql-data-service/query-datasource"
+    """
+    Query a datasource using MCP server instead of direct VDS API.
+    This function maintains compatibility with existing code while using MCP.
+    """
+    # Get MCP server URL from environment or use default
+    mcp_server_url = os.environ.get('MCP_SERVER_URL', 'https://your-mcp-server.herokuapp.com/tableau-mcp')
 
-    payload = {
-        "datasource": {
-            "datasourceLuid": datasource_luid
-        },
-        "query": query
-    }
-
-    headers = {
-        'X-Tableau-Auth': api_key,
-        'Content-Type': 'application/json'
-    }
-
-    response = requests.post(full_url, headers=headers, json=payload)
-
-    if response.status_code == 200:
-        return response.json()
-    else:
-        error_message = (
-            f"Failed to query data source via Tableau VizQL Data Service. "
-            f"Status code: {response.status_code}. Response: {response.text}"
-        )
-        raise RuntimeError(error_message)
+    return query_mcp_datasource(mcp_server_url, datasource_luid, query)
 
 
 def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Dict[str, Any]:
-    full_url = f"{url}/api/v1/vizql-data-service/read-metadata"
+    """
+    Get datasource metadata using MCP server instead of direct VDS API.
+    This function maintains compatibility with existing code while using MCP.
+    """
+    # Get MCP server URL from environment or use default
+    mcp_server_url = os.environ.get('MCP_SERVER_URL', 'https://your-mcp-server.herokuapp.com/tableau-mcp')
 
-    payload = {
-        "datasource": {
-            "datasourceLuid": datasource_luid
-        }
-    }
-
-    headers = {
-        'X-Tableau-Auth': api_key,
-        'Content-Type': 'application/json'
-    }
-
-    response = requests.post(full_url, headers=headers, json=payload)
-
-    if response.status_code == 200:
-        return response.json()
-    else:
-        error_message = (
-            f"Failed to obtain data source metadata from VizQL Data Service. "
-            f"Status code: {response.status_code}. Response: {response.text}"
-        )
-        raise RuntimeError(error_message)
+    return query_mcp_metadata(mcp_server_url, datasource_luid)
