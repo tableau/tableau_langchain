@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 
 from experimental.tools.simple_datasource_qa import initialize_simple_datasource_qa
+from experimental.tools.tableau_mcp_tool import initialize_tableau_mcp_tool
 
 from experimental.tools.external.retrievers import pinecone_retriever_tool
 from experimental.tools.external.web_search import tavily_tool
@@ -130,4 +131,7 @@ tableau_analytics = pinecone_retriever_tool(
 web_search = tavily_tool()
 
 # List of tools used to build the state graph and for binding them to nodes
-tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics, web_search ]
+# Enhanced Tableau MCP Tool for general questions
+tableau_mcp_tool = initialize_tableau_mcp_tool()
+
+tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics, web_search, tableau_mcp_tool ]
