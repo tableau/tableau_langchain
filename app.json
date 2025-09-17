@@ -75,6 +75,10 @@
         "TABLEAU_USER": {
             "description": "A valid Tableau user for access to the analytics environment",
             "value": ""
+        },
+        "TABLEAU_MCP_URL": {
+            "description": "Base URL of the Tableau MCP HTTP server (no trailing slash required)",
+            "value": "https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp"
         }
     }
 }

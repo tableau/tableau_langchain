@@ -1,10 +1,11 @@
 import os
+import json
 from dotenv import load_dotenv
 
 from experimental.tools.simple_datasource_qa import initialize_simple_datasource_qa
-
-from experimental.tools.external.retrievers import pinecone_retriever_tool
-from experimental.tools.external.web_search import tavily_tool
+from langchain_core.tools import tool
+from typing import Optional, Dict, Any
+from experimental.utilities.vizql_data_service import list_datasources, call_mcp_tool, list_mcp_tools
 
 # Load environment variables before accessing them
 load_dotenv()
@@ -19,115 +20,65 @@ datasource_luid = os.environ['DATASOURCE_LUID']
 model_provider = os.environ['MODEL_PROVIDER']
 tooling_llm_model = os.environ['TOOLING_MODEL']
 
-# Tableau VizQL Data Service Query Tool
-analyze_datasource = initialize_simple_datasource_qa(
-    domain=tableau_domain,
-    site=tableau_site,
-    jwt_client_id=tableau_jwt_client_id,
-    jwt_secret_id=tableau_jwt_secret_id,
-    jwt_secret=tableau_jwt_secret,
-    tableau_api_version=tableau_api_version,
-    tableau_user=tableau_user,
-    datasource_luid=datasource_luid,
-    model_provider=model_provider,
-    tooling_llm_model=tooling_llm_model
-)
+# Direct MCP tools only - no intermediate layers
+mcp_url = os.getenv('TABLEAU_MCP_URL', 'https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp')
 
-tableau_metrics = pinecone_retriever_tool(
-    name='tableau_metrics',
-    description="""Returns ML insights & predictive analytics on user-subscribed metrics
-    Prioritize using this tool if the user mentions metrics, KPIs, OKRs or similar
+# Build tools list with MCP-backed tools only
+tools = []
 
-    Make thorough queries for relevant context.
-    For a high level summary ask this way:
-    - start with requesting a KPI metrics summary
-    - dive deeper on those results using the methods for detailed metric info described below
+# MCP-backed utility tool: list Tableau datasources on the current site
+@tool("list-datasources")
+def list_datasources_tool(filter: Optional[str] = None) -> str:
+    """List all available Tableau datasources. Optional filter parameter to search by name."""
+    try:
+        arguments = {}
+        if filter:
+            arguments["filter"] = filter
+        result = call_mcp_tool(mcp_url, "list-datasources", arguments)
+        return json.dumps(result)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-    For detailed metric info, ask using the target metric plus any of these topics:
-    - dimensions
-    - data
-    - descriptions
-    - drivers
-    - unusual changes
-    - trends
-    - sentiment
-    - current & previous values
-    - period over period change
-    - contributors
-    - detractors
+@tool("list-fields")
+def list_fields_tool(datasourceLuid: str) -> str:
+    """List all fields in a Tableau datasource. Requires datasourceLuid parameter."""
+    try:
+        arguments = {"datasourceLuid": datasourceLuid}
+        result = call_mcp_tool(mcp_url, "list-fields", arguments)
+        return json.dumps(result)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-    NOT for precise data values. Use a data source query tool for specific values.
-    NOT for fetching data values on specific dates
+@tool("query-datasource")
+def query_datasource_tool(datasourceLuid: str, query: Dict[str, Any]) -> str:
+    """Query a Tableau datasource with a structured query. Requires datasourceLuid and query parameters."""
+    try:
+        arguments = {
+            "datasourceLuid": datasourceLuid,
+            "query": query
+        }
+        result = call_mcp_tool(mcp_url, "query-datasource", arguments)
+        return json.dumps(result)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-    Examples:
-    User: give me an update on my KPIs
-    Input: 'update on all KPIs, trends, sentiment"
+@tool("read-metadata")
+def read_metadata_tool(datasourceLuid: str) -> str:
+    """Read metadata for a Tableau datasource. Requires datasourceLuid parameter."""
+    try:
+        arguments = {"datasourceLuid": datasourceLuid}
+        result = call_mcp_tool(mcp_url, "read-metadata", arguments)
+        return json.dumps(result)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-    User: what is going on with sales?
-    Input: 'sales trend, data driving sales, unusual changes, contributors, drivers and detractors'
+@tool("tools-list")
+def list_tools_tool() -> str:
+    """List all available MCP tools with their descriptions and parameter schemas."""
+    try:
+        result = list_mcp_tools(mcp_url)
+        return json.dumps(result)
+    except Exception as e:
+        return f"Error: {str(e)}"
 
-    User: what is the value of sales in 2024?
-    -> wrong usage of this tool, not for specific values
-    """,
-    pinecone_index = os.environ["METRICS_INDEX"],
-    model_provider = os.environ["MODEL_PROVIDER"],
-    embedding_model = os.environ["EMBEDDING_MODEL"],
-    text_key = "_node_content",
-    search_k = 6,
-    max_concurrency = 5
-)
-
-tableau_datasources = pinecone_retriever_tool(
-    name='tableau_datasources_catalog',
-    description="""Find the most relevant or useful Tableau data sources to answer the user query. Datasources often
-    have descriptions and fields that may match the needs of the user, use this information to determine the best data
-    resource for the user to consult.
-
-    Output is various chunks of text in vector format for summarization.
-
-    Args:
-        query (str): A natural language query describing the data to retrieve or an open-ended question
-        that can be answered using information contained in the data source
-
-    Returns:
-        dict: A data set relevant to the user's query
-    """,
-    pinecone_index=os.environ["DATASOURCES_INDEX"],
-    model_provider=os.environ["MODEL_PROVIDER"],
-    embedding_model=os.environ["EMBEDDING_MODEL"],
-    text_key = "_node_content",
-    search_k = 6,
-    max_concurrency = 5
-)
-
-tableau_analytics = pinecone_retriever_tool(
-    name='tableau_analytics_catalog',
-    description="""Find the most relevant or useful Tableau workbooks, dashboards, charts, reports and other forms
-    of visual analytics to help the user find canonical answers to their query. Unless the user specifically requests
-    for charts, workbooks, dashboards, etc. don't assume this is what they intend to find, if in doubt confirm by
-    letting them know you can search the catalog in their behalf.
-
-    If nothing matches the user's needs, then you might need to try a different approach such as querying a data source.
-
-    Output is various chunks of text in vector format for summarization.
-
-    Args:
-        query (str): A natural language query describing the data to retrieve or an open-ended question
-        that can be answered using information contained in the data source
-
-    Returns:
-        dict: A data set relevant to the user's query
-    """,
-    pinecone_index=os.environ["WORKBOOKS_INDEX"],
-    model_provider=os.environ["MODEL_PROVIDER"],
-    embedding_model=os.environ["EMBEDDING_MODEL"],
-    text_key = "_node_content",
-    search_k = 6,
-    max_concurrency = 5
-)
-
-# Web Search tool
-web_search = tavily_tool()
-
-# List of tools used to build the state graph and for binding them to nodes
-tools = [ analyze_datasource, tableau_metrics, tableau_datasources, tableau_analytics, web_search ]
+tools.extend([list_datasources_tool, list_fields_tool, query_datasource_tool, read_metadata_tool, list_tools_tool])

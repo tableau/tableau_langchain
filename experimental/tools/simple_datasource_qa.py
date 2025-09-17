@@ -156,14 +156,34 @@ def initialize_simple_datasource_qa(
         # credentials to access Tableau environment on behalf of the user
         tableau_auth =  tableau_session['credentials']['token']
 
-        # Data source for VDS querying
-        tableau_datasource = env_vars["datasource_luid"]
+        # Pick datasource: prefer configured, else select dynamically via MCP list-datasources using query keywords
+        tableau_datasource = env_vars.get("datasource_luid", "")
+        if not tableau_datasource:
+            from experimental.utilities.vizql_data_service import list_datasources
+            ds_list = list_datasources(url=env_vars["mcp_url"]) or []
+            # Simple heuristic: choose Superstore if present, else first
+            candidate = None
+            try:
+                for item in ds_list if isinstance(ds_list, list) else []:
+                    name = item.get('name') if isinstance(item, dict) else None
+                    if isinstance(name, str) and 'superstore' in name.lower():
+                        candidate = item
+                        break
+                if candidate is None and isinstance(ds_list, list) and ds_list:
+                    candidate = ds_list[0]
+                if candidate and isinstance(candidate, dict):
+                    tableau_datasource = candidate.get('id', '')
+            except Exception:
+                tableau_datasource = ''
+        if not tableau_datasource:
+            raise ToolException("No datasource could be determined. Set DATASOURCE_LUID or ensure MCP list-datasources returns results.")
 
         # 0. Obtain metadata about the data source to enhance the query writing prompt
         query_writing_data = augment_datasource_metadata(
             task = user_input,
             api_key = tableau_auth,
-            url = domain,
+            tableau_domain = env_vars["domain"],
+            mcp_url = env_vars["mcp_url"],
             datasource_luid = tableau_datasource,
             prompt = vds_prompt_data,
             previous_errors = previous_call_error,
@@ -199,7 +219,7 @@ def initialize_simple_datasource_qa(
             try:
                 data = get_headlessbi_data(
                     api_key = tableau_auth,
-                    url = domain,
+                    url = env_vars["mcp_url"],
                     datasource_luid = tableau_datasource,
                     payload = payload
                 )

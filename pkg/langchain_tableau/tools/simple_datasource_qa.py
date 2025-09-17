@@ -156,14 +156,52 @@ def initialize_simple_datasource_qa(
         # credentials to access Tableau environment on behalf of the user
         tableau_auth =  tableau_session['credentials']['token']
 
-        # Data source for VDS querying
-        tableau_datasource = env_vars["datasource_luid"]
+        # Pick datasource: prefer configured, else select dynamically via MCP based on field-name match to user_input
+        tableau_datasource = env_vars.get("datasource_luid", "")
+        if not tableau_datasource:
+            from langchain_tableau.utilities.vizql_data_service import list_datasources, list_fields
+            ds_list = list_datasources(url=env_vars["mcp_url"]) or []
+            best = (None, -1)
+            query_terms = {t.strip(".,:;!?").lower() for t in user_input.split() if len(t) > 2}
+            try:
+                for item in ds_list if isinstance(ds_list, list) else []:
+                    if not isinstance(item, dict):
+                        continue
+                    luid = item.get('id')
+                    if not isinstance(luid, str):
+                        continue
+                    # Fetch fields and score overlap
+                    fields = list_fields(url=env_vars["mcp_url"], datasource_luid=luid)
+                    if isinstance(fields, dict) and 'data' in fields:
+                        fields_list = fields['data']
+                    else:
+                        fields_list = fields if isinstance(fields, list) else []
+                    names = set()
+                    for f in fields_list:
+                        if isinstance(f, dict):
+                            n = f.get('fieldCaption') or f.get('name')
+                            if isinstance(n, str):
+                                for token in n.replace('/', ' ').split():
+                                    if len(token) > 2:
+                                        names.add(token.lower())
+                    score = len(query_terms & names)
+                    if score > best[1]:
+                        best = (luid, score)
+                if best[0]:
+                    tableau_datasource = best[0]
+                elif isinstance(ds_list, list) and ds_list and isinstance(ds_list[0], dict):
+                    tableau_datasource = ds_list[0].get('id', '')
+            except Exception:
+                tableau_datasource = ''
+        if not tableau_datasource:
+            raise ToolException("No datasource could be determined. Set DATASOURCE_LUID or ensure MCP list-datasources returns results.")
 
         # 0. Obtain metadata about the data source to enhance the query writing prompt
         query_writing_data = augment_datasource_metadata(
             task = user_input,
             api_key = tableau_auth,
-            url = domain,
+            tableau_domain = env_vars["domain"],
+            mcp_url = env_vars["mcp_url"],
             datasource_luid = tableau_datasource,
             prompt = vds_prompt_data,
             previous_errors = previous_call_error,
@@ -199,7 +237,7 @@ def initialize_simple_datasource_qa(
             try:
                 data = get_headlessbi_data(
                     api_key = tableau_auth,
-                    url = domain,
+                    url = env_vars["mcp_url"],
                     datasource_luid = tableau_datasource,
                     payload = payload
                 )

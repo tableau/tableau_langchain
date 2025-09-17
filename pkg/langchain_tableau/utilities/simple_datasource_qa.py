@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from langchain_tableau.utilities.vizql_data_service import query_vds, query_vds_metadata
 from langchain_tableau.utilities.utils import json_to_markdown_table
 from langchain_tableau.utilities.metadata import get_data_dictionary
+from langchain_tableau.utilities.vizql_data_service import list_fields, list_datasources
 
 
 def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
@@ -75,7 +76,8 @@ def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
 def augment_datasource_metadata(
     task: str,
     api_key: str,
-    url: str,
+    tableau_domain: str,
+    mcp_url: str,
     datasource_luid: str,
     prompt: Dict[str, str],
     previous_errors: Optional[str] = None,
@@ -106,23 +108,36 @@ def augment_datasource_metadata(
     # insert the user input as a task
     prompt['task'] = task
 
-    # get dictionary for the data source from the Metadata API
-    data_dictionary = get_data_dictionary(
-        api_key=api_key,
-        domain=url,
-        datasource_luid=datasource_luid
-    )
+    # MCP ONLY: fetch rich field metadata via MCP
+    fields = list_fields(url=mcp_url, datasource_luid=datasource_luid)
+    if isinstance(fields, dict) and 'data' in fields:
+        # some servers may wrap under data
+        fields_list = fields['data']
+    else:
+        fields_list = fields if isinstance(fields, list) else []
+    prompt['data_dictionary'] = fields_list
 
-    # insert data dictionary from Tableau's Data Catalog
-    prompt['data_dictionary'] = data_dictionary['datasource_fields']
-    # insert data source name, description and owner into 'meta' key
-    del data_dictionary['datasource_fields']
-    prompt['meta'] = data_dictionary
+    # MCP ONLY: fetch datasource basic info via MCP list-datasources
+    ds_meta = { 'datasource_name': 'unknown', 'datasource_description': '', 'datasource_owner': '' }
+    try:
+        ds_list = list_datasources(url=mcp_url)
+        if isinstance(ds_list, list):
+            for ds in ds_list:
+                if isinstance(ds, dict) and ds.get('id') == datasource_luid:
+                    ds_meta['datasource_name'] = ds.get('name') or ds.get('contentUrl') or 'unknown'
+                    ds_meta['datasource_description'] = ds.get('description') or ''
+                    owner = ds.get('owner')
+                    if isinstance(owner, dict):
+                        ds_meta['datasource_owner'] = owner.get('name') or ''
+                    break
+    except Exception:
+        pass
+    prompt['meta'] = ds_meta
 
-    #  get sample values for fields from VDS metadata endpoint
+    #  get sample values for fields from MCP VDS read-metadata endpoint
     datasource_metadata = query_vds_metadata(
         api_key=api_key,
-        url=url,
+        url=mcp_url,
         datasource_luid=datasource_luid
     )
 
@@ -174,7 +189,8 @@ def env_vars_simple_datasource_qa(
     tableau_user=None,
     datasource_luid=None,
     model_provider=None,
-    tooling_llm_model=None
+    tooling_llm_model=None,
+    mcp_url=None
 ):
     """
     Retrieves Tableau configuration from environment variables if not provided as arguments.
@@ -204,9 +220,10 @@ def env_vars_simple_datasource_qa(
         'jwt_secret': jwt_secret or os.environ['TABLEAU_JWT_SECRET'],
         'tableau_api_version': tableau_api_version or os.environ['TABLEAU_API_VERSION'],
         'tableau_user': tableau_user or os.environ['TABLEAU_USER'],
-        'datasource_luid': datasource_luid or os.environ['DATASOURCE_LUID'],
+        'datasource_luid': datasource_luid if isinstance(datasource_luid, str) and datasource_luid else os.getenv('DATASOURCE_LUID', ''),
         'model_provider': model_provider or os.environ['MODEL_PROVIDER'],
-        'tooling_llm_model': tooling_llm_model or os.environ['TOOLING_MODEL']
+        'tooling_llm_model': tooling_llm_model or os.environ['TOOLING_MODEL'],
+        'mcp_url': mcp_url if isinstance(mcp_url, str) and mcp_url else os.getenv('TABLEAU_MCP_URL', 'https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp')
     }
 
     return config
