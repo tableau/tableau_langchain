@@ -56,21 +56,6 @@ def _invoke_mcp_tool(mcp_url: str, tool_name: str, arguments: Dict[str, Any]) ->
     return result_obj
 
 
-def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any]) -> Dict[str, Any]:
-    arguments = {
-        "datasourceLuid": datasource_luid,
-        "query": query
-    }
-    tool_name = "query-datasource"
-    return _invoke_mcp_tool(url, tool_name, arguments)
-
-
-def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Dict[str, Any]:
-    arguments = {
-        "datasourceLuid": datasource_luid
-    }
-    tool_name = "read-metadata"
-    return _invoke_mcp_tool(url, tool_name, arguments)
 
 
 def list_datasources(url: str, filter: str | None = None) -> Any:
@@ -84,21 +69,6 @@ def list_datasources(url: str, filter: str | None = None) -> Any:
     return result if isinstance(result, list) else []
 
 
-def list_fields(url: str, datasource_luid: str) -> Any:
-    arguments = {"datasourceLuid": datasource_luid}
-    result = _invoke_mcp_tool(url, "list-fields", arguments)
-    # Handle various response formats
-    if isinstance(result, dict):
-        # Handle nested structure with publishedDatasources array
-        if 'data' in result and isinstance(result['data'], dict) and 'publishedDatasources' in result['data']:
-            datasources = result['data']['publishedDatasources']
-            if isinstance(datasources, list) and len(datasources) > 0:
-                if 'fields' in datasources[0]:
-                    return datasources[0]['fields']
-        # Direct data array
-        elif 'data' in result:
-            return result['data']
-    return result
 
 
 def call_mcp_tool(url: str, tool_name: str, arguments: Dict[str, Any]) -> Any:
