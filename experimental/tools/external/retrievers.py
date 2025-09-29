@@ -1,8 +1,12 @@
 import os
 
-from pinecone import Pinecone
+try:
+    from pinecone import Pinecone
+    from langchain_pinecone import PineconeVectorStore
+    PINECONE_AVAILABLE = True
+except ImportError:
+    PINECONE_AVAILABLE = False
 
-from langchain_pinecone import PineconeVectorStore
 from langchain.tools.retriever import create_retriever_tool
 
 from experimental.utilities.models import select_embeddings
@@ -42,6 +46,9 @@ def pinecone_retriever_tool(
         EnvironmentError: If required Pinecone environment variables are missing.
         Exception: If connection to the Pinecone index fails.
     """
+    if not PINECONE_AVAILABLE:
+        raise ImportError("Pinecone dependencies are not installed. Please install pinecone-client and langchain-pinecone.")
+
     # Initialize Pinecone client
     pc = Pinecone(api_key=os.environ.get("PINECONE_API_KEY"))
 
