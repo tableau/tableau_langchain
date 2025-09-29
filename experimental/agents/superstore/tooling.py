@@ -35,13 +35,20 @@ def list_tableau_datasources(filter: Optional[str] = None) -> str:
 def mcp_call(tool_name: str, arguments_json: str) -> str:
     """Call any MCP tool by name with raw JSON arguments. Use list_mcp_tools to discover available tools."""
     mcp_url = os.getenv('TABLEAU_MCP_URL', 'https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp')
+
     try:
         # Parse the arguments JSON string into a Python dict
         arguments = json.loads(arguments_json) if arguments_json else {}
+        print(f"DEBUG: Calling MCP tool '{tool_name}' with arguments: {json.dumps(arguments, indent=2)}")
+
         result = call_mcp_tool(mcp_url, tool_name, arguments)
+        print(f"DEBUG: MCP tool '{tool_name}' returned: {json.dumps(result, indent=2) if isinstance(result, (dict, list)) else str(result)}")
+
         return json.dumps(result)
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        error_msg = f"Error calling MCP tool '{tool_name}': {str(e)}"
+        print(f"DEBUG: {error_msg}")
+        return json.dumps({'error': error_msg, 'tool_name': tool_name, 'arguments': arguments_json})
 
 @tool("list_mcp_tools")
 def get_mcp_tools() -> str:
