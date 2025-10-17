@@ -1,0 +1,38 @@
+# Security and monitoring dependencies
+# Install with: pip install -r security_requirements.txt
+
+# Core Flask security
+flask>=3.0.0
+flask-limiter>=3.5.0  # Additional rate limiting library
+flask-cors>=4.0.0  # CORS protection
+
+# Environment management
+python-dotenv>=1.0.0
+
+# Logging and monitoring
+python-json-logger>=2.0.7  # Structured logging
+
+# IP filtering (optional but recommended)
+ipaddress>=1.0.23
+
+# Password hashing for API keys (optional enhancement)
+bcrypt>=4.1.2
+
+# Request validation
+werkzeug>=3.0.0
+
+# Production WSGI server
+gunicorn>=21.2.0  # For production deployment
+gevent>=24.2.1  # Async worker support
+
+# Monitoring (optional but recommended)
+prometheus-flask-exporter>=0.23.0  # Prometheus metrics
+
+# Notes:
+# - Most core dependencies should already be in your main requirements
+# - These are specifically for enhanced security features
+# - For production, also consider:
+#   - nginx or Apache as reverse proxy
+#   - Cloudflare for DDoS protection
+#   - Redis for distributed rate limiting
+
