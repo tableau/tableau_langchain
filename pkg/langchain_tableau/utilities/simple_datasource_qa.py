@@ -134,9 +134,12 @@ def augment_datasource_metadata(
         datasource_luid=datasource_luid
     )
 
-    for field in datasource_metadata['data']:
-        del field['fieldName']
-        del field['logicalTableId']
+    for field in datasource_metadata.get('data', []):
+        field.pop('fieldName', None)
+        field.pop('logicalTableId', None)
+        field.pop('defaultAggregation', None)
+        field.pop('columnClass', None)
+        field.pop('formula', None)
 
     # insert the data model with sample values from Tableau's VDS metadata API
     prompt['data_model'] = datasource_metadata['data']
