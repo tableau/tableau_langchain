@@ -173,7 +173,7 @@ def initialize_simple_datasource_qa(
         # 1. Insert instruction data into the template
         query_writing_prompt = PromptTemplate(
             input_variables=[
-                "task"
+                "task",
                 "instructions",
                 "vds_schema",
                 "sample_queries",
