@@ -24,4 +24,5 @@ dependencies:
         - "pinecone-client[grpc]==6.0.0"
         - tavily-python==0.5.3
         - build==1.2.2
+        - langchain-aws==0.2.27
 
