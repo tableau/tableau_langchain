@@ -22,7 +22,7 @@ dependencies = [
     "langchain-anthropic==0.3.10",
     "langchain-openai==0.3.11",
     "langchain-tableau",
-    "langchain-community==0.3.20",
+    "langchain-community>=0.3.27",
     "python-dotenv==1.1.0",
     "slack-sdk==3.35.0",
     "tavily-python==0.5.3",
