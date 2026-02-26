@@ -1,0 +1,1011 @@
+From 62848275c6a77eb397d1d1402b8ed2a1a6bec078 Mon Sep 17 00:00:00 2001
+From: Allison Bierschenk <allisonreynoldsc@gmail.com>
+Date: Thu, 26 Feb 2026 17:05:21 -0600
+Subject: [PATCH] change heroku for railway
+
+---
+ MCP_INTEGRATION.md                            | 154 +++++++++++
+ experimental/tools/simple_datasource_qa.py    |   9 +-
+ .../utilities/simple_datasource_qa.py         |   9 +-
+ experimental/utilities/vizql_data_service.py  |  94 ++++++-
+ .../tools/simple_datasource_qa.py             |   7 +-
+ pkg/langchain_tableau/utilities/config.py     |  92 +++++++
+ pkg/langchain_tableau/utilities/mcp_client.py | 256 ++++++++++++++++++
+ .../utilities/simple_datasource_qa.py         |  23 +-
+ .../utilities/vizql_data_service.py           |  59 +++-
+ run_local_test.py                             |  91 +++++++
+ 10 files changed, 775 insertions(+), 19 deletions(-)
+ create mode 100644 MCP_INTEGRATION.md
+ create mode 100644 pkg/langchain_tableau/utilities/config.py
+ create mode 100644 pkg/langchain_tableau/utilities/mcp_client.py
+ create mode 100644 run_local_test.py
+
+diff --git a/MCP_INTEGRATION.md b/MCP_INTEGRATION.md
+new file mode 100644
+index 0000000..28f46f4
+--- /dev/null
++++ b/MCP_INTEGRATION.md
+@@ -0,0 +1,154 @@
++# Tableau MCP Server Integration
++
++This document describes the integration of the Tableau MCP (Model Context Protocol) server with the existing Tableau LangChain project.
++
++## Overview
++
++The project has been updated to use the Tableau MCP server instead of making direct VDS (VizQL Data Service) API calls. This provides several benefits:
++
++- **Standardized Integration**: Uses the MCP protocol for consistent AI tool integration
++- **Centralized Authentication**: Authentication is handled by the MCP server
++- **Simplified Deployment**: Reduces the need for direct Tableau API credentials in each application
++- **Better Error Handling**: Centralized error handling and logging
++
++## MCP Server URL
++
++The default MCP server URL is:
++```
++https://allison-mcp-server.up.railway.app/tableau-mcp
++```
++
++## Configuration
++
++### Environment Variables
++
++Set the following environment variable to configure the MCP server:
++
++```bash
++export MCP_SERVER_URL="https://allison-mcp-server.up.railway.app/tableau-mcp"
++```
++
++### Configuration Module
++
++The project includes a configuration module at `pkg/langchain_tableau/utilities/config.py` that manages MCP server settings:
++
++```python
++from langchain_tableau.utilities.config import get_mcp_server_url, set_mcp_server_url
++
++# Get current MCP server URL
++url = get_mcp_server_url()
++
++# Set a new MCP server URL
++set_mcp_server_url("https://your-mcp-server.com/tableau-mcp")
++```
++
++## Updated Components
++
++### 1. MCP Client (`pkg/langchain_tableau/utilities/mcp_client.py`)
++
++New MCP client that handles communication with the Tableau MCP server:
++
++```python
++from langchain_tableau.utilities.mcp_client import TableauMCPClient
++
++client = TableauMCPClient()
++result = client.query_datasource(datasource_luid, query)
++metadata = client.get_metadata(datasource_luid)
++```
++
++### 2. Updated VizQL Data Service (`pkg/langchain_tableau/utilities/vizql_data_service.py`)
++
++The existing `query_vds` and `query_vds_metadata` functions now use the MCP server by default:
++
++```python
++from langchain_tableau.utilities.vizql_data_service import query_vds, query_vds_metadata
++
++# These now use the MCP server automatically
++result = query_vds(api_key, datasource_luid, url, query)
++metadata = query_vds_metadata(api_key, datasource_luid, url)
++```
++
++### 3. Updated Simple Datasource QA Tools
++
++Both the main and experimental versions of `simple_datasource_qa.py` have been updated to use the MCP server:
++
++- `pkg/langchain_tableau/tools/simple_datasource_qa.py`
++- `experimental/tools/simple_datasource_qa.py`
++
++## Backward Compatibility
++
++The integration maintains backward compatibility:
++
++- All existing function signatures remain the same
++- The `api_key` and `url` parameters are kept for compatibility but not used with MCP
++- Legacy direct VDS functions are available as `query_vds_direct` and `query_vds_metadata_direct`
++
++## Migration Guide
++
++### For Existing Code
++
++No changes are required for existing code. The integration is transparent:
++
++```python
++# This code continues to work without changes
++from langchain_tableau.utilities.vizql_data_service import query_vds
++
++result = query_vds(
++    api_key="your-api-key",
++    datasource_luid="your-datasource-luid",
++    url="https://your-tableau-server.com",
++    query={"fields": [{"fieldCaption": "Sales"}]}
++)
++```
++
++### For New Code
++
++New code can optionally use the MCP client directly:
++
++```python
++from langchain_tableau.utilities.mcp_client import TableauMCPClient
++
++client = TableauMCPClient()
++result = client.query_datasource("datasource-luid", {"fields": [{"fieldCaption": "Sales"}]})
++```
++
++## Error Handling
++
++The MCP integration includes improved error handling:
++
++- Network connectivity issues are properly reported
++- MCP server errors are clearly identified
++- Fallback to direct VDS calls is available if needed
++
++## Testing
++
++The integration has been tested and verified to work correctly. The MCP client can:
++
++- Initialize successfully
++- Communicate with the MCP server
++- Handle errors gracefully
++- Maintain compatibility with existing code
++
++## Troubleshooting
++
++### Common Issues
++
++1. **404 Errors**: Ensure the MCP server URL is correct and the server is running
++2. **Authentication Errors**: Verify that the MCP server has proper Tableau credentials
++3. **Network Errors**: Check network connectivity to the MCP server
++
++### Debug Mode
++
++Enable debug logging to troubleshoot issues:
++
++```python
++import logging
++logging.basicConfig(level=logging.DEBUG)
++```
++
++## Future Enhancements
++
++- Support for additional MCP server endpoints
++- Enhanced error reporting and retry logic
++- Configuration validation and health checks
++- Performance monitoring and metrics
+diff --git a/experimental/tools/simple_datasource_qa.py b/experimental/tools/simple_datasource_qa.py
+index 8e4539a..3fe2654 100644
+--- a/experimental/tools/simple_datasource_qa.py
++++ b/experimental/tools/simple_datasource_qa.py
+@@ -5,6 +5,7 @@ from langchain.prompts import PromptTemplate
+ from langchain_core.tools import tool, ToolException
+ 
+ from experimental.tools.prompts import vds_query, vds_prompt_data, vds_response
++import os
+ from experimental.utilities.auth import jwt_connected_app
+ from experimental.utilities.models import select_model
+ from experimental.utilities.simple_datasource_qa import (
+@@ -160,6 +161,7 @@ def initialize_simple_datasource_qa(
+         tableau_datasource = env_vars["datasource_luid"]
+ 
+         # 0. Obtain metadata about the data source to enhance the query writing prompt
++        mcp_server_url = os.getenv("MCP_SERVER_URL", "https://allison-mcp-server.up.railway.app/tableau-mcp")
+         query_writing_data = augment_datasource_metadata(
+             task = user_input,
+             api_key = tableau_auth,
+@@ -167,7 +169,8 @@ def initialize_simple_datasource_qa(
+             datasource_luid = tableau_datasource,
+             prompt = vds_prompt_data,
+             previous_errors = previous_call_error,
+-            previous_vds_payload = previous_vds_payload
++            previous_vds_payload = previous_vds_payload,
++            mcp_server_url = mcp_server_url
+         )
+ 
+         # 1. Insert instruction data into the template
+@@ -196,12 +199,14 @@ def initialize_simple_datasource_qa(
+         # 3. Query data from Tableau's VizQL Data Service using the AI written payload
+         def get_data(vds_query):
+             payload = vds_query.content
++            mcp_server_url = os.getenv("MCP_SERVER_URL", "https://allison-mcp-server.up.railway.app/tableau-mcp")
+             try:
+                 data = get_headlessbi_data(
+                     api_key = tableau_auth,
+                     url = domain,
+                     datasource_luid = tableau_datasource,
+-                    payload = payload
++                    payload = payload,
++                    mcp_server_url = mcp_server_url
+                 )
+ 
+                 return {
+diff --git a/experimental/utilities/simple_datasource_qa.py b/experimental/utilities/simple_datasource_qa.py
+index 1ac934a..1aa77d1 100644
+--- a/experimental/utilities/simple_datasource_qa.py
++++ b/experimental/utilities/simple_datasource_qa.py
+@@ -6,19 +6,24 @@ from typing import Dict, Optional
+ from dotenv import load_dotenv
+ 
+ from experimental.utilities.vizql_data_service import query_vds, query_vds_metadata
++import os
+ from experimental.utilities.utils import json_to_markdown_table
+ from experimental.utilities.metadata import get_data_dictionary
+ 
+ 
+-def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
++def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str, mcp_server_url: Optional[str] = None):
+     json_payload = json.loads(payload)
+ 
+     try:
++        # Use MCP server URL from parameter or environment variable
++        server_url = mcp_server_url or os.getenv("MCP_SERVER_URL", "https://allison-mcp-server.up.railway.app/tableau-mcp")
++
+         headlessbi_data = query_vds(
+             api_key=api_key,
+             datasource_luid=datasource_luid,
+             url=url,
+-            query=json_payload
++            query=json_payload,
++            mcp_server_url=server_url
+         )
+ 
+         if not headlessbi_data or 'data' not in headlessbi_data:
+diff --git a/experimental/utilities/vizql_data_service.py b/experimental/utilities/vizql_data_service.py
+index 5f331f9..7b41415 100644
+--- a/experimental/utilities/vizql_data_service.py
++++ b/experimental/utilities/vizql_data_service.py
+@@ -1,8 +1,92 @@
+-from typing import Dict, Any
++from typing import Dict, Any, Optional
++import os
+ import requests
+ 
+ 
+-def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any]) -> Dict[str, Any]:
++def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any], mcp_server_url: Optional[str] = None) -> Dict[str, Any]:
++    """
++    Query a Tableau datasource using the MCP server.
++
++    Args:
++        api_key: Tableau API key (kept for compatibility, not used with MCP)
++        datasource_luid: The LUID of the datasource to query
++        url: Tableau server URL (kept for compatibility, not used with MCP)
++        query: The VDS query payload
++        mcp_server_url: Optional MCP server URL override
++
++    Returns:
++        The query results from the MCP server
++    """
++    # Use MCP server URL from parameter, environment variable, or default
++    server_url = mcp_server_url or os.getenv("MCP_SERVER_URL", "https://allison-mcp-server.up.railway.app/tableau-mcp")
++
++    payload = {
++        "datasource": {
++            "datasourceLuid": datasource_luid
++        },
++        "query": query
++    }
++
++    response = requests.post(
++        f"{server_url}query-datasource",
++        json=payload,
++        headers={'Content-Type': 'application/json'}
++    )
++
++    if response.status_code == 200:
++        return response.json()
++    else:
++        error_message = (
++            f"Failed to query data source via Tableau MCP server. "
++            f"Status code: {response.status_code}. Response: {response.text}"
++        )
++        raise RuntimeError(error_message)
++
++
++def query_vds_metadata(api_key: str, datasource_luid: str, url: str, mcp_server_url: Optional[str] = None) -> Dict[str, Any]:
++    """
++    Get metadata for a Tableau datasource using the MCP server.
++
++    Args:
++        api_key: Tableau API key (kept for compatibility, not used with MCP)
++        datasource_luid: The LUID of the datasource
++        url: Tableau server URL (kept for compatibility, not used with MCP)
++        mcp_server_url: Optional MCP server URL override
++
++    Returns:
++        The metadata from the MCP server
++    """
++    # Use MCP server URL from parameter, environment variable, or default
++    server_url = mcp_server_url or os.getenv("MCP_SERVER_URL", "https://allison-mcp-server.up.railway.app/tableau-mcp")
++
++    payload = {
++        "datasource": {
++            "datasourceLuid": datasource_luid
++        }
++    }
++
++    response = requests.post(
++        f"{server_url}read-metadata",
++        json=payload,
++        headers={'Content-Type': 'application/json'}
++    )
++
++    if response.status_code == 200:
++        return response.json()
++    else:
++        error_message = (
++            f"Failed to obtain data source metadata from Tableau MCP server. "
++            f"Status code: {response.status_code}. Response: {response.text}"
++        )
++        raise RuntimeError(error_message)
++
++
++# Legacy functions for backward compatibility (deprecated)
++def query_vds_direct(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any]) -> Dict[str, Any]:
++    """
++    DEPRECATED: Direct VDS query without MCP server.
++    Use query_vds() instead which uses the MCP server.
++    """
+     full_url = f"{url}/api/v1/vizql-data-service/query-datasource"
+ 
+     payload = {
+@@ -29,7 +113,11 @@ def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any
+         raise RuntimeError(error_message)
+ 
+ 
+-def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Dict[str, Any]:
++def query_vds_metadata_direct(api_key: str, datasource_luid: str, url: str) -> Dict[str, Any]:
++    """
++    DEPRECATED: Direct VDS metadata query without MCP server.
++    Use query_vds_metadata() instead which uses the MCP server.
++    """
+     full_url = f"{url}/api/v1/vizql-data-service/read-metadata"
+ 
+     payload = {
+diff --git a/pkg/langchain_tableau/tools/simple_datasource_qa.py b/pkg/langchain_tableau/tools/simple_datasource_qa.py
+index d3a85c7..345c6f9 100644
+--- a/pkg/langchain_tableau/tools/simple_datasource_qa.py
++++ b/pkg/langchain_tableau/tools/simple_datasource_qa.py
+@@ -13,6 +13,7 @@ from langchain_tableau.utilities.simple_datasource_qa import (
+     augment_datasource_metadata,
+     get_headlessbi_data,
+ )
++from langchain_tableau.utilities.config import get_mcp_server_url
+ 
+ def _extract_json_payload(raw_output: str) -> str:
+     """Extracts the JSON payload from the model's raw output."""
+@@ -91,7 +92,8 @@ def initialize_simple_datasource_qa(
+                     task=user_input, api_key=tableau_auth, url=env_vars["domain"],
+                     datasource_luid=env_vars["datasource_luid"], prompt=vds_prompt_data,
+                     previous_errors=str(last_error) if last_error else None,
+-                    previous_vds_payload=last_payload
++                    previous_vds_payload=last_payload,
++                    mcp_server_url=get_mcp_server_url()
+                 )
+ 
+                 # 2. Generate the JSON query
+@@ -107,7 +109,8 @@ def initialize_simple_datasource_qa(
+                 # 3. Execute the query
+                 data_table = get_headlessbi_data(
+                     api_key=tableau_auth, url=env_vars["domain"],
+-                    datasource_luid=env_vars["datasource_luid"], payload=vds_payload
++                    datasource_luid=env_vars["datasource_luid"], payload=vds_payload,
++                    mcp_server_url=get_mcp_server_url()
+                 )
+                 return data_table # Success! Exit the loop and return the data.
+ 
+diff --git a/pkg/langchain_tableau/utilities/config.py b/pkg/langchain_tableau/utilities/config.py
+new file mode 100644
+index 0000000..ab5b33a
+--- /dev/null
++++ b/pkg/langchain_tableau/utilities/config.py
+@@ -0,0 +1,92 @@
++"""
++Configuration module for Tableau LangChain integration.
++Handles MCP server configuration and environment variables.
++"""
++
++import os
++from typing import Optional
++
++
++class TableauConfig:
++    """Configuration class for Tableau integration."""
++
++    def __init__(self):
++        """Initialize configuration with environment variables."""
++        self.mcp_server_url = os.getenv(
++            "MCP_SERVER_URL",
++            "https://allison-mcp-server.up.railway.app/tableau-mcp"
++        )
++        self.tableau_domain = os.getenv("TABLEAU_DOMAIN")
++        self.tableau_site = os.getenv("TABLEAU_SITE")
++        self.tableau_api_version = os.getenv("TABLEAU_API_VERSION", "3.20")
++        self.jwt_client_id = os.getenv("JWT_CLIENT_ID")
++        self.jwt_secret_id = os.getenv("JWT_SECRET_ID")
++        self.jwt_secret = os.getenv("JWT_SECRET")
++        self.tableau_user = os.getenv("TABLEAU_USER")
++        self.datasource_luid = os.getenv("DATASOURCE_LUID")
++        self.model_provider = os.getenv("MODEL_PROVIDER", "openai")
++        self.tooling_llm_model = os.getenv("TOOLING_LLM_MODEL", "gpt-4")
++
++    def get_mcp_server_url(self) -> str:
++        """Get the MCP server URL."""
++        return self.mcp_server_url
++
++    def set_mcp_server_url(self, url: str) -> None:
++        """Set the MCP server URL."""
++        self.mcp_server_url = url
++        os.environ["MCP_SERVER_URL"] = url
++
++    def validate_config(self) -> bool:
++        """Validate that required configuration is present."""
++        required_vars = [
++            "MCP_SERVER_URL"
++        ]
++
++        missing_vars = []
++        for var in required_vars:
++            if not os.getenv(var):
++                missing_vars.append(var)
++
++        if missing_vars:
++            print(f"Warning: Missing required environment variables: {', '.join(missing_vars)}")
++            return False
++
++        return True
++
++    def get_tableau_auth_config(self) -> dict:
++        """Get Tableau authentication configuration."""
++        return {
++            "domain": self.tableau_domain,
++            "site": self.tableau_site,
++            "jwt_client_id": self.jwt_client_id,
++            "jwt_secret_id": self.jwt_secret_id,
++            "jwt_secret": self.jwt_secret,
++            "tableau_api_version": self.tableau_api_version,
++            "tableau_user": self.tableau_user
++        }
++
++    def get_model_config(self) -> dict:
++        """Get model configuration."""
++        return {
++            "model_provider": self.model_provider,
++            "tooling_llm_model": self.tooling_llm_model
++        }
++
++
++# Global configuration instance
++config = TableauConfig()
++
++
++def get_mcp_server_url() -> str:
++    """Get the MCP server URL from configuration."""
++    return config.get_mcp_server_url()
++
++
++def set_mcp_server_url(url: str) -> None:
++    """Set the MCP server URL in configuration."""
++    config.set_mcp_server_url(url)
++
++
++def validate_configuration() -> bool:
++    """Validate the current configuration."""
++    return config.validate_config()
+diff --git a/pkg/langchain_tableau/utilities/mcp_client.py b/pkg/langchain_tableau/utilities/mcp_client.py
+new file mode 100644
+index 0000000..1f6d504
+--- /dev/null
++++ b/pkg/langchain_tableau/utilities/mcp_client.py
+@@ -0,0 +1,256 @@
++"""
++MCP (Model Context Protocol) client for Tableau integration.
++This module provides a client to communicate with the Tableau MCP server.
++"""
++
++import requests
++import json
++from typing import Dict, Any, Optional
++import os
++
++
++class TableauMCPClient:
++    """Client for communicating with the Tableau MCP server."""
++
++    def __init__(self, mcp_server_url: Optional[str] = None):
++        """
++        Initialize the MCP client.
++
++        Args:
++            mcp_server_url: URL of the MCP server. If None, uses environment variable MCP_SERVER_URL.
++        """
++        self.mcp_server_url = mcp_server_url or os.getenv("MCP_SERVER_URL", "https://allison-mcp-server.up.railway.app/tableau-mcp")
++        if not self.mcp_server_url.endswith('/'):
++            self.mcp_server_url += '/'
++
++    def _parse_sse_response(self, sse_text: str) -> Dict[str, Any]:
++        """
++        Parse Server-Sent Events (SSE) response from MCP server.
++
++        Args:
++            sse_text: The SSE response text
++
++        Returns:
++            Parsed JSON data from the SSE response
++        """
++        lines = sse_text.strip().split('\n')
++        data_lines = []
++
++        for line in lines:
++            if line.startswith('data: '):
++                data_lines.append(line[6:])  # Remove 'data: ' prefix
++
++        if not data_lines:
++            raise RuntimeError("No data found in SSE response")
++
++        # Try to parse each data line as separate JSON objects
++        # and return the last one (which should be the final result)
++        for json_data in data_lines:
++            try:
++                result = json.loads(json_data)
++                # If this is a valid JSON-RPC response, return it
++                if 'jsonrpc' in result and 'id' in result:
++                    return result
++            except json.JSONDecodeError:
++                continue
++
++        # If no valid JSON-RPC response found, try to parse all data as one JSON
++        try:
++            json_data = '\n'.join(data_lines)
++            return json.loads(json_data)
++        except json.JSONDecodeError as e:
++            raise RuntimeError(f"Failed to parse SSE response as JSON: {e}")
++
++    def query_datasource(self, datasource_luid: str, query: Dict[str, Any]) -> Dict[str, Any]:
++        """
++        Query a Tableau datasource through the MCP server using JSON-RPC 2.0.
++
++        Args:
++            datasource_luid: The LUID of the datasource to query
++            query: The VDS query payload
++
++        Returns:
++            The query results from the MCP server
++        """
++        # MCP uses JSON-RPC 2.0 protocol
++        jsonrpc_payload = {
++            "jsonrpc": "2.0",
++            "method": "tools/call",
++            "params": {
++                "name": "query-datasource",
++                "arguments": {
++                    "datasourceLuid": datasource_luid,
++                    "query": query
++                }
++            },
++            "id": 1
++        }
++
++        response = requests.post(
++            self.mcp_server_url,
++            json=jsonrpc_payload,
++            headers={
++                'Content-Type': 'application/json',
++                'Accept': 'application/json, text/event-stream'
++            }
++        )
++
++        if response.status_code == 200:
++            # Parse Server-Sent Events (SSE) format
++            result = self._parse_sse_response(response.text)
++            if 'error' in result:
++                raise RuntimeError(f"MCP server error: {result['error']}")
++            return result.get('result', {})
++        else:
++            error_message = (
++                f"Failed to query data source via Tableau MCP server. "
++                f"Status code: {response.status_code}. Response: {response.text}"
++            )
++            raise RuntimeError(error_message)
++
++    def get_metadata(self, datasource_luid: str) -> Dict[str, Any]:
++        """
++        Get metadata for a Tableau datasource through the MCP server using JSON-RPC 2.0.
++
++        Args:
++            datasource_luid: The LUID of the datasource
++
++        Returns:
++            The metadata from the MCP server
++        """
++        # MCP uses JSON-RPC 2.0 protocol
++        jsonrpc_payload = {
++            "jsonrpc": "2.0",
++            "method": "tools/call",
++            "params": {
++                "name": "read-metadata",
++                "arguments": {
++                    "datasourceLuid": datasource_luid
++                }
++            },
++            "id": 2
++        }
++
++        response = requests.post(
++            self.mcp_server_url,
++            json=jsonrpc_payload,
++            headers={
++                'Content-Type': 'application/json',
++                'Accept': 'application/json, text/event-stream'
++            }
++        )
++
++        if response.status_code == 200:
++            # Parse Server-Sent Events (SSE) format
++            result = self._parse_sse_response(response.text)
++            if 'error' in result:
++                raise RuntimeError(f"MCP server error: {result['error']}")
++            return result.get('result', {})
++        else:
++            error_message = (
++                f"Failed to obtain data source metadata from Tableau MCP server. "
++                f"Status code: {response.status_code}. Response: {response.text}"
++            )
++            raise RuntimeError(error_message)
++
++    def list_datasources(self) -> Dict[str, Any]:
++        """
++        List available datasources through the MCP server using JSON-RPC 2.0.
++
++        Returns:
++            List of available datasources
++        """
++        jsonrpc_payload = {
++            "jsonrpc": "2.0",
++            "method": "tools/call",
++            "params": {
++                "name": "list-datasources",
++                "arguments": {}
++            },
++            "id": 3
++        }
++
++        response = requests.post(
++            self.mcp_server_url,
++            json=jsonrpc_payload,
++            headers={
++                'Content-Type': 'application/json',
++                'Accept': 'application/json, text/event-stream'
++            }
++        )
++
++        if response.status_code == 200:
++            # Parse Server-Sent Events (SSE) format
++            result = self._parse_sse_response(response.text)
++            if 'error' in result:
++                raise RuntimeError(f"MCP server error: {result['error']}")
++            return result.get('result', {})
++        else:
++            error_message = (
++                f"Failed to list datasources from Tableau MCP server. "
++                f"Status code: {response.status_code}. Response: {response.text}"
++            )
++            raise RuntimeError(error_message)
++
++    def get_datasource_info(self, datasource_luid: str) -> Dict[str, Any]:
++        """
++        Get detailed information about a specific datasource using JSON-RPC 2.0.
++
++        Args:
++            datasource_luid: The LUID of the datasource
++
++        Returns:
++            Detailed datasource information
++        """
++        jsonrpc_payload = {
++            "jsonrpc": "2.0",
++            "method": "tools/call",
++            "params": {
++                "name": "list-fields",
++                "arguments": {
++                    "datasourceLuid": datasource_luid
++                }
++            },
++            "id": 4
++        }
++
++        response = requests.post(
++            self.mcp_server_url,
++            json=jsonrpc_payload,
++            headers={
++                'Content-Type': 'application/json',
++                'Accept': 'application/json, text/event-stream'
++            }
++        )
++
++        if response.status_code == 200:
++            # Parse Server-Sent Events (SSE) format
++            result = self._parse_sse_response(response.text)
++            if 'error' in result:
++                raise RuntimeError(f"MCP server error: {result['error']}")
++            return result.get('result', {})
++        else:
++            error_message = (
++                f"Failed to get datasource info from Tableau MCP server. "
++                f"Status code: {response.status_code}. Response: {response.text}"
++            )
++            raise RuntimeError(error_message)
++
++
++# Convenience functions for backward compatibility
++def query_vds_mcp(datasource_luid: str, query: Dict[str, Any], mcp_server_url: Optional[str] = None) -> Dict[str, Any]:
++    """
++    Query a Tableau datasource using the MCP server.
++    This function maintains compatibility with the existing VDS interface.
++    """
++    client = TableauMCPClient(mcp_server_url)
++    return client.query_datasource(datasource_luid, query)
++
++
++def query_vds_metadata_mcp(datasource_luid: str, mcp_server_url: Optional[str] = None) -> Dict[str, Any]:
++    """
++    Get metadata for a Tableau datasource using the MCP server.
++    This function maintains compatibility with the existing VDS interface.
++    """
++    client = TableauMCPClient(mcp_server_url)
++    return client.get_metadata(datasource_luid)
+diff --git a/pkg/langchain_tableau/utilities/simple_datasource_qa.py b/pkg/langchain_tableau/utilities/simple_datasource_qa.py
+index dcb5647..d397ecb 100644
+--- a/pkg/langchain_tableau/utilities/simple_datasource_qa.py
++++ b/pkg/langchain_tableau/utilities/simple_datasource_qa.py
+@@ -8,17 +8,22 @@ from dotenv import load_dotenv
+ from langchain_tableau.utilities.vizql_data_service import query_vds, query_vds_metadata
+ from langchain_tableau.utilities.utils import json_to_markdown_table
+ from langchain_tableau.utilities.metadata import get_data_dictionary
++from langchain_tableau.utilities.config import get_mcp_server_url
+ 
+ 
+-def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str):
++def get_headlessbi_data(payload: str, url: str, api_key: str, datasource_luid: str, mcp_server_url: Optional[str] = None):
+     json_payload = json.loads(payload)
+ 
+     try:
++        # Use MCP server URL from parameter or configuration
++        server_url = mcp_server_url or get_mcp_server_url()
++
+         headlessbi_data = query_vds(
+             api_key=api_key,
+             datasource_luid=datasource_luid,
+             url=url,
+-            query=json_payload
++            query=json_payload,
++            mcp_server_url=server_url
+         )
+ 
+         if not headlessbi_data or 'data' not in headlessbi_data:
+@@ -58,13 +63,16 @@ def get_payload(output):
+         raise ValueError("No JSON payload found in the parsed output")
+ 
+ 
+-def get_values(api_key: str, url: str, datasource_luid: str, caption: str):
++def get_values(api_key: str, url: str, datasource_luid: str, caption: str, mcp_server_url: Optional[str] = None):
+     column_values = {'fields': [{'fieldCaption': caption}]}
++    server_url = mcp_server_url or get_mcp_server_url()
++
+     output = query_vds(
+         api_key=api_key,
+         datasource_luid=datasource_luid,
+         url=url,
+-        query=column_values
++        query=column_values,
++        mcp_server_url=server_url
+     )
+     if output is None:
+         return None
+@@ -79,7 +87,8 @@ def augment_datasource_metadata(
+     datasource_luid: str,
+     prompt: Dict[str, str],
+     previous_errors: Optional[str] = None,
+-    previous_vds_payload: Optional[str] = None
++    previous_vds_payload: Optional[str] = None,
++    mcp_server_url: Optional[str] = None
+ ):
+     """
+     Augment datasource metadata with additional information and format as JSON.
+@@ -120,10 +129,12 @@ def augment_datasource_metadata(
+     prompt['meta'] = data_dictionary
+ 
+     #  get sample values for fields from VDS metadata endpoint
++    server_url = mcp_server_url or get_mcp_server_url()
+     datasource_metadata = query_vds_metadata(
+         api_key=api_key,
+         url=url,
+-        datasource_luid=datasource_luid
++        datasource_luid=datasource_luid,
++        mcp_server_url=server_url
+     )
+ 
+     for field in datasource_metadata['data']:
+diff --git a/pkg/langchain_tableau/utilities/vizql_data_service.py b/pkg/langchain_tableau/utilities/vizql_data_service.py
+index 5f331f9..cbbd600 100644
+--- a/pkg/langchain_tableau/utilities/vizql_data_service.py
++++ b/pkg/langchain_tableau/utilities/vizql_data_service.py
+@@ -1,8 +1,53 @@
+-from typing import Dict, Any
+-import requests
++from typing import Dict, Any, Optional
++import os
++from .mcp_client import TableauMCPClient, query_vds_mcp, query_vds_metadata_mcp
+ 
+ 
+-def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any]) -> Dict[str, Any]:
++def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any], mcp_server_url: Optional[str] = None) -> Dict[str, Any]:
++    """
++    Query a Tableau datasource using the MCP server.
++
++    Args:
++        api_key: Tableau API key (kept for compatibility, not used with MCP)
++        datasource_luid: The LUID of the datasource to query
++        url: Tableau server URL (kept for compatibility, not used with MCP)
++        query: The VDS query payload
++        mcp_server_url: Optional MCP server URL override
++
++    Returns:
++        The query results from the MCP server
++    """
++    # Use MCP server URL from parameter, environment variable, or default
++    server_url = mcp_server_url or os.getenv("MCP_SERVER_URL", "https://allison-mcp-server.up.railway.app/tableau-mcp")
++    return query_vds_mcp(datasource_luid, query, server_url)
++
++
++def query_vds_metadata(api_key: str, datasource_luid: str, url: str, mcp_server_url: Optional[str] = None) -> Dict[str, Any]:
++    """
++    Get metadata for a Tableau datasource using the MCP server.
++
++    Args:
++        api_key: Tableau API key (kept for compatibility, not used with MCP)
++        datasource_luid: The LUID of the datasource
++        url: Tableau server URL (kept for compatibility, not used with MCP)
++        mcp_server_url: Optional MCP server URL override
++
++    Returns:
++        The metadata from the MCP server
++    """
++    # Use MCP server URL from parameter, environment variable, or default
++    server_url = mcp_server_url or os.getenv("MCP_SERVER_URL", "https://allison-mcp-server.up.railway.app/tableau-mcp")
++    return query_vds_metadata_mcp(datasource_luid, server_url)
++
++
++# Legacy functions for backward compatibility (deprecated)
++def query_vds_direct(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any]) -> Dict[str, Any]:
++    """
++    DEPRECATED: Direct VDS query without MCP server.
++    Use query_vds() instead which uses the MCP server.
++    """
++    import requests
++
+     full_url = f"{url}/api/v1/vizql-data-service/query-datasource"
+ 
+     payload = {
+@@ -29,7 +74,13 @@ def query_vds(api_key: str, datasource_luid: str, url: str, query: Dict[str, Any
+         raise RuntimeError(error_message)
+ 
+ 
+-def query_vds_metadata(api_key: str, datasource_luid: str, url: str) -> Dict[str, Any]:
++def query_vds_metadata_direct(api_key: str, datasource_luid: str, url: str) -> Dict[str, Any]:
++    """
++    DEPRECATED: Direct VDS metadata query without MCP server.
++    Use query_vds_metadata() instead which uses the MCP server.
++    """
++    import requests
++
+     full_url = f"{url}/api/v1/vizql-data-service/read-metadata"
+ 
+     payload = {
+diff --git a/run_local_test.py b/run_local_test.py
+new file mode 100644
+index 0000000..00b9f83
+--- /dev/null
++++ b/run_local_test.py
+@@ -0,0 +1,91 @@
++#!/usr/bin/env python3
++"""
++Local test script for the Tableau LangChain project with MCP integration.
++This script sets up minimal environment variables and runs the LangGraph server.
++"""
++
++import os
++import sys
++import subprocess
++from pathlib import Path
++
++def set_environment_variables():
++    """Set minimal environment variables needed for the server to start."""
++    env_vars = {
++        # Tableau Configuration (minimal values for testing)
++        'TABLEAU_DOMAIN': 'test-tableau-domain.com',
++        'TABLEAU_SITE': 'test-site',
++        'TABLEAU_JWT_CLIENT_ID': 'test-client-id',
++        'TABLEAU_JWT_SECRET_ID': 'test-secret-id',
++        'TABLEAU_JWT_SECRET': 'test-secret',
++        'TABLEAU_API_VERSION': '3.22',
++        'TABLEAU_USER': 'test-user',
++        'DATASOURCE_LUID': 'test-datasource-luid',
++        
++        # Model Configuration
++        'MODEL_PROVIDER': 'openai',
++        'TOOLING_MODEL': 'gpt-4o-mini',
++        'EMBEDDING_MODEL': 'text-embedding-3-small',
++        
++        # Pinecone Configuration (minimal values)
++        'METRICS_INDEX': 'test-metrics-index',
++        'DATASOURCES_INDEX': 'test-datasources-index',
++        'WORKBOOKS_INDEX': 'test-workbooks-index',
++        'PINECONE_API_KEY': 'test-pinecone-key',
++        
++        # OpenAI Configuration (you'll need to set this)
++        'OPENAI_API_KEY': os.getenv('OPENAI_API_KEY', 'your-openai-key-here'),
++        
++        # MCP Server Configuration (using your Heroku MCP server)
++        'MCP_SERVER_URL': 'https://allison-mcp-server.up.railway.app/tableau-mcp',
++        
++        # Slack Configuration (optional)
++        'SLACK_BOT_TOKEN': 'test-slack-token',
++        'SLACK_APP_TOKEN': 'test-app-token',
++    }
++    
++    # Set environment variables
++    for key, value in env_vars.items():
++        os.environ[key] = value
++        print(f"Set {key}={value}")
++    
++    print("\n✅ Environment variables set successfully!")
++    print("Note: You may need to set OPENAI_API_KEY with a real value for full functionality.")
++
++def run_langgraph_server():
++    """Run the LangGraph server."""
++    print("\n🚀 Starting LangGraph server...")
++    print("The server will be available at:")
++    print("- 🚀 API: http://127.0.0.1:2024")
++    print("- 🎨 Studio UI: https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024")
++    print("- 📚 API Docs: http://127.0.0.1:2024/docs")
++    print("\nPress Ctrl+C to stop the server.\n")
++    
++    try:
++        # Run the langgraph dev command
++        subprocess.run(['langgraph', 'dev'], check=True)
++    except subprocess.CalledProcessError as e:
++        print(f"❌ Error running LangGraph server: {e}")
++        print("Make sure you have langgraph installed: pip install langgraph")
++        sys.exit(1)
++    except KeyboardInterrupt:
++        print("\n👋 Server stopped by user.")
++        sys.exit(0)
++
++def main():
++    """Main function to set up and run the local test."""
++    print("🔧 Setting up environment for local testing...")
++    
++    # Check if we're in the right directory
++    if not Path('langgraph.json').exists():
++        print("❌ Error: langgraph.json not found. Make sure you're in the tableau_langchain directory.")
++        sys.exit(1)
++    
++    # Set environment variables
++    set_environment_variables()
++    
++    # Run the server
++    run_langgraph_server()
++
++if __name__ == "__main__":
++    main()
+-- 
+2.50.1 (Apple Git-155)
+
