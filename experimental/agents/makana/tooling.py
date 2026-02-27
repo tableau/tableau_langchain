@@ -12,7 +12,7 @@ load_dotenv()
 @tool("list_tableau_datasources")
 def list_tableau_datasources(filter: Optional[str] = None) -> str:
     """Return JSON array of datasources with id, name, projectName. Optional filter string."""
-    mcp_url = os.getenv('TABLEAU_MCP_URL', 'https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp')
+    mcp_url = os.getenv('TABLEAU_MCP_URL')
     try:
         results = list_datasources(url=mcp_url, filter=filter)
         if not isinstance(results, list) or not results:
@@ -34,7 +34,7 @@ tools = [ list_tableau_datasources ]
 @tool("mcp_call")
 def mcp_call(tool_name: str, arguments_json: str) -> str:
     """Call any MCP tool by name with raw JSON arguments. Example: tool_name='get-workbook', arguments_json='{"workbookId":"..."}'"""
-    mcp_url = os.getenv('TABLEAU_MCP_URL', 'https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp')
+    mcp_url = os.getenv('TABLEAU_MCP_URL')
     try:
         args: Dict[str, Any] = {}
         if isinstance(arguments_json, str) and arguments_json.strip():
@@ -47,7 +47,7 @@ def mcp_call(tool_name: str, arguments_json: str) -> str:
 @tool("list_mcp_tools")
 def get_mcp_tools() -> str:
     """List all available MCP tools with their descriptions and parameter schemas."""
-    mcp_url = os.getenv('TABLEAU_MCP_URL', 'https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp')
+    mcp_url = os.getenv('TABLEAU_MCP_URL')
     try:
         result = list_mcp_tools(mcp_url)
         return json.dumps(result)

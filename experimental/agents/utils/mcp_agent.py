@@ -56,8 +56,7 @@ class MCPAgentBuilder:
         agent_identity: Optional[str] = None
     ):
         """Initialize the agent builder."""
-        self.mcp_url = mcp_url or os.getenv('TABLEAU_MCP_URL',
-                                           'https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp')
+        self.mcp_url = mcp_url or os.getenv('TABLEAU_MCP_URL')
         self.mcp_client = MCPClient(self.mcp_url)
         self.system_prompt = system_prompt or get_system_prompt()
         self.model_name = model_name or os.getenv('TOOLING_MODEL', 'gpt-4o')
