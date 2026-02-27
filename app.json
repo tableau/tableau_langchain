@@ -78,7 +78,7 @@
         },
         "TABLEAU_MCP_URL": {
             "description": "Base URL of the Tableau MCP HTTP server (no trailing slash required)",
-            "value": "https://tableau-mcp-bierschenk-2df05b623f7a.herokuapp.com/tableau-mcp"
+            "value": "https://mcpagent.up.railway.app/tableau-mcp"
         }
     }
 }
