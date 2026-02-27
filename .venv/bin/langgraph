@@ -1,0 +1,6 @@
+#!/Users/abierschenk/Desktop/TableauRepos/tableau_langchain_Allison/tableau_langchain/.venv/bin/python3.12
+import sys
+from langgraph_cli.cli import cli
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(cli())
