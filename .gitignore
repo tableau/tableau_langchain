@@ -59,3 +59,16 @@ htmlcov/
 # Docker
 *.log
 docker-compose.override.yml
+
+# LangGraph cache and checkpoint files
+.langgraph_api/
+*.pckl
+
+# Test and debug files
+test_*.py
+debug_*.py
+*_TEST_*.md
+*_REPORT.md
+*_RESULTS.md
+.langgraph_api/
+*.pckl
