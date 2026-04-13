@@ -15,8 +15,29 @@ from pydantic import BaseModel, Field, create_model
 from dotenv import load_dotenv
 
 load_dotenv()
-logging.basicConfig(level=logging.INFO)
+# Set up logging - only DEBUG level if DEBUG=1, otherwise WARNING
+if os.getenv('DEBUG') == '1':
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
+
+# Module-level session for connection pooling
+_session = None
+
+def _get_session():
+    """Get or create a shared requests Session with connection pooling."""
+    global _session
+    if _session is None:
+        _session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=10,
+            pool_maxsize=20,
+            max_retries=0
+        )
+        _session.mount('http://', adapter)
+        _session.mount('https://', adapter)
+    return _session
 
 
 class MCPToolDiscovery:
@@ -43,7 +64,8 @@ class MCPToolDiscovery:
         }
 
         try:
-            response = requests.post(endpoint, headers=headers, data=json.dumps(payload), timeout=30)
+            session = _get_session()
+            response = session.post(endpoint, headers=headers, data=json.dumps(payload), timeout=30)
             if response.status_code != 200:
                 raise RuntimeError(f"MCP call failed: {method}. Status: {response.status_code}")
 
@@ -81,7 +103,7 @@ class MCPToolDiscovery:
         if self.tools_cache is not None:
             return self.tools_cache
 
-        logger.info(f"Discovering MCP tools from {self.mcp_url}")
+        logger.debug(f"Discovering MCP tools from {self.mcp_url}")
         result = self._call_mcp_jsonrpc("tools/list", {})
 
         if isinstance(result, dict) and 'tools' in result:
@@ -89,7 +111,7 @@ class MCPToolDiscovery:
         else:
             self.tools_cache = []
 
-        logger.info(f"Discovered {len(self.tools_cache)} MCP tools")
+        logger.debug(f"Discovered {len(self.tools_cache)} MCP tools")
         return self.tools_cache
 
     def _format_result_for_agent(self, tool_name: str, result: Any) -> str:
@@ -101,15 +123,15 @@ class MCPToolDiscovery:
 
             # Create a concise summary
             summary = f"Found {len(result)} datasources:\n\n"
-            for i, ds in enumerate(result[:20], 1):  # Limit to first 20
+            for i, ds in enumerate(result[:10], 1):  # Limit to first 10
                 ds_id = ds.get('id', 'unknown')
                 ds_name = ds.get('name', 'Unnamed')
                 project = ds.get('project', {})
                 project_name = project.get('name', 'Unknown') if isinstance(project, dict) else 'Unknown'
                 summary += f"{i}. {ds_name} (ID: {ds_id}, Project: {project_name})\n"
 
-            if len(result) > 20:
-                summary += f"\n... and {len(result) - 20} more datasources.\n"
+            if len(result) > 10:
+                summary += f"\n... and {len(result) - 10} more datasources.\n"
 
             summary += "\nUse the datasource ID with get_datasource_metadata or query_datasource to work with a specific datasource."
             return summary
@@ -134,29 +156,31 @@ class MCPToolDiscovery:
 
             if dimensions:
                 summary += f"\nDimensions ({len(dimensions)}):\n"
-                for f in dimensions[:20]:  # Show more fields
+                for f in dimensions[:10]:  # Show first 10 fields
                     name = f.get('name', f.get('caption', 'Unknown'))
                     data_type = f.get('dataType', 'unknown')
                     summary += f"  - {name} ({data_type})\n"
-                if len(dimensions) > 20:
-                    summary += f"  ... and {len(dimensions) - 20} more dimensions\n"
+                if len(dimensions) > 10:
+                    summary += f"  ... and {len(dimensions) - 10} more dimensions\n"
 
             if measures:
                 summary += f"\nMeasures ({len(measures)}):\n"
-                for f in measures[:20]:  # Show more fields
+                for f in measures[:10]:  # Show first 10 fields
                     name = f.get('name', f.get('caption', 'Unknown'))
                     data_type = f.get('dataType', 'unknown')
                     aggregation = f.get('aggregation', 'none')
                     summary += f"  - {name} ({data_type}, agg: {aggregation})\n"
-                if len(measures) > 20:
-                    summary += f"  ... and {len(measures) - 20} more measures\n"
+                if len(measures) > 10:
+                    summary += f"  ... and {len(measures) - 10} more measures\n"
 
             if other_fields:
                 summary += f"\nOther Fields ({len(other_fields)}):\n"
-                for f in other_fields[:20]:
+                for f in other_fields[:10]:
                     name = f.get('name', f.get('caption', 'Unknown'))
                     data_type = f.get('dataType', 'unknown')
                     summary += f"  - {name} ({data_type})\n"
+                if len(other_fields) > 10:
+                    summary += f"  ... and {len(other_fields) - 10} more fields\n"
 
             summary += "\nUse these field names exactly as shown when calling query_datasource."
             return summary
@@ -178,13 +202,13 @@ class MCPToolDiscovery:
                 summary += " | ".join(headers) + "\n"
                 summary += "-" * (len(" | ".join(headers))) + "\n"
 
-                # Rows (limit to first 50 for better visibility)
-                for row in data[:50]:
+                # Rows (limit to first 20 for better visibility)
+                for row in data[:20]:
                     row_values = [str(row.get(h, '')) for h in headers]
                     summary += " | ".join(row_values) + "\n"
 
-                if len(data) > 50:
-                    summary += f"\n... and {len(data) - 50} more rows (showing first 50)\n"
+                if len(data) > 20:
+                    summary += f"\n... and {len(data) - 20} more rows (showing first 20)\n"
             else:
                 # Fallback: return raw JSON if structure is unexpected
                 summary += json.dumps(data, indent=2)
@@ -199,7 +223,7 @@ class MCPToolDiscovery:
 
     def call_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Any:
         """Call an MCP tool by name with arguments."""
-        logger.info(f"Calling MCP tool: {tool_name} with args: {arguments}")
+        logger.debug(f"Calling MCP tool: {tool_name} with args: {arguments}")
         result = self._call_mcp_jsonrpc("tools/call", {
             "name": tool_name,
             "arguments": arguments

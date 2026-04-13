@@ -19,6 +19,7 @@ Usage:
 import json
 import hashlib
 import logging
+import time
 from typing import Any, Dict, List, Callable
 from langchain_core.tools import StructuredTool
 from functools import wraps
@@ -29,10 +30,12 @@ logger = logging.getLogger(__name__)
 class ToolCallTracker:
     """Tracks tool calls to prevent redundant queries"""
 
-    def __init__(self, max_retries: int = 3):
+    def __init__(self, max_retries: int = 3, cache_ttl: int = 300):
         self.max_retries = max_retries
+        self.cache_ttl = cache_ttl  # Time-to-live in seconds (default: 5 minutes)
         self.call_history = []  # List of (tool_name, args_hash)
         self.cache = {}  # args_hash -> result
+        self.cache_timestamps = {}  # args_hash -> timestamp
         self.consecutive_failures = 0
 
     def get_call_signature(self, tool_name: str, **kwargs) -> str:
@@ -67,13 +70,22 @@ class ToolCallTracker:
             self.consecutive_failures += 1
         else:
             self.consecutive_failures = 0
-            # Cache successful results
+            # Cache successful results with timestamp
             self.cache[signature] = result
+            self.cache_timestamps[signature] = time.time()
 
     def get_cached_result(self, signature: str) -> tuple[bool, Any]:
-        """Check if we have a cached result"""
+        """Check if we have a cached result (with TTL check)"""
         if signature in self.cache:
-            return True, self.cache[signature]
+            # Check if cache entry has expired
+            cache_age = time.time() - self.cache_timestamps.get(signature, 0)
+            if cache_age < self.cache_ttl:
+                return True, self.cache[signature]
+            else:
+                # Cache expired - remove it
+                logger.info(f"[CACHE EXPIRED] Removing stale cache entry (age: {cache_age:.1f}s)")
+                del self.cache[signature]
+                del self.cache_timestamps[signature]
         return False, None
 
     def get_stats(self) -> Dict[str, Any]:
@@ -86,8 +98,8 @@ class ToolCallTracker:
         }
 
 
-# Global tracker (persists across agent iterations)
-_global_tracker = ToolCallTracker(max_retries=3)
+# Global tracker (persists across agent iterations) with 5-minute TTL
+_global_tracker = ToolCallTracker(max_retries=3, cache_ttl=300)
 
 
 def create_smart_wrapper(tool: StructuredTool, tracker: ToolCallTracker) -> StructuredTool:
@@ -144,7 +156,8 @@ def create_smart_wrapper(tool: StructuredTool, tracker: ToolCallTracker) -> Stru
 def wrap_tools_with_dedup(
     tools: List[StructuredTool],
     max_retries: int = 3,
-    use_global_tracker: bool = True
+    use_global_tracker: bool = True,
+    cache_ttl: int = 300
 ) -> List[StructuredTool]:
     """
     Wrap tools with deduplication and smart retry logic.
@@ -153,11 +166,12 @@ def wrap_tools_with_dedup(
         tools: List of LangChain StructuredTool instances
         max_retries: Maximum number of times to allow identical call (default: 3)
         use_global_tracker: Use global tracker across agent sessions (default: True)
+        cache_ttl: Time-to-live for cached results in seconds (default: 300 = 5 minutes)
 
     Returns:
         List of wrapped tools with smart deduplication
     """
-    tracker = _global_tracker if use_global_tracker else ToolCallTracker(max_retries)
+    tracker = _global_tracker if use_global_tracker else ToolCallTracker(max_retries, cache_ttl)
 
     smart_tools = []
     for tool in tools:
@@ -172,7 +186,7 @@ def wrap_tools_with_dedup(
 def reset_tracker():
     """Reset the global tracker (useful for testing)"""
     global _global_tracker
-    _global_tracker = ToolCallTracker(max_retries=3)
+    _global_tracker = ToolCallTracker(max_retries=3, cache_ttl=300)
     logger.info("Reset global tool call tracker")
 
 

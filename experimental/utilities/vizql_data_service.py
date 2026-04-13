@@ -2,10 +2,31 @@ from typing import Dict, Any
 import json
 import requests
 import logging
+import os
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
+# Set up logging - only INFO level if DEBUG=1, otherwise WARNING
+if os.getenv('DEBUG') == '1':
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
+
+# Module-level session for connection pooling
+_session = None
+
+def _get_session():
+    """Get or create a shared requests Session with connection pooling."""
+    global _session
+    if _session is None:
+        _session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=10,
+            pool_maxsize=20,
+            max_retries=0
+        )
+        _session.mount('http://', adapter)
+        _session.mount('https://', adapter)
+    return _session
 
 
 def _invoke_mcp_tool(mcp_url: str, tool_name: str, arguments: Dict[str, Any]) -> Dict[str, Any]:
@@ -24,12 +45,13 @@ def _invoke_mcp_tool(mcp_url: str, tool_name: str, arguments: Dict[str, Any]) ->
         }
     }
 
-    logger.info(f"MCP Tool Call - Tool: {tool_name}, Arguments: {json.dumps(arguments, indent=2)}")
+    logger.debug(f"MCP Tool Call - Tool: {tool_name}, Arguments: {json.dumps(arguments, indent=2)}")
 
     try:
-        response = requests.post(endpoint, headers=headers, data=json.dumps(payload), timeout=30)
-        logger.info(f"MCP Response Status: {response.status_code}")
-        logger.info(f"MCP Response Headers: {dict(response.headers)}")
+        session = _get_session()
+        response = session.post(endpoint, headers=headers, data=json.dumps(payload), timeout=30)
+        logger.debug(f"MCP Response Status: {response.status_code}")
+        logger.debug(f"MCP Response Headers: {dict(response.headers)}")
 
         if response.status_code != 200:
             error_msg = f"MCP tool invocation failed: {tool_name}. Status code: {response.status_code}. Response: {response.text}"
@@ -37,7 +59,7 @@ def _invoke_mcp_tool(mcp_url: str, tool_name: str, arguments: Dict[str, Any]) ->
             raise RuntimeError(error_msg)
 
         text = response.text
-        logger.info(f"MCP Raw Response Text: {text[:500]}...")  # Log first 500 chars
+        logger.debug(f"MCP Raw Response Text: {text[:500]}...")  # Log first 500 chars
 
         result_obj = None
         error_obj = None
@@ -45,10 +67,10 @@ def _invoke_mcp_tool(mcp_url: str, tool_name: str, arguments: Dict[str, Any]) ->
             if line.startswith('data: '):
                 try:
                     msg = json.loads(line[6:])
-                    logger.info(f"MCP Data Line: {msg}")
+                    logger.debug(f"MCP Data Line: {msg}")
                     if 'result' in msg:
                         result_obj = msg['result']
-                        logger.info(f"MCP Result Object: {result_obj}")
+                        logger.debug(f"MCP Result Object: {result_obj}")
                     elif 'error' in msg:
                         error_obj = msg['error']
                         logger.error(f"MCP Error Object: {error_obj}")
@@ -65,7 +87,7 @@ def _invoke_mcp_tool(mcp_url: str, tool_name: str, arguments: Dict[str, Any]) ->
             logger.warning("No result found in data lines, trying to parse full body as JSON")
             try:
                 body = json.loads(text)
-                logger.info(f"MCP Full Body Result: {body}")
+                logger.debug(f"MCP Full Body Result: {body}")
                 if 'error' in body:
                     error_msg = f"MCP tool error: {body['error'].get('message', 'Unknown error')}"
                     logger.error(error_msg)
@@ -77,28 +99,28 @@ def _invoke_mcp_tool(mcp_url: str, tool_name: str, arguments: Dict[str, Any]) ->
                 raise RuntimeError(error_msg)
 
         content = result_obj.get('content')
-        logger.info(f"MCP Content: {content}")
+        logger.debug(f"MCP Content: {content}")
 
         if isinstance(content, list) and content:
             for item in content:
                 if isinstance(item, dict):
                     if item.get('type') == 'json' and 'json' in item:
-                        logger.info(f"Returning JSON content: {item['json']}")
+                        logger.debug(f"Returning JSON content: {item['json']}")
                         return item['json']
                     if item.get('type') in ['text', 'string'] and 'text' in item:
                         txt = item['text']
                         if isinstance(txt, str) and (txt.strip().startswith('{') or txt.strip().startswith('[')):
                             try:
                                 parsed = json.loads(txt)
-                                logger.info(f"Returning parsed text content: {parsed}")
+                                logger.debug(f"Returning parsed text content: {parsed}")
                                 return parsed
                             except Exception as e:
                                 logger.warning(f"Failed to parse text content: {txt}, Error: {e}")
                                 pass
-            logger.info(f"Returning raw content: {content}")
+            logger.debug(f"Returning raw content: {content}")
             return content
 
-        logger.info(f"Returning result object: {result_obj}")
+        logger.debug(f"Returning result object: {result_obj}")
         return result_obj
 
     except requests.exceptions.Timeout:
@@ -148,7 +170,8 @@ def list_mcp_tools(url: str) -> Any:
         "method": "tools/list",
         "params": {}
     }
-    response = requests.post(endpoint, headers=headers, data=json.dumps(payload))
+    session = _get_session()
+    response = session.post(endpoint, headers=headers, data=json.dumps(payload))
     if response.status_code != 200:
         raise RuntimeError(f"MCP tools/list failed. Status code: {response.status_code}. Response: {response.text}")
     text = response.text

@@ -8,6 +8,7 @@ from langgraph.store.memory import InMemoryStore
 from experimental.utilities.models import select_model
 from experimental.agents.omnicell.tooling import tools
 from experimental.agents.omnicell.prompt import AGENT_SYSTEM_PROMPT
+from experimental.utilities.smart_tool_wrapper import wrap_tools_with_dedup
 
 
 """
@@ -41,10 +42,13 @@ if os.getenv('DEBUG') == '1':
 else:
     debugging = False
 
+# Wrap tools with smart deduplication to prevent redundant calls
+smart_tools = wrap_tools_with_dedup(tools, max_retries=2)
+
 # define the agent graph
 analytics_agent = create_react_agent(
     model=llm,
-    tools=tools,
+    tools=smart_tools,
     debug=debugging,
     prompt=AGENT_SYSTEM_PROMPT
 )

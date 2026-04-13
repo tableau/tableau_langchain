@@ -45,7 +45,7 @@ else:
 # Wrap tools with smart deduplication to prevent redundant calls
 smart_tools = wrap_tools_with_dedup(
     tools,
-    max_retries=3  # Block after 3 identical calls
+    max_retries=3  # Allow 3 tries for complex analytical workflows
 )
 
 # define the agent graph
