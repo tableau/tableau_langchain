@@ -1,0 +1,79 @@
+[
+  {
+    "agent": "makana",
+    "question": "What are the top three reasons for claim denials, and how do they vary by provider?",
+    "response_time": 9.593661069869995,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "makana",
+    "question": "How does the average processing time for claims correlate with the type of plan and denial rates?",
+    "response_time": 22.9984450340271,
+    "passed": false,
+    "error": "Too slow: 23.00s"
+  },
+  {
+    "agent": "makana",
+    "question": "How do sales trends for specific products vary over time, and what factors contribute to these trends?",
+    "response_time": 18.90855312347412,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "cumulus",
+    "question": "What's the AUM by client segment?",
+    "response_time": 9.144636869430542,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "cumulus",
+    "question": "Which advisors have the highest client retention rates?",
+    "response_time": 4.790768146514893,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "cumulus",
+    "question": "What are the NPS scores by market segment?",
+    "response_time": 2.6176722049713135,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "superstore",
+    "question": "What are the total sales across each region?",
+    "response_time": 4.596785068511963,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "superstore",
+    "question": "What's our profit margin by category?",
+    "response_time": 8.086912155151367,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "superstore",
+    "question": "List the Datasources",
+    "response_time": 2.9102559089660645,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "superstore",
+    "question": "What are the risks in my sales pipeline?",
+    "response_time": 9.558738946914673,
+    "passed": true,
+    "error": null
+  },
+  {
+    "agent": "superstore",
+    "question": "Where should I focus this week?",
+    "response_time": 14.586526155471802,
+    "passed": true,
+    "error": null
+  }
+]

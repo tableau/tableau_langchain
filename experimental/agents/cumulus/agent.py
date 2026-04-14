@@ -45,13 +45,13 @@ else:
 # Wrap tools with smart deduplication to prevent redundant calls
 smart_tools = wrap_tools_with_dedup(
     tools,
-    max_retries=3  # Allow 3 tries for complex analytical workflows
+    max_retries=1  # Ultra-aggressive: block after 1 identical call for maximum speed
 )
 
-# define the agent graph
+# define the agent graph with increased recursion limit for complex queries
 analytics_agent = create_react_agent(
     model=llm,
     tools=smart_tools,
     debug=debugging,
     prompt=AGENT_SYSTEM_PROMPT
-)
+).with_config({"recursion_limit": 50})

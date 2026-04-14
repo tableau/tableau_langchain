@@ -1,0 +1,133 @@
+{
+  "timestamp": "2026-04-14T10:44:29.505462",
+  "total_tests": 11,
+  "passed": 7,
+  "failed": 4,
+  "max_response_time_threshold": 20.0,
+  "results": [
+    {
+      "agent": "makana",
+      "question": "What are the top three reasons for claim denials, and how do they vary by provider?",
+      "response_time": 5.1911091804504395,
+      "passed": false,
+      "error": "Response lacks meaningful insights or is too short",
+      "has_insights": false,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "It seems that I currently do not have access to the relevant data sources to provide information on claim denials and their variations by provider. Please check back later or consult another resource "
+    },
+    {
+      "agent": "makana",
+      "question": "How does the average processing time for claims correlate with the type of plan and denial rates?",
+      "response_time": 8.592854022979736,
+      "passed": true,
+      "error": null,
+      "has_insights": true,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [
+        "I",
+        "Therefore"
+      ],
+      "response_preview": "It appears that there is no available data regarding the average processing time for claims, plan types, or denial rates in the current datasource. Therefore, I cannot provide insights on how these me"
+    },
+    {
+      "agent": "makana",
+      "question": "How do sales trends for specific products vary over time, and what factors contribute to these trends?",
+      "response_time": 4.735602378845215,
+      "passed": true,
+      "error": null,
+      "has_insights": true,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "It appears that there are currently no available data sources related to sales trends for products. Without access to the relevant data, I am unable to perform the analysis on sales trends and contrib"
+    },
+    {
+      "agent": "cumulus",
+      "question": "What's the AUM by client segment?",
+      "response_time": 19.125051975250244,
+      "passed": false,
+      "error": "Response lacks meaningful insights or is too short",
+      "has_insights": false,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "I currently do not have access to any relevant data sources to provide the AUM by client segment. Please check back later or consult another resource for this information."
+    },
+    {
+      "agent": "cumulus",
+      "question": "Which advisors have the highest client retention rates?",
+      "response_time": 4.705718040466309,
+      "passed": true,
+      "error": null,
+      "has_insights": true,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "It seems that I currently do not have access to any relevant data sources to provide information on advisors with the highest client retention rates. Please check back later or consult another resourc"
+    },
+    {
+      "agent": "cumulus",
+      "question": "What are the NPS scores by market segment?",
+      "response_time": 2.008358955383301,
+      "passed": true,
+      "error": null,
+      "has_insights": true,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "It seems that there are no available data sources related to NPS scores or market segments in the current configuration. If you have any other questions or need assistance with a different topic, feel"
+    },
+    {
+      "agent": "superstore",
+      "question": "What are the total sales across each region?",
+      "response_time": 5.617281913757324,
+      "passed": true,
+      "error": null,
+      "has_insights": true,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "The total sales across each region are as follows:\n\n| Region  | Total Sales    |\n|---------|----------------|\n| West    | $739,813.61    |\n| East    | $691,828.17    |\n| Central | $503,170.67    |\n| S"
+    },
+    {
+      "agent": "superstore",
+      "question": "What's our profit margin by category?",
+      "response_time": 8.662652015686035,
+      "passed": true,
+      "error": null,
+      "has_insights": true,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "Here is the profit margin by category:\n\n| Category         | Total Profit     | Total Sales      | Profit Margin (%)       |\n|------------------|------------------|------------------|-----------------"
+    },
+    {
+      "agent": "superstore",
+      "question": "List the Datasources",
+      "response_time": 1.601557970046997,
+      "passed": false,
+      "error": "Response lacks meaningful insights or is too short",
+      "has_insights": false,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "There are no datasources available."
+    },
+    {
+      "agent": "superstore",
+      "question": "What are the risks in my sales pipeline?",
+      "response_time": 8.338421106338501,
+      "passed": true,
+      "error": null,
+      "has_insights": true,
+      "has_visualization_reference": true,
+      "datasources_mentioned": [],
+      "response_preview": "### Sales Pipeline Risks Analysis\n\n#### Sales Data Overview\n| Segment      | Total Sales   | Total Profit   | Total Discount |\n|--------------|---------------|----------------|-----------------|\n| Con"
+    },
+    {
+      "agent": "superstore",
+      "question": "Where should I focus this week?",
+      "response_time": 2.791663885116577,
+      "passed": false,
+      "error": "Response lacks meaningful insights or is too short",
+      "has_insights": false,
+      "has_visualization_reference": false,
+      "datasources_mentioned": [],
+      "response_preview": "I am currently unable to generate insights for you. Please try again later or ask a different question."
+    }
+  ]
+}

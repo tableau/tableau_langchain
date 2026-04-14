@@ -65,7 +65,7 @@ class MCPToolDiscovery:
 
         try:
             session = _get_session()
-            response = session.post(endpoint, headers=headers, data=json.dumps(payload), timeout=30)
+            response = session.post(endpoint, headers=headers, data=json.dumps(payload), timeout=20)
             if response.status_code != 200:
                 raise RuntimeError(f"MCP call failed: {method}. Status: {response.status_code}")
 

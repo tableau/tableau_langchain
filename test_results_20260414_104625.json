@@ -1,0 +1,79 @@
+[
+  {
+    "agent": "makana",
+    "question": "What are the top three reasons for claim denials, and how do they vary by provider?",
+    "response_time": 3.6296298503875732,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "makana",
+    "question": "How does the average processing time for claims correlate with the type of plan and denial rates?",
+    "response_time": 3.341028928756714,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "makana",
+    "question": "How do sales trends for specific products vary over time, and what factors contribute to these trends?",
+    "response_time": 4.3196632862091064,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "cumulus",
+    "question": "What's the AUM by client segment?",
+    "response_time": 11.937563180923462,
+    "passed": false,
+    "error": "Recursion limit of 25 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/GRAPH_RECURSION_LIMIT"
+  },
+  {
+    "agent": "cumulus",
+    "question": "Which advisors have the highest client retention rates?",
+    "response_time": 5.216944694519043,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "cumulus",
+    "question": "What are the NPS scores by market segment?",
+    "response_time": 2.0501959323883057,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "superstore",
+    "question": "What are the total sales across each region?",
+    "response_time": 4.190748929977417,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "superstore",
+    "question": "What's our profit margin by category?",
+    "response_time": 7.909987926483154,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "superstore",
+    "question": "List the Datasources",
+    "response_time": 1.6396362781524658,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "superstore",
+    "question": "What are the risks in my sales pipeline?",
+    "response_time": 9.81330418586731,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  },
+  {
+    "agent": "superstore",
+    "question": "Where should I focus this week?",
+    "response_time": 3.3015570640563965,
+    "passed": false,
+    "error": "print_flush() got an unexpected keyword argument 'end'"
+  }
+]

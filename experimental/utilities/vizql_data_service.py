@@ -49,7 +49,7 @@ def _invoke_mcp_tool(mcp_url: str, tool_name: str, arguments: Dict[str, Any]) ->
 
     try:
         session = _get_session()
-        response = session.post(endpoint, headers=headers, data=json.dumps(payload), timeout=30)
+        response = session.post(endpoint, headers=headers, data=json.dumps(payload), timeout=20)
         logger.debug(f"MCP Response Status: {response.status_code}")
         logger.debug(f"MCP Response Headers: {dict(response.headers)}")
 
