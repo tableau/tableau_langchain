@@ -1,0 +1,123 @@
+[
+  {
+    "agent": "makana",
+    "question": "What are the top three reasons for claim denials, and how do they vary by provider?",
+    "response_time": 11.877705812454224,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 1061,
+    "failure_reason": null
+  },
+  {
+    "agent": "makana",
+    "question": "How does the average processing time for claims correlate with the type of plan and denial rates?",
+    "response_time": 14.109164953231812,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 2181,
+    "failure_reason": null
+  },
+  {
+    "agent": "makana",
+    "question": "How do sales trends for specific products vary over time, and what factors contribute to these trends?",
+    "response_time": 19.313010931015015,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 907,
+    "failure_reason": null
+  },
+  {
+    "agent": "cumulus",
+    "question": "What's the AUM by client segment?",
+    "response_time": 12.916278839111328,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 778,
+    "failure_reason": null
+  },
+  {
+    "agent": "cumulus",
+    "question": "Which advisors have the highest client retention rates?",
+    "response_time": 24.23791193962097,
+    "passed": false,
+    "has_data": false,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 324,
+    "failure_reason": "Contains excuse phrase: 'not available', Too slow: 24.24s"
+  },
+  {
+    "agent": "cumulus",
+    "question": "What are the NPS scores by market segment?",
+    "response_time": 6.342226028442383,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 945,
+    "failure_reason": null
+  },
+  {
+    "agent": "superstore",
+    "question": "What are the total sales across each region?",
+    "response_time": 14.297429084777832,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 725,
+    "failure_reason": null
+  },
+  {
+    "agent": "superstore",
+    "question": "What's our profit margin by category?",
+    "response_time": 14.105082988739014,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 1469,
+    "failure_reason": null
+  },
+  {
+    "agent": "superstore",
+    "question": "List the Datasources",
+    "response_time": 2.2279059886932373,
+    "passed": false,
+    "has_data": false,
+    "has_insights": false,
+    "has_followup": true,
+    "response_length": 341,
+    "failure_reason": "No data structure indicators (tables, values, etc.), No insights detected"
+  },
+  {
+    "agent": "superstore",
+    "question": "What are the risks in my sales pipeline?",
+    "response_time": 7.79728102684021,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 1687,
+    "failure_reason": null
+  },
+  {
+    "agent": "superstore",
+    "question": "Where should I focus this week?",
+    "response_time": 12.926580905914307,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 2361,
+    "failure_reason": null
+  }
+]

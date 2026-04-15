@@ -67,7 +67,7 @@ def create_filtered_list_datasources(original_tool, filter_keywords):
     )
 
 # Filter keywords for Makana agent
-MAKANA_KEYWORDS = ['Makana', 'Health', 'Healthcare', 'Claims', 'Pharma', 'Clinical', 'Medical']
+MAKANA_KEYWORDS = ['Makana', 'Health', 'Healthcare', 'Claims', 'Pharma', 'Clinical', 'Medical', 'HLS', 'Payer', 'Denial']
 
 # Find and replace list_datasources with filtered version
 tools = []

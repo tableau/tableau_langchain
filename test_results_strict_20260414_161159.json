@@ -1,0 +1,123 @@
+[
+  {
+    "agent": "makana",
+    "question": "What are the top performing pharmaceutical products by TRx sales?",
+    "response_time": 5.873957872390747,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 810,
+    "failure_reason": null
+  },
+  {
+    "agent": "makana",
+    "question": "Show me market share by product and how it varies across regions",
+    "response_time": 9.474818706512451,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 862,
+    "failure_reason": null
+  },
+  {
+    "agent": "makana",
+    "question": "How do sales trends for specific products vary over time, and which reps are driving performance?",
+    "response_time": 17.095100164413452,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 879,
+    "failure_reason": null
+  },
+  {
+    "agent": "cumulus",
+    "question": "What's the AUM by client segment?",
+    "response_time": 6.488981008529663,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 795,
+    "failure_reason": null
+  },
+  {
+    "agent": "cumulus",
+    "question": "Which advisors have the highest client retention rates?",
+    "response_time": 52.40367293357849,
+    "passed": false,
+    "has_data": false,
+    "has_insights": false,
+    "has_followup": false,
+    "response_length": 47,
+    "failure_reason": "No numeric data found, Too slow: 52.40s, No insights detected"
+  },
+  {
+    "agent": "cumulus",
+    "question": "What are the NPS scores by market segment?",
+    "response_time": 5.865911960601807,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 917,
+    "failure_reason": null
+  },
+  {
+    "agent": "superstore",
+    "question": "What are the total sales across each region?",
+    "response_time": 5.691445827484131,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 749,
+    "failure_reason": null
+  },
+  {
+    "agent": "superstore",
+    "question": "What's our profit margin by category?",
+    "response_time": 7.7774059772491455,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 1405,
+    "failure_reason": null
+  },
+  {
+    "agent": "superstore",
+    "question": "List the Datasources",
+    "response_time": 3.0441761016845703,
+    "passed": false,
+    "has_data": false,
+    "has_insights": false,
+    "has_followup": true,
+    "response_length": 462,
+    "failure_reason": "No data structure indicators (tables, values, etc.), No insights detected"
+  },
+  {
+    "agent": "superstore",
+    "question": "What are the risks in my sales pipeline?",
+    "response_time": 8.43732500076294,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 1757,
+    "failure_reason": null
+  },
+  {
+    "agent": "superstore",
+    "question": "Where should I focus this week?",
+    "response_time": 14.562838792800903,
+    "passed": true,
+    "has_data": true,
+    "has_insights": true,
+    "has_followup": true,
+    "response_length": 2413,
+    "failure_reason": null
+  }
+]
